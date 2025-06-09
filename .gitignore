@@ -1,0 +1,42 @@
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+
+# User-specific files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+
+# Crash Reports
+sysinfo.txt
+
+# Unity generated folders
+ExportedObj/
+.consulo/
+.idea/
+.vscode/
+*.tmproj
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+*.svd.meta
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
