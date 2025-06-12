@@ -19,7 +19,7 @@
 *.svd
 *.pdb
 *.mdb
-
+*.vsconfig
 # Crash Reports
 sysinfo.txt
 
