@@ -6,6 +6,7 @@ public class Mevement : MonoBehaviour
 {
     public float speed; // Speed of the movement
     public Animator animator;
+    private Vector3 direction; // Direction of movement
     // Start is called before the first frame update
     void Start()
     {
@@ -18,12 +19,15 @@ public class Mevement : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 direction = new Vector3(horizontal, vertical);
+         direction = new Vector3(horizontal, vertical);
 
         AnimateMovement(direction);
         transform.position += direction * speed * Time.deltaTime;
     }
-    
+    private void FixedUpdate()
+    {
+        this.transform.position += direction.normalized * speed * Time.deltaTime;
+    }
     void AnimateMovement(Vector3 direction)
     {
     if(animator != null)
