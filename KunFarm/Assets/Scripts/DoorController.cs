@@ -1,77 +1,70 @@
 using UnityEngine;
+using System.Collections;
 
 public class DoorController : MonoBehaviour
 {
-    public Sprite openDoorSprite;
-    public Sprite closedDoorSprite;
+    [Tooltip("Frames for opening: Doors_1 → Doors_3 → Doors_2")]
+    public Sprite[] openSequence;    // size = 3
+    [Tooltip("Frames for closing: Doors_2 → Doors_3 → Doors_1")]
+    public Sprite[] closeSequence;   // size = 3
+    [Tooltip("Seconds per frame")]
+    public float stepTime = 0.1f;
+
+    [Tooltip("Collider that blocks the player when door is closed")]
+    public Collider2D blockingCollider;
 
     private SpriteRenderer spriteRenderer;
-    // Thay đổi: Tạo một tham chiếu riêng cho Collider chặn vật lý
-    public Collider2D blockingCollider; // Kéo Collider 2D chặn vật lý vào đây từ Inspector
-
-    public bool isOpen = false;
-
-    private bool playerIsAtDoor = false;
+    private Coroutine animCoroutine;
+    private bool isOpen = false;
+    private bool playerAtDoor = false;
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // blockingCollider đã được gán qua Inspector
-
-        spriteRenderer.sprite = closedDoorSprite;
+        // Initialize as closed
+        if (openSequence != null && openSequence.Length > 0)
+            spriteRenderer.sprite = openSequence[0];
         if (blockingCollider != null)
-        {
-            blockingCollider.enabled = true; // Đảm bảo collider chặn vật lý bật khi bắt đầu
-        }
+            blockingCollider.enabled = true;
     }
 
     void Update()
     {
-        if (playerIsAtDoor && Input.GetKeyDown(KeyCode.E))
-        {
+        if (playerAtDoor && Input.GetKeyDown(KeyCode.E))
             ToggleDoor();
-        }
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerIsAtDoor = true;
-            Debug.Log("Người chơi đã ở gần cửa. Nhấn E để tương tác.");
-        }
-    }
-
-    void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerIsAtDoor = false;
-            Debug.Log("Người chơi đã rời khỏi cửa.");
-        }
     }
 
     void ToggleDoor()
     {
         isOpen = !isOpen;
+        if (animCoroutine != null)
+            StopCoroutine(animCoroutine);
+        animCoroutine = StartCoroutine(AnimateDoor(isOpen));
+    }
 
-        if (isOpen)
+    IEnumerator AnimateDoor(bool opening)
+    {
+        Sprite[] seq = opening ? openSequence : closeSequence;
+
+        foreach (var frame in seq)
         {
-            spriteRenderer.sprite = openDoorSprite;
-            if (blockingCollider != null)
-            {
-                blockingCollider.enabled = false; // TẮT collider chặn khi cửa mở
-            }
-            Debug.Log("Cửa đã mở.");
+            spriteRenderer.sprite = frame;
+            yield return new WaitForSeconds(stepTime);
         }
-        else
-        {
-            spriteRenderer.sprite = closedDoorSprite;
-            if (blockingCollider != null)
-            {
-                blockingCollider.enabled = true; // BẬT collider chặn khi cửa đóng
-            }
-            Debug.Log("Cửa đã đóng.");
-        }
+
+        if (blockingCollider != null)
+            blockingCollider.enabled = !opening;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerAtDoor = true;
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerAtDoor = false;
     }
 }
