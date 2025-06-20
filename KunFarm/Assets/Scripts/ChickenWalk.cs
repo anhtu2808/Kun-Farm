@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Debug = UnityEngine.Debug; // Thêm alias này để chỉ định rõ sử dụng Debug từ UnityEngine
+using System.Collections.Generic;
+using Debug = UnityEngine.Debug;
 
 public class ChickenWalk : MonoBehaviour
 {
@@ -17,11 +18,18 @@ public class ChickenWalk : MonoBehaviour
 
     [Header("Sprite Settings")]
     [Tooltip("Đánh dấu để đảo ngược hướng flip sprite")]
-    public bool reverseFlipDirection = true; // Mặc định bật để sửa lỗi gà đi lùi
+    public bool reverseFlipDirection = true;
 
     [Header("Environment Detection")]
     public float obstacleDetectionRadius = 0.5f;
     public LayerMask obstacleLayer;
+
+    [Header("Egg Laying Settings")]
+    public GameObject eggPrefab; // Prefab của quả trứng
+    public float eggLayInterval = 30f; // Thời gian giữa mỗi lần đẻ trứng (giây)
+    public bool layEggsOnlyWhenIdle = true; // Chỉ đẻ trứng khi đứng yên
+    public Vector3 eggOffset = new Vector3(0, 0, 0); // Spawn trứng tại vị trí của gà
+    public int maxEggsPerChicken = 5; // Số lượng trứng tối đa mỗi con gà
 
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = false;
@@ -31,12 +39,14 @@ public class ChickenWalk : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool isMoving = false;
     private bool isInitialized = false;
+    private float eggLayTimer = 0f; // Bộ đếm thời gian cho việc đẻ trứng
+    private List<GameObject> eggsLaid = new List<GameObject>(); // Danh sách các quả trứng đã đẻ
+
 
     void Awake()
     {
         InitializeComponents();
     }
-
     void InitializeComponents()
     {
         // Rigidbody2D
@@ -62,7 +72,6 @@ public class ChickenWalk : MonoBehaviour
             animator = GetComponent<Animator>();
             if (animator == null)
             {
-                // Thử tìm trong con
                 animator = GetComponentInChildren<Animator>();
                 if (animator == null)
                 {
@@ -75,8 +84,24 @@ public class ChickenWalk : MonoBehaviour
             }
         }
 
+        // Tự động gán prefab trứng nếu chưa có
+        if (eggPrefab == null)
+        {
+            eggPrefab = Resources.Load<GameObject>("Prelabs/Collectable");
+
+            if (eggPrefab == null)
+            {
+                Debug.LogWarning("Không thể tìm thấy Prefab 'Prefabs/Collectable' trong Resources!");
+            }
+            else if (showDebugInfo)
+            {
+                Debug.Log("Đã tự động gán prefab trứng từ Resources/Prefabs/Collectable cho " + gameObject.name);
+            }
+        }
+
         isInitialized = true;
     }
+
 
     // Phương thức để truyền Animator từ bên ngoài
     public void SetAnimator(Animator newAnimator)
@@ -89,11 +114,15 @@ public class ChickenWalk : MonoBehaviour
     {
         if (!isInitialized) InitializeComponents();
         StartCoroutine(ChickenAI());
+
+        // Khởi tạo timer đẻ trứng với giá trị ngẫu nhiên để tránh tất cả gà đẻ cùng lúc
+        eggLayTimer = Random.Range(0f, eggLayInterval * 0.5f);
     }
 
     void Update()
     {
         UpdateAnimation();
+        UpdateEggLaying();
     }
 
     void UpdateAnimation()
@@ -110,14 +139,69 @@ public class ChickenWalk : MonoBehaviour
             if (moveDirection.x < 0)
             {
                 // Sử dụng biến để quyết định hướng flip
-                spriteRenderer.flipX = !reverseFlipDirection; // Đảo ngược logic
+                spriteRenderer.flipX = !reverseFlipDirection;
             }
             else if (moveDirection.x > 0)
             {
                 // Sử dụng biến để quyết định hướng flip
-                spriteRenderer.flipX = reverseFlipDirection; // Đảo ngược logic
+                spriteRenderer.flipX = reverseFlipDirection;
             }
         }
+    }
+
+    void UpdateEggLaying()
+    {
+        // Cập nhật bộ đếm thời gian đẻ trứng
+        eggLayTimer += Time.deltaTime;
+
+        // Kiểm tra xem đã đến thời gian đẻ trứng chưa
+        if (eggLayTimer >= eggLayInterval)
+        {
+            // Nếu chỉ đẻ trứng khi đứng yên và đang di chuyển, thì chưa đẻ
+            if (layEggsOnlyWhenIdle && isMoving)
+            {
+                return;
+            }
+
+            // Đẻ trứng
+            LayEgg();
+
+            // Reset bộ đếm thời gian
+            eggLayTimer = 0f;
+        }
+    }
+
+    void LayEgg()
+    {
+        if (eggPrefab == null)
+        {
+            Debug.LogWarning("Không thể đẻ trứng vì eggPrefab chưa được gán!");
+            return;
+        }
+
+        // Kiểm tra giới hạn số trứng
+        if (maxEggsPerChicken > 0 && eggsLaid.Count >= maxEggsPerChicken)
+        {
+            // Xóa quả trứng cũ nhất
+            if (eggsLaid[0] != null)
+            {
+                Destroy(eggsLaid[0]);
+            }
+            eggsLaid.RemoveAt(0);
+        }
+
+        // Tạo quả trứng mới tại vị trí của gà (với offset)
+        Vector3 eggPosition = transform.position + eggOffset;
+        eggPosition.z = 0;
+        GameObject newEgg = Instantiate(eggPrefab, eggPosition, Quaternion.identity);
+
+        // Thêm vào danh sách quản lý
+        eggsLaid.Add(newEgg);
+
+        // Đặt tên cho dễ nhận biết
+        newEgg.name = "Egg_" + gameObject.name + "_" + eggsLaid.Count;
+
+        if (showDebugInfo) Debug.Log("Gà " + gameObject.name + " đã đẻ một quả trứng!");
     }
 
     void FixedUpdate()
@@ -207,6 +291,10 @@ public class ChickenWalk : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawLine(transform.position, (Vector2)transform.position + moveDirection * obstacleDetectionRadius);
         }
+
+        // Vẽ vị trí đẻ trứng
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(transform.position + eggOffset, 0.1f);
     }
 
     // Phương thức public để can thiệp từ bên ngoài nếu cần
@@ -229,4 +317,18 @@ public class ChickenWalk : MonoBehaviour
     {
         return moveDirection;
     }
+
+    // Phương thức mới để buộc gà đẻ trứng ngay lập tức
+    public void ForceLayEgg()
+    {
+        LayEgg();
+    }
+
+    // Phương thức mới để lấy thời gian còn lại trước khi đẻ trứng tiếp theo
+    public float GetTimeUntilNextEgg()
+    {
+        return Mathf.Max(0, eggLayInterval - eggLayTimer);
+    }
+
+
 }
