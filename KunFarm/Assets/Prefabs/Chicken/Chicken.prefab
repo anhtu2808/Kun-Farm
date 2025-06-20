@@ -60,6 +60,11 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
+  eggPrefab: {fileID: 0}
+  eggLayInterval: 30
+  layEggsOnlyWhenIdle: 1
+  eggOffset: {x: 0, y: 0, z: 0}
+  maxEggsPerChicken: 5
   showDebugInfo: 0
 --- !u!212 &6333239139150405167
 SpriteRenderer:
@@ -146,7 +151,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 0.0001
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
@@ -170,7 +175,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 309317774953899226}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: b1521b82005de4e948e1a1132c672ea4, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
