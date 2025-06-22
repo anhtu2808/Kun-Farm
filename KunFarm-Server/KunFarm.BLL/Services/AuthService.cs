@@ -78,7 +78,8 @@ namespace KunFarm.BLL.Services
                         Experience = user.Experience,
                         Coins = user.Coins,
                         Gems = user.Gems,
-                        LastLoginAt = user.LastLoginAt
+                        LastLoginAt = user.LastLoginAt,
+                        Role = user.Role.ToString()
                     },
                     Token = token
                 };
@@ -151,7 +152,8 @@ namespace KunFarm.BLL.Services
                         Experience = user.Experience,
                         Coins = user.Coins,
                         Gems = user.Gems,
-                        LastLoginAt = user.LastLoginAt
+                        LastLoginAt = user.LastLoginAt,
+                        Role = user.Role.ToString()
                     },
                     Token = token
                 };

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace KunFarm.Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

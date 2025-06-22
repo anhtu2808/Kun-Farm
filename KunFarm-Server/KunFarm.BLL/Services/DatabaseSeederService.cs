@@ -51,6 +51,7 @@ namespace KunFarm.BLL.Services
                         PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminConfig["Password"] ?? "admin"),
                         DisplayName = adminConfig["DisplayName"] ?? "Administrator",
                         IsActive = true,
+                        Role = Role.ADMIN,
                         Level = int.Parse(adminConfig["Level"] ?? "1"),
                         Experience = int.Parse(adminConfig["Experience"] ?? "0"),
                         Coins = decimal.Parse(adminConfig["Coins"] ?? "1000"),

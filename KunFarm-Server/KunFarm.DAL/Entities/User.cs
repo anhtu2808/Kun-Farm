@@ -24,6 +24,8 @@ namespace KunFarm.DAL.Entities
         
         public bool IsActive { get; set; } = true;
         
+        public Role Role { get; set; } = Role.PLAYER;
+        
         // Game specific properties
         public int Level { get; set; } = 1;
         public int Experience { get; set; } = 0;

@@ -19,5 +19,6 @@ namespace KunFarm.BLL.DTOs.Response
         public decimal Coins { get; set; }
         public decimal Gems { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public string Role { get; set; } = string.Empty;
     }
 } 
