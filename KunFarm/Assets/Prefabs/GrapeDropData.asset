@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24c63833933b97a479fb7e633733d275, type: 3}
+  m_Name: GrapeDropData
+  m_EditorClassIdentifier: 
+  cropName: Grape
+  growthStages:
+  - {fileID: 101016092, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  - {fileID: -611944613, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  - {fileID: -1045987566, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  - {fileID: 582994517, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  - {fileID: -2007504898, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  stageDurations:
+  - 5
+  - 7
+  - 10
+  - 8
+  - 0
+  harvestDrops:
+  - itemPrefab: {fileID: 7969602473186116602, guid: 71a6de17695331445b263044debdac5b, type: 3}
+    quantity: 1
+  cropPrefab: {fileID: 1709082786131891710, guid: d9acf4e3c1d406547a9372a3dbe7b914, type: 3}
