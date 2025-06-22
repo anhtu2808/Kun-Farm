@@ -32,16 +32,19 @@ public class Collectable : MonoBehaviour
     }
 
     private IEnumerator HatchEgg()
+{
+    // Đợi 10 giây (hoặc 120f cho 2 phút)
+    yield return new WaitForSeconds(10f);
+
+    if (chickenPrefab != null)
     {
-        yield return new WaitForSeconds(10f); // 2 phút
-
-        if (chickenPrefab != null)
-        {
-            Instantiate(chickenPrefab, transform.position, Quaternion.identity);
-        }
-
-        Destroy(this.gameObject);
+        // Tạo vị trí mới với z = -10
+        Vector3 spawnPos = new Vector3(0f, 0f, -10f);
+        Instantiate(chickenPrefab, spawnPos, Quaternion.identity);
     }
+
+    Destroy(this.gameObject);
+}
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
