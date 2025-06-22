@@ -23,3 +23,8 @@ MonoBehaviour:
   - 60
   - 90
   - 120
+  harvestDrops:
+  - itemPrefab: {fileID: 29784602559576804, guid: 049cb37e9e49e9144980142b62f3ad45, type: 3}
+    quantity: 2
+  - itemPrefab: {fileID: 29784602559576804, guid: b46b3e2a2bcf1904996c35fd94260f3b, type: 3}
+    quantity: 1
