@@ -6,11 +6,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public ItemManager itemManager;
+    public TileManager tileManager;
     private void Awake()
     {
         if (instance != null && instance != this)
         {
-            Destroy(this.gameObject);
+            Debug.LogWarning("Multiple instances of GameManager detected. Destroying the new instance.");
+            Destroy(gameObject);
         }
         else
         {
@@ -19,6 +21,7 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
         itemManager = GetComponent<ItemManager>();
-        
-    }  
+        tileManager = GetComponent<TileManager>();
+
+    }
 }
