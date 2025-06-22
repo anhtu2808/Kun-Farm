@@ -5,6 +5,8 @@ public class Collectable : MonoBehaviour
 {
     public CollectableType type;
     private GameObject chickenPrefab;
+    public Sprite icon;
+    public Rigidbody2D rb2d;
 
     private void Awake()
     {
