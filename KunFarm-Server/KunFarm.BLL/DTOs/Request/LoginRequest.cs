@@ -18,8 +18,8 @@ namespace KunFarm.BLL.DTOs.Request
         /// </summary>
         /// <example>admin123</example>
         [Required(ErrorMessage = "Password là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Password phải có ít nhất 6 ký tự")]
-        [Description("Mật khẩu của người dùng (tối thiểu 6 ký tự)")]
+        // [MinLength(6, ErrorMessage = "Password phải có ít nhất 6 ký tự")]
+        // [Description("Mật khẩu của người dùng (tối thiểu 6 ký tự)")]
         public string Password { get; set; } = string.Empty;
     }
 } 
