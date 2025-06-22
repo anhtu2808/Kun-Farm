@@ -1,0 +1,38 @@
+# Build artifacts
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider files
+.idea/
+*.sln.iml
+
+# VS Code files
+.vscode/
+
+# User-specific files
+*.mef
+*.dbmdl
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Entity Framework migrations
+Migrations/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Logs
+*.log
+
+# OS files
+*.DS_Store
