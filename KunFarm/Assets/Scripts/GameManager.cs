@@ -8,8 +8,6 @@ using Debug = UnityEngine.Debug;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Managers")]
-    public TileManager tileManager;
 
     [Header("Player Data")]
     [SerializeField] private int currency = 0; // Private với SerializeField để bảo mật
@@ -36,6 +34,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
+    public ItemManager itemManager;
+    public TileManager tileManager;
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -47,7 +47,9 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
+
         DontDestroyOnLoad(this.gameObject);
+        itemManager = GetComponent<ItemManager>();
         tileManager = GetComponent<TileManager>();
 
         // Load dữ liệu khi khởi động

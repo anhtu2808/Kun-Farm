@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2787442484080482603}
   - component: {fileID: 666170834585352449}
   - component: {fileID: 7111629027074667479}
+  - component: {fileID: 3889439660985576900}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -42,10 +43,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1577793514417630603}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0192ee991488f44b5869fda5fbce85dc, type: 3}
+  m_Script: {fileID: 11500000, guid: 74eb342d658590e44aa69039b4252658, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileManager: {fileID: 0}
+  itemManager: {fileID: 3889439660985576900}
+  tileManager: {fileID: 7111629027074667479}
 --- !u!114 &7111629027074667479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,3 +62,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactableMap: {fileID: 0}
   hiddenIntaractableTile: {fileID: 11400000, guid: 0671fcb18c971409a9dd11e221159464, type: 2}
+--- !u!114 &3889439660985576900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1577793514417630603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 582357e4c1eada342b2902185151abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collectableItems: []
