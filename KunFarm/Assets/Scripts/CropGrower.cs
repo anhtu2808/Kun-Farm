@@ -1,41 +1,43 @@
+// CropGrower.cs
 using UnityEngine;
 
 public class CropGrower : MonoBehaviour
 {
-    public CropData cropData;
+    public CropData cropData; // Kéo CropData Asset của cây này vào đây (trên Prefab Grape)
     private SpriteRenderer spriteRenderer;
     private int currentStage = 0;
     private float timer = 0f;
     public bool isMature = false; // Đổi thành public để PlayerInteraction có thể đọc
-    private bool playerNearby = false;
+    private bool playerNearby = false; // Để kiểm tra player có gần không (nếu bạn dùng logic này)
 
-    // Sử dụng Awake để lấy SpriteRenderer ngay khi đối tượng được tạo
+    // Thêm tham chiếu đến TileManager và biến lưu vị trí ô
+    private TileManager tileManager;
+    private Vector3Int myCellPosition; // Vị trí ô của cây này trên Tilemap
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // Không gán sprite ở đây, sẽ gán trong Initialize()
-    }
-
-    // Hàm khởi tạo riêng, được gọi ngay sau khi gán CropData từ PlayerInteraction
-    public void InitializeCrop(CropData data)
-    {
-        cropData = data;
-        if (cropData == null)
+        if (spriteRenderer == null)
         {
-            Debug.LogError("CropData is null for CropGrower!", this);
+            Debug.LogError("CropGrower: SpriteRenderer component not found on this GameObject.", this);
             return;
         }
 
-        if (spriteRenderer == null)
+        // Lấy tham chiếu đến TileManager ngay trong Awake
+        tileManager = FindObjectOfType<TileManager>();
+        if (tileManager == null)
         {
-            spriteRenderer = GetComponent<SpriteRenderer>(); // Đảm bảo đã có
+            Debug.LogError("TileManager not found in the scene! Crop growth state won't update tile status.", this);
         }
 
-        currentStage = 0; // Đảm bảo bắt đầu từ giai đoạn 0
-        timer = 0f;
-        isMature = false;
+        // Kiểm tra và khởi tạo CropData
+        if (cropData == null)
+        {
+            Debug.LogError("CropData is null for CropGrower on " + gameObject.name + "! Make sure to assign it on the Prefab.", this);
+            return;
+        }
 
-        // Gán sprite đầu tiên
+        // Gán sprite đầu tiên từ CropData
         if (cropData.growthStages != null && cropData.growthStages.Length > 0 && cropData.growthStages[0] != null)
         {
             spriteRenderer.sprite = cropData.growthStages[0];
@@ -44,54 +46,73 @@ public class CropGrower : MonoBehaviour
         {
             Debug.LogError("CropData for " + cropData.cropName + " has no initial sprite or growth stages!", this);
         }
+
+        // Reset trạng thái ban đầu của cây
+        currentStage = 0;
+        timer = 0f;
+        isMature = false;
+    }
+
+    // Hàm này được gọi từ PlayerInteraction để thiết lập vị trí ô của cây
+    public void SetTilePosition(Vector3Int pos)
+    {
+        myCellPosition = pos;
     }
 
     void Update()
     {
-        // Các logic cũ của Update vẫn giữ nguyên
-        if (!isMature && currentStage < cropData.growthStages.Length - 1)
+        // Cây phát triển qua từng stage
+        // Chỉ chạy nếu cropData không null (đã được gán) và cây chưa trưởng thành
+        if (cropData != null && !isMature && currentStage < cropData.growthStages.Length - 1)
         {
             timer += Time.deltaTime;
             if (timer >= cropData.stageDurations[currentStage])
             {
                 currentStage++;
-                spriteRenderer.sprite = cropData.growthStages[currentStage];
+                // Kiểm tra để tránh lỗi IndexOutOfRangeException nếu mảng bị cấu hình sai
+                if (currentStage < cropData.growthStages.Length)
+                {
+                    spriteRenderer.sprite = cropData.growthStages[currentStage];
+                }
+                else
+                {
+                    Debug.LogWarning("GrowthStages array is too short for currentStage " + currentStage + " for crop " + cropData.cropName, this);
+                }
                 timer = 0f;
 
+                // Nếu đạt đến giai đoạn cuối cùng, đánh dấu là trưởng thành và cập nhật trạng thái ô đất
                 if (currentStage == cropData.growthStages.Length - 1)
                 {
                     isMature = true;
+                    Debug.Log(cropData.cropName + " đã trưởng thành và sẵn sàng thu hoạch!", this);
+                    // === QUAN TRỌNG: CẬP NHẬT TRẠNG THÁI CỦA Ô ĐẤT Ở ĐÂY ===
+                    if (tileManager != null)
+                    {
+                        tileManager.SetTileState(myCellPosition, TileState.Harvested);
+                    }
                 }
             }
         }
-
-        // Thu hoạch khi đủ điều kiện
-        // (Bạn đang kiểm tra Input.GetKeyDown(KeyCode.F) ở đây, nhưng chúng ta sẽ dùng PlayerInteraction để thu hoạch)
-        // Nếu bạn muốn giữ logic thu hoạch tự động khi người chơi lại gần và ấn F, thì giữ lại.
-        // Tuy nhiên, tôi khuyên bạn nên điều khiển việc thu hoạch hoàn toàn từ PlayerInteraction để nhất quán.
-        // if (isMature && playerNearby && Input.GetKeyDown(KeyCode.F))
-        // {
-        //     Harvest();
-        // }
     }
 
-    // Đảm bảo là public như đã sửa
-    public void Harvest()
+    // Hàm Harvest() được gọi từ PlayerInteraction
+    public void Harvest() // Đảm bảo là public
     {
-        Debug.Log("Đã thu hoạch: " + cropData.cropName);
+        Debug.Log("Đã thu hoạch: " + cropData.cropName, this);
 
+        // Sinh ra các item rơi ra
         foreach (HarvestDrop drop in cropData.harvestDrops)
         {
             for (int i = 0; i < drop.quantity; i++)
             {
-                Vector3 dropPos = transform.position + new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(-0.3f, 0.3f), 0);
-                Instantiate(drop.itemPrefab, dropPos, Quaternion.identity);
+                // Vị trí rơi ngẫu nhiên quanh cây
+                Debug.Log($"Đã thu thập: {drop.quantity} x {drop.itemPrefab.name}");
             }
         }
-        // Destroy(gameObject); // Không phá hủy ở đây nữa, PlayerInteraction sẽ xử lý sau khi deregister
+        // GameObject cây sẽ được phá hủy bởi TileManager/PlayerInteraction sau khi Deregister
     }
 
-    // Các OnTriggerEnter2D/Exit2D giữ nguyên nếu bạn vẫn muốn dùng playerNearby
+    // Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
