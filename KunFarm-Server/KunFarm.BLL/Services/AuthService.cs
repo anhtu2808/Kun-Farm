@@ -15,15 +15,17 @@ namespace KunFarm.BLL.Services
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPlayerStateRepository _playerStateRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IPlayerStateRepository playerStateRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
+            _playerStateRepository = playerStateRepository;
             _configuration = configuration;
         }
 
-        public async Task<LoginResponse> LoginAsync(LoginRequest request)
+        public async Task<AuthResponse?> LoginAsync(LoginRequest request)
         {
             try
             {
@@ -41,21 +43,13 @@ namespace KunFarm.BLL.Services
 
                 if (user == null || !user.IsActive)
                 {
-                    return new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Tài khoản không tồn tại hoặc đã bị khóa"
-                    };
+                    return null;
                 }
 
                 // Verify password
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 {
-                    return new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Mật khẩu không chính xác"
-                    };
+                    return null;
                 }
 
                 // Update last login
@@ -64,58 +58,40 @@ namespace KunFarm.BLL.Services
                 // Generate token
                 var token = GenerateToken(user.Id, user.Username);
 
-                return new LoginResponse
+                return new AuthResponse
                 {
-                    Success = true,
-                    Message = "Đăng nhập thành công",
-                    User = new KunFarm.BLL.DTOs.Response.User
+                    Token = token,
+                    User = new UserResponse
                     {
                         Id = user.Id,
                         Username = user.Username,
                         Email = user.Email,
                         DisplayName = user.DisplayName,
-                        Level = user.Level,
-                        Experience = user.Experience,
-                        Coins = user.Coins,
-                        Gems = user.Gems,
                         LastLoginAt = user.LastLoginAt,
                         Role = user.Role.ToString()
-                    },
-                    Token = token
+                    }
                 };
             }
             catch (Exception ex)
             {
-                return new LoginResponse
-                {
-                    Success = false,
-                    Message = "Có lỗi xảy ra trong quá trình đăng nhập"
-                };
+                return null;
             }
         }
 
-        public async Task<LoginResponse> RegisterAsync(RegisterRequest request)
+        public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
         {
             try
             {
                 // Check if username exists
                 if (await _userRepository.ExistsByUsernameAsync(request.Username))
                 {
-                    return new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Username đã tồn tại"
-                    };
+                    return null;
                 }
 
                 // Check if email exists
                 if (await _userRepository.ExistsByEmailAsync(request.Email))
                 {
-                    return new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Email đã tồn tại"
-                    };
+                    return null;
                 }
 
                 // Create new user
@@ -125,46 +101,45 @@ namespace KunFarm.BLL.Services
                     Email = request.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                     DisplayName = string.IsNullOrEmpty(request.DisplayName) ? request.Username : request.DisplayName,
-                    IsActive = true,
-                    Level = 1,
-                    Experience = 0,
-                    Coins = 1000,
-                    Gems = 10
+                    IsActive = true
                 };
 
                 await _userRepository.AddAsync(user);
                 await _userRepository.SaveChangesAsync();
 
+                // Create initial PlayerState for new user
+                var playerState = new PlayerState
+                {
+                    UserId = user.Id,
+                    Money = 1000, // Starting money
+                    PosX = 0f,
+                    PosY = 0f,
+                    PosZ = 0f,
+                    LastSaved = DateTime.UtcNow
+                };
+
+                await _playerStateRepository.CreatePlayerStateAsync(playerState);
+
                 // Generate token
                 var token = GenerateToken(user.Id, user.Username);
 
-                return new LoginResponse
+                return new AuthResponse
                 {
-                    Success = true,
-                    Message = "Đăng ký thành công",
-                    User = new KunFarm.BLL.DTOs.Response.User
+                    Token = token,
+                    User = new UserResponse
                     {
                         Id = user.Id,
                         Username = user.Username,
                         Email = user.Email,
                         DisplayName = user.DisplayName,
-                        Level = user.Level,
-                        Experience = user.Experience,
-                        Coins = user.Coins,
-                        Gems = user.Gems,
                         LastLoginAt = user.LastLoginAt,
                         Role = user.Role.ToString()
-                    },
-                    Token = token
+                    }
                 };
             }
             catch (Exception ex)
             {
-                return new LoginResponse
-                {
-                    Success = false,
-                    Message = "Có lỗi xảy ra trong quá trình đăng ký"
-                };
+                return null;
             }
         }
 

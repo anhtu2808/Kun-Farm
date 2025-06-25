@@ -10,6 +10,7 @@ namespace KunFarm.DAL.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PlayerState> PlayerStates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,8 +23,23 @@ namespace KunFarm.DAL.Data
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasQueryFilter(e => !e.IsDeleted);
                 
-                entity.Property(e => e.Coins).HasPrecision(18, 2);
-                entity.Property(e => e.Gems).HasPrecision(18, 2);
+                // One-to-one relationship with PlayerState
+                entity.HasOne(u => u.PlayerState)
+                      .WithOne(ps => ps.User)
+                      .HasForeignKey<PlayerState>(ps => ps.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PlayerState entity configuration
+            modelBuilder.Entity<PlayerState>(entity =>
+            {
+                entity.HasKey(e => e.UserId);
+                
+                entity.Property(e => e.LastSaved)
+                      .HasDefaultValue(DateTime.Now);
+                      
+                entity.Property(e => e.Money)
+                      .HasDefaultValue(0);
             });
 
             // Seed data

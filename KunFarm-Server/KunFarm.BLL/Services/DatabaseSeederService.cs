@@ -52,14 +52,24 @@ namespace KunFarm.BLL.Services
                         DisplayName = adminConfig["DisplayName"] ?? "Administrator",
                         IsActive = true,
                         Role = Role.ADMIN,
-                        Level = int.Parse(adminConfig["Level"] ?? "1"),
-                        Experience = int.Parse(adminConfig["Experience"] ?? "0"),
-                        Coins = decimal.Parse(adminConfig["Coins"] ?? "1000"),
-                        Gems = decimal.Parse(adminConfig["Gems"] ?? "10"),
                         CreatedAt = DateTime.UtcNow
                     };
 
                     _context.Users.Add(adminUser);
+                    await _context.SaveChangesAsync();
+
+                    // Create PlayerState for admin (optional, in case admin wants to play)
+                    var adminPlayerState = new PlayerState
+                    {
+                        UserId = adminUser.Id,
+                        Money = int.Parse(adminConfig["Money"] ?? "10000"), // Admin gets more money
+                        PosX = 0f,
+                        PosY = 0f,
+                        PosZ = 0f,
+                        LastSaved = DateTime.UtcNow
+                    };
+
+                    _context.PlayerStates.Add(adminPlayerState);
                     await _context.SaveChangesAsync();
 
                     _logger.LogInformation("Admin account created successfully: {Username}", adminUsername);
