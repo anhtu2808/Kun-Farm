@@ -114,6 +114,7 @@ public class PlayerInteraction : MonoBehaviour
 
                     tileManager.DeregisterPlant(cellPosition); // Dòng này sẽ HỦY cây và xóa khỏi dictionary
                     tileManager.SetTileState(cellPosition, TileState.Dug); // Đặt lại trạng thái đất thành đã đào
+                    Destroy(plantAtCell);
                 }
                 else
                 {

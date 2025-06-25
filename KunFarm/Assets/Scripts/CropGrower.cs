@@ -103,11 +103,21 @@ public class CropGrower : MonoBehaviour
         // Sinh ra các item rơi ra
         foreach (HarvestDrop drop in cropData.harvestDrops)
         {
-            for (int i = 0; i < drop.quantity; i++)
+           for (int i = 0; i < drop.quantity; i++)
+        {
+            // Vị trí rơi ngẫu nhiên quanh cây
+            Vector3 spawnPos = transform.position + (Vector3)Random.insideUnitCircle * 0.5f;
+
+            if (drop.itemPrefab != null)
             {
-                // Vị trí rơi ngẫu nhiên quanh cây
-                Debug.Log($"Đã thu thập: {drop.quantity} x {drop.itemPrefab.name}");
+                Instantiate(drop.itemPrefab, spawnPos, Quaternion.identity);
+                Debug.Log($"Đã thu thập: {drop.itemPrefab.name} tại {spawnPos}");
             }
+            else
+            {
+                Debug.LogWarning("itemPrefab trong HarvestDrop chưa được gán!");
+            }
+        }
         }
         // GameObject cây sẽ được phá hủy bởi TileManager/PlayerInteraction sau khi Deregister
     }
