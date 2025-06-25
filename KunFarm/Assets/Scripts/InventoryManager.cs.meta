@@ -1,10 +1,9 @@
 fileFormatVersion: 2
-guid: 24c63833933b97a479fb7e633733d275
+guid: 45b036cbccff9e84484eb71faf400c83
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - cropPrefab: {fileID: 1709082786131891710, guid: d9acf4e3c1d406547a9372a3dbe7b914, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

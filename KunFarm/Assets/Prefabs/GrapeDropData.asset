@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24c63833933b97a479fb7e633733d275, type: 3}
-  m_Name: Grapes
+  m_Name: GrapeDropData
   m_EditorClassIdentifier: 
-  cropName: 
+  cropName: Grape
   growthStages:
   - {fileID: 101016092, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   - {fileID: -611944613, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   - {fileID: -1045987566, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   - {fileID: 582994517, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  - {fileID: -2007504898, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   stageDurations:
   - 5
-  - 6
-  - 6
-  - 6
+  - 7
+  - 10
+  - 8
+  - 0
   harvestDrops:
-  - itemPrefab: {fileID: 29784602559576804, guid: 049cb37e9e49e9144980142b62f3ad45, type: 3}
-    quantity: 2
-  - itemPrefab: {fileID: 29784602559576804, guid: b46b3e2a2bcf1904996c35fd94260f3b, type: 3}
+  - itemPrefab: {fileID: 0}
     quantity: 1
-  cropPrefab: {fileID: 29784602559576804, guid: b46b3e2a2bcf1904996c35fd94260f3b, type: 3}
+  cropPrefab: {fileID: 1709082786131891710, guid: d9acf4e3c1d406547a9372a3dbe7b914, type: 3}

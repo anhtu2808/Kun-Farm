@@ -1,12 +1,13 @@
 fileFormatVersion: 2
-guid: beaeddf6d4d1640f1a85f9b43f854123
+guid: a0f3afa7a3729d8459beb1db15099dda
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
   - interactableMap: {instanceID: 0}
-  - hiddenInteractableTile: {fileID: 11400000, guid: 0671fcb18c971409a9dd11e221159464, type: 2}
-  - dugGroundTile: {fileID: 11400000, guid: b2a6dc0ce43a74dd3bfbbd162c75b49c, type: 2}
+  - tileManager: {instanceID: 0}
+  - playerAnimator: {instanceID: 0}
+  - grapeCropDataAsset: {fileID: 11400000, guid: f62c8ed2dcfeb2e4783bb241e09846b0, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

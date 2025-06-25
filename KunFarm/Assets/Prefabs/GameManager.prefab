@@ -61,7 +61,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactableMap: {fileID: 0}
-  hiddenIntaractableTile: {fileID: 11400000, guid: 0671fcb18c971409a9dd11e221159464, type: 2}
+  hiddenInteractableTile: {fileID: 11400000, guid: 0671fcb18c971409a9dd11e221159464, type: 2}
+  dugGroundTile: {fileID: 11400000, guid: 0ae732ad06481044eb2d85087853ff91, type: 2}
 --- !u!114 &3889439660985576900
 MonoBehaviour:
   m_ObjectHideFlags: 0
