@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Quản lý tools trong toolbar và tương tác với UI
@@ -8,20 +9,35 @@ public class ToolManager : MonoBehaviour
     [Header("Tools Setup")]
     [SerializeField] private ToolData[] toolDataArray; // Mảng tools để setup trong editor
     
+    [Header("Animation Settings")]
+    [SerializeField] private float hoeAnimationSpeed = 0.7f; // Adjustable animation speed
+    
+    [Header("Interaction Settings")]
+    [SerializeField] private float maxInteractionDistance = 1.5f; // Maximum distance to interact with tiles
+    
     [Header("References")]
     [SerializeField] private Toolbar_UI toolbarUI;
     [SerializeField] private TileManager tileManager;
-    [SerializeField] private Animator playerAnimator;
-
+    [SerializeField] private Movement playerMovement; // Changed from playerAnimator to playerMovement
+    
     private Tool[] tools; // Mảng tools trong toolbar (9 slots)
     private int selectedToolIndex = 0;
+    private bool isUsingTool = false;
     
-    public Tool SelectedTool => selectedToolIndex < tools.Length ? tools[selectedToolIndex] : null;
+    public Tool SelectedTool => tools != null && selectedToolIndex < tools.Length ? tools[selectedToolIndex] : null;
+
+    void Awake()
+    {
+        InitializeTools();
+    }
 
     void Start()
     {
-        InitializeTools();
         UpdateToolbarUI();
+        
+        // Auto-find Movement component if not assigned
+        if (playerMovement == null)
+            playerMovement = FindObjectOfType<Movement>();
     }
 
     void Update()
@@ -66,6 +82,12 @@ public class ToolManager : MonoBehaviour
 
     public void SelectTool(int index, bool updateUI = true)
     {
+        if (tools == null)
+        {
+            Debug.LogWarning("ToolManager: tools array is null, skipping SelectTool");
+            return;
+        }
+        
         if (index >= 0 && index < tools.Length)
         {
             selectedToolIndex = index;
@@ -81,43 +103,164 @@ public class ToolManager : MonoBehaviour
 
     public void UseTool(Vector3Int cellPosition)
     {
-        if (tileManager == null || !tileManager.IsInteractable(cellPosition))
+        if (tileManager == null || !tileManager.IsInteractable(cellPosition) || isUsingTool)
             return;
+
+        // Check distance from player to target cell
+        if (!IsWithinInteractionRange(cellPosition))
+        {
+            Debug.Log("Target is too far away! Move closer to dig.");
+            return;
+        }
 
         Tool currentTool = SelectedTool;
         if (currentTool != null && currentTool.CanUse(cellPosition, tileManager))
         {
-            // Use the tool
-            currentTool.Use(cellPosition, tileManager);
-            
-            // Handle tool consumption
-            if (currentTool.IsConsumable())
+            // Check if this is a shovel tool for hoeing animation
+            if (currentTool is ShovelTool)
             {
-                bool stillUsable = currentTool.ConsumeOnUse();
-                
-                // If tool is depleted, remove it
-                if (!stillUsable)
-                {
-                    tools[selectedToolIndex] = null;
-                }
-                
-                // Update display để show quantity mới hoặc xóa tool
-                UpdateToolbarDisplay();
+                StartCoroutine(PlayHoeAnimation(cellPosition, currentTool));
             }
+            else
+            {
+                // Use other tools immediately
+                currentTool.Use(cellPosition, tileManager);
+                HandleToolConsumption(currentTool);
+            }
+        }
+    }
+
+    private IEnumerator PlayHoeAnimation(Vector3Int cellPosition, Tool tool)
+    {
+        isUsingTool = true;
+        
+        if (playerMovement != null && playerMovement.GetAnimator() != null)
+        {
+            var animator = playerMovement.GetAnimator();
+            
+            // Get direction to target for very close targets, otherwise use facing direction
+            Vector3 playerPos = playerMovement.transform.position;
+            Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
+            Vector3 directionToTarget = (targetPos - playerPos).normalized;
+            
+            // If target is very close (direction is nearly zero), use player's facing direction
+            Vector3 finalDirection;
+            if (Vector3.Distance(playerPos, targetPos) < 0.5f)
+            {
+                // Use player's current facing direction when target is very close
+                finalDirection = playerMovement.GetFacingDirection();
+            }
+            else
+            {
+                // Use direction to target when target is further away
+                finalDirection = directionToTarget;
+            }
+            
+            // Determine hoe direction using 2D blend tree coordinates
+            Vector2 hoeBlendDirection = GetHoeBlendDirection(finalDirection);
+            
+            // Set animator parameters for 2D blend tree
+            animator.SetFloat("horizontal", hoeBlendDirection.x);
+            animator.SetFloat("vertical", hoeBlendDirection.y);
+            animator.SetBool("isHoeing", true);
+            
+            // Apply animation speed if specified
+            if (hoeAnimationSpeed != 1f)
+            {
+                animator.speed = hoeAnimationSpeed;
+            }
+            
+            // Wait for animation to play (dynamic based on animation speed)
+            float waitTime = 0.5f / hoeAnimationSpeed; // Base duration / speed
+            yield return new WaitForSeconds(waitTime);
+            
+            // Reset animation speed to normal
+            animator.speed = 1f;
+            
+            // Use the tool
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+            
+            // Stop hoeing animation
+            animator.SetBool("isHoeing", false);
+        }
+        else
+        {
+            // Fallback if no animator
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+        }
+        
+        isUsingTool = false;
+    }
+
+    private Vector2 GetHoeBlendDirection(Vector3 direction)
+    {
+        // Ensure direction is normalized
+        direction = direction.normalized;
+        
+        // Determine primary direction based on larger component
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            // Horizontal movement is stronger
+            if (direction.x > 0)
+            {
+                return new Vector2(1, 0); // Right
+            }
+            else
+            {
+                return new Vector2(-1, 0); // Left
+            }
+        }
+        else
+        {
+            // Vertical movement is stronger (or equal)
+            if (direction.y > 0)
+            {
+                return new Vector2(0, 1); // Up
+            }
+            else
+            {
+                return new Vector2(0, -1); // Down (default)
+            }
+        }
+    }
+
+    private void HandleToolConsumption(Tool tool)
+    {
+        // Handle tool consumption
+        if (tool.IsConsumable())
+        {
+            bool stillUsable = tool.ConsumeOnUse();
+            
+            // If tool is depleted, remove it
+            if (!stillUsable)
+            {
+                tools[selectedToolIndex] = null;
+            }
+            
+            // Update display để show quantity mới hoặc xóa tool
+            UpdateToolbarDisplay();
         }
     }
 
     private void UpdatePlayerAnimation()
     {
-        if (playerAnimator != null && SelectedTool != null)
+        if (playerMovement != null && playerMovement.GetAnimator() != null && SelectedTool != null)
         {
-            playerAnimator.SetInteger("ToolIndex", SelectedTool.animatorToolIndex);
+            var animator = playerMovement.GetAnimator();
+            animator.SetInteger("ToolIndex", SelectedTool.animatorToolIndex);
+        }
+        else if (playerMovement != null && playerMovement.GetAnimator() != null)
+        {
+            var animator = playerMovement.GetAnimator();
+            animator.SetInteger("ToolIndex", 0); // Default/no tool
         }
     }
 
     private void UpdateToolbarUI()
     {
-        if (toolbarUI == null) return;
+        if (toolbarUI == null || tools == null) return;
 
         var toolbarSlots = toolbarUI.GetToolbarSlots();
         
@@ -169,5 +312,35 @@ public class ToolManager : MonoBehaviour
     public void UpdateToolbarDisplay()
     {
         UpdateToolbarUI();
+    }
+
+    /// <summary>
+    /// Public method để trigger tool use từ scripts khác (như NewPlayerInteraction)
+    /// </summary>
+    public void TriggerToolUse(Vector3Int cellPosition)
+    {
+        UseTool(cellPosition);
+    }
+
+    /// <summary>
+    /// Check if player is currently using a tool (for preventing multiple actions)
+    /// </summary>
+    public bool IsUsingTool()
+    {
+        return isUsingTool;
+    }
+
+    /// <summary>
+    /// Check if target cell is within interaction range of player
+    /// </summary>
+    private bool IsWithinInteractionRange(Vector3Int cellPosition)
+    {
+        if (playerMovement == null) return false;
+        
+        Vector3 playerPos = playerMovement.transform.position;
+        Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
+        float distance = Vector3.Distance(playerPos, targetPos);
+        
+        return distance <= maxInteractionDistance;
     }
 } 

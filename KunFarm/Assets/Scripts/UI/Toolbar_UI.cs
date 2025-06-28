@@ -9,11 +9,14 @@ public class Toolbar_UI : MonoBehaviour
     private Slot_UI selectedSlot;
     private ToolManager toolManager;
 
-    private void Start()
+    private void Awake()
     {
         // Find ToolManager
         toolManager = FindObjectOfType<ToolManager>();
-        
+    }
+
+    private void Start()
+    {
         // Setup click callbacks for all slots
         for (int i = 0; i < toolbarSlots.Count; i++)
         {
@@ -34,7 +37,7 @@ public class Toolbar_UI : MonoBehaviour
 
     public void SelectSlot(int index)
     {
-        if(toolbarSlots.Count == 9)
+        if(toolbarSlots.Count == 9 && index >= 0 && index < toolbarSlots.Count)
         {
             if(selectedSlot != null)
             {

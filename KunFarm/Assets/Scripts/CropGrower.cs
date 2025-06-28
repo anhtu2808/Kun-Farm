@@ -8,7 +8,7 @@ public class CropGrower : MonoBehaviour
     private int currentStage = 0;
     private float timer = 0f;
     public bool isMature = false; // Đổi thành public để PlayerInteraction có thể đọc
-    private bool playerNearby = false; // Để kiểm tra player có gần không (nếu bạn dùng logic này)
+    // private bool playerNearby = false; // Để kiểm tra player có gần không (nếu bạn dùng logic này)
 
     // Thêm tham chiếu đến TileManager và biến lưu vị trí ô
     private TileManager tileManager;
@@ -123,19 +123,19 @@ public class CropGrower : MonoBehaviour
     }
 
     // Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerNearby = true;
-        }
-    }
+    // private void OnTriggerEnter2D(Collider2D other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         playerNearby = true;
+    //     }
+    // }
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerNearby = false;
-        }
-    }
+    // private void OnTriggerExit2D(Collider2D other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         playerNearby = false;
+    //     }
+    // }
 }

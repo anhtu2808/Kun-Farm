@@ -183,9 +183,11 @@ MonoBehaviour:
   toolDataArray:
   - {fileID: 11400000, guid: 7e51e6fbf737e464da2455fda77dc848, type: 2}
   - {fileID: 11400000, guid: 813f4a49664af459ebd5023c76b49b08, type: 2}
+  hoeAnimationSpeed: 0.7
+  maxInteractionDistance: 1.5
   toolbarUI: {fileID: 0}
   tileManager: {fileID: 0}
-  playerAnimator: {fileID: 0}
+  playerMovement: {fileID: 0}
 --- !u!114 &2083536048103807085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactableMap: {fileID: 0}
   toolManager: {fileID: 944264181672840308}
-  player: {fileID: 0}
+  player: {fileID: 6099918374191354116}
 --- !u!1 &4358920708629238525
 GameObject:
   m_ObjectHideFlags: 0

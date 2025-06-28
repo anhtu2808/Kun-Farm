@@ -27,6 +27,10 @@ public class NewPlayerInteraction : MonoBehaviour
 
     private void HandleInput()
     {
+        // Don't handle input if tool is already being used
+        if (toolManager != null && toolManager.IsUsingTool())
+            return;
+
         Vector3Int targetCell = Vector3Int.zero;
         bool shouldInteract = false;
 
@@ -59,8 +63,8 @@ public class NewPlayerInteraction : MonoBehaviour
             Tool selectedTool = toolManager.SelectedTool;
             if (selectedTool != null && selectedTool.CanUse(targetCell, GameManager.instance.tileManager))
             {
-                // Dùng ToolManager.UseTool() để xử lý consumption
-                toolManager.UseTool(targetCell);
+                // Use ToolManager.TriggerToolUse() instead of UseTool() để support animations
+                toolManager.TriggerToolUse(targetCell);
                 toolUsed = true;
             }
         }

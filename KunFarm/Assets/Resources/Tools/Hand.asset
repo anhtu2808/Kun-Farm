@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   toolName: Hand
   toolIcon: {fileID: 478781030, guid: 73c3fdc0d2a9a44adbf1782aae038fc1, type: 3}
-  toolType: 0
+  toolType: 1
   animatorToolIndex: 3
   cropData: {fileID: 0}

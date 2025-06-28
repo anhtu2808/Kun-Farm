@@ -40,7 +40,7 @@ public class ShovelTool : Tool
     public ShovelTool(int durability = 10)
     {
         toolName = "Shovel";
-        animatorToolIndex = 1;
+        animatorToolIndex = 1; // Index for shovel tool in animator
         quantity = durability; // Độ bền của xẻng
     }
 
