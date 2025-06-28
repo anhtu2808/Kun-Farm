@@ -122,4 +122,22 @@ public class Inventory
         }
     }
 
+    // Method to clear entire slot and trigger event
+    public void ClearSlot(int index)
+    {
+        if (index >= 0 && index < slots.Count)
+        {
+            slots[index].count = 0;
+            slots[index].type = CollectableType.NONE;
+            slots[index].icon = null;
+            onInventoryChanged?.Invoke();
+        }
+    }
+
+    // Method to trigger inventory changed event from external scripts
+    public void NotifyInventoryChanged()
+    {
+        onInventoryChanged?.Invoke();
+    }
+
 }

@@ -4,12 +4,13 @@ using UnityEngine.Tilemaps;
 /// <summary>
 /// Simplified player interaction system using ToolManager and direct collectable planting
 /// </summary>
-public class NewPlayerInteraction : MonoBehaviour
+public class PlayerInteraction : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Tilemap interactableMap;
     [SerializeField] private ToolManager toolManager;
     [SerializeField] private Player player;
+    [SerializeField] private InventoryUI inventoryUI;
 
     void Start()
     {
@@ -18,6 +19,8 @@ public class NewPlayerInteraction : MonoBehaviour
             player = FindObjectOfType<Player>();
         if (toolManager == null)
             toolManager = FindObjectOfType<ToolManager>();
+        if (inventoryUI == null)
+            inventoryUI = FindObjectOfType<InventoryUI>();
     }
 
     void Update()
@@ -29,6 +32,10 @@ public class NewPlayerInteraction : MonoBehaviour
     {
         // Don't handle input if tool is already being used
         if (toolManager != null && toolManager.IsUsingTool())
+            return;
+
+        // Don't handle input if inventory is open
+        if (inventoryUI != null && inventoryUI.IsOpen)
             return;
 
         Vector3Int targetCell = Vector3Int.zero;
@@ -56,8 +63,7 @@ public class NewPlayerInteraction : MonoBehaviour
     
     private void HandleInteraction(Vector3Int targetCell)
     {
-        // Đầu tiên thử dùng tool từ toolbar
-        bool toolUsed = false;
+        // Chỉ dùng tool từ toolbar, không dùng inventory
         if (toolManager != null)
         {
             Tool selectedTool = toolManager.SelectedTool;
@@ -65,46 +71,8 @@ public class NewPlayerInteraction : MonoBehaviour
             {
                 // Use ToolManager.TriggerToolUse() instead of UseTool() để support animations
                 toolManager.TriggerToolUse(targetCell);
-                toolUsed = true;
-            }
-        }
-        
-        // Nếu tool không thể dùng hoặc không có tool, thử dùng collectable từ inventory
-        if (!toolUsed && CanPlantAtCell(targetCell))
-        {
-            TryPlantFromInventory(targetCell);
-        }
-    }
-    
-    private bool CanPlantAtCell(Vector3Int cellPosition)
-    {
-        return GameManager.instance.tileManager.GetTileState(cellPosition) == TileState.Dug;
-    }
-    
-    private void TryPlantFromInventory(Vector3Int targetCell)
-    {
-        if (player?.inventory == null) return;
-        
-        // Tìm collectable đầu tiên trong inventory có thể plant
-        for (int i = 0; i < player.inventory.slots.Count; i++)
-        {
-            var slot = player.inventory.slots[i];
-            if (slot.count > 0 && ToolHelpers.CanPlantDirectly(slot.type))
-            {
-                // Thử plant bằng collectable này
-                if (ToolHelpers.PlantFromCollectable(slot.type, targetCell, GameManager.instance.tileManager))
-                {
-                    // Plant thành công, remove 1 item từ inventory
-                    player.inventory.Remove(i);
-                    
-                    // Refresh inventory UI if available
-                    var inventoryUI = FindObjectOfType<InventoryUI>();
-                    if (inventoryUI != null)
-                        inventoryUI.Refresh();
-                    
-                    break; // Chỉ plant 1 cây
-                }
             }
         }
     }
+
 } 

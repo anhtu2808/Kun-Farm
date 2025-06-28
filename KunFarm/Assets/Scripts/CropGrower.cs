@@ -84,7 +84,6 @@ public class CropGrower : MonoBehaviour
                 if (currentStage == cropData.growthStages.Length - 1)
                 {
                     isMature = true;
-                    Debug.Log(cropData.cropName + " đã trưởng thành và sẵn sàng thu hoạch!", this);
                     // === QUAN TRỌNG: CẬP NHẬT TRẠNG THÁI CỦA Ô ĐẤT Ở ĐÂY ===
                     if (tileManager != null)
                     {
@@ -98,7 +97,6 @@ public class CropGrower : MonoBehaviour
     // Hàm Harvest() được gọi từ PlayerInteraction
     public void Harvest() // Đảm bảo là public
     {
-        Debug.Log("Đã thu hoạch: " + cropData.cropName, this);
 
         // Sinh ra các item rơi ra
         foreach (HarvestDrop drop in cropData.harvestDrops)
@@ -111,7 +109,6 @@ public class CropGrower : MonoBehaviour
             if (drop.itemPrefab != null)
             {
                 Instantiate(drop.itemPrefab, spawnPos, Quaternion.identity);
-                Debug.Log($"Đã thu thập: {drop.itemPrefab.name} tại {spawnPos}");
             }
             else
             {

@@ -19,6 +19,7 @@ public class ToolManager : MonoBehaviour
     [SerializeField] private Toolbar_UI toolbarUI;
     [SerializeField] private TileManager tileManager;
     [SerializeField] private Movement playerMovement; // Changed from playerAnimator to playerMovement
+    [SerializeField] private InventoryUI inventoryUI;
     
     private Tool[] tools; // Mảng tools trong toolbar (9 slots)
     private int selectedToolIndex = 0;
@@ -35,9 +36,11 @@ public class ToolManager : MonoBehaviour
     {
         UpdateToolbarUI();
         
-        // Auto-find Movement component if not assigned
+        // Auto-find components if not assigned
         if (playerMovement == null)
             playerMovement = FindObjectOfType<Movement>();
+        if (inventoryUI == null)
+            inventoryUI = FindObjectOfType<InventoryUI>();
     }
 
     void Update()
@@ -62,6 +65,10 @@ public class ToolManager : MonoBehaviour
 
     private void CheckToolSelection()
     {
+        // Don't allow tool selection if inventory is open
+        if (inventoryUI != null && inventoryUI.IsOpen)
+            return;
+            
         int newSelection = -1;
         
         if (Input.GetKeyDown(KeyCode.Alpha1)) newSelection = 0;
@@ -104,6 +111,10 @@ public class ToolManager : MonoBehaviour
     public void UseTool(Vector3Int cellPosition)
     {
         if (tileManager == null || !tileManager.IsInteractable(cellPosition) || isUsingTool)
+            return;
+
+        // Don't allow tool use if inventory is open
+        if (inventoryUI != null && inventoryUI.IsOpen)
             return;
 
         // Check distance from player to target cell
@@ -237,6 +248,16 @@ public class ToolManager : MonoBehaviour
             if (!stillUsable)
             {
                 tools[selectedToolIndex] = null;
+                
+                // Force refresh the specific slot to clear DragDropHandler cache
+                if (toolbarUI != null)
+                {
+                    var toolbarSlots = toolbarUI.GetToolbarSlots();
+                    if (selectedToolIndex < toolbarSlots.Count)
+                    {
+                        toolbarSlots[selectedToolIndex].SetEmpty();
+                    }
+                }
             }
             
             // Update display để show quantity mới hoặc xóa tool
@@ -275,6 +296,7 @@ public class ToolManager : MonoBehaviour
             }
             else
             {
+                // Force clear the slot to ensure DragDropHandler is properly reset
                 toolbarSlots[i].SetEmpty();
             }
         }

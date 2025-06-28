@@ -17,10 +17,12 @@ public class Toolbar_UI : MonoBehaviour
 
     private void Start()
     {
-        // Setup click callbacks for all slots
+        // Setup click callbacks and drag drop for all slots
         for (int i = 0; i < toolbarSlots.Count; i++)
         {
             toolbarSlots[i].SetClickCallback(OnSlotClicked);
+            // Initialize drag drop functionality for toolbar slots
+            toolbarSlots[i].InitializeDragDrop(SlotType.Toolbar, i);
         }
         
         SelectSlot(0);

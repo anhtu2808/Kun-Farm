@@ -38,6 +38,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (canvas == null)
             canvas = GetComponentInParent<Canvas>();
+            
     }
 
     public void Initialize(SlotType type, int index)
@@ -69,7 +70,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         // Create drag object
         CreateDragObject();
 
-        // Make original slot transparent
+        // Make original slot transparent but don't block raycasts completely
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
     }
@@ -136,6 +137,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             text.fontSize = 14;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
+            text.raycastTarget = false; // Ensure quantity text doesn't block raycasts
         }
 
         // Set size
@@ -191,11 +193,11 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         // Check if this item can become a tool
         if (!ToolHelpers.CanBeTool(draggedSlot.currentSlot.type)) return;
         
-        // Convert collectable to tool với quantity từ inventory
+        // Convert collectable to tool với toàn bộ quantity từ inventory
         Tool newTool = ToolHelpers.CreateToolFromCollectable(
             draggedSlot.currentSlot.type, 
             draggedSlot.currentSlot.icon, 
-            draggedSlot.currentSlot.count
+            draggedSlot.currentSlot.count  // Move toàn bộ quantity
         );
         
         if (newTool != null)
@@ -203,11 +205,24 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             // Additional null checks
             if (inventoryUI.player == null || inventoryUI.player.inventory == null) return;
             
-            // Set tool in toolbar
+            // Handle existing tool in target slot
+            Tool existingTool = toolManager.GetToolAtIndex(slotIndex);
+            if (existingTool != null)
+            {
+                // Convert existing tool back to collectable and add to inventory
+                CollectableType existingType = ToolHelpers.GetCollectableFromTool(existingTool);
+                if (existingType != CollectableType.NONE)
+                {
+                    int existingQuantity = existingTool.quantity > 0 ? existingTool.quantity : 1;
+                    inventoryUI.player.inventory.AddItemByType(existingType, existingTool.toolIcon, existingQuantity);
+                }
+            }
+            
+            // Set new tool in toolbar
             toolManager.SetToolAtIndex(slotIndex, newTool);
             
-            // Remove item from inventory
-            inventoryUI.player.inventory.Remove(draggedSlot.slotIndex);
+            // Remove toàn bộ item từ inventory slot
+            inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
             inventoryUI.Refresh();
             
             // Update toolbar display
@@ -230,11 +245,11 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             // Get quantity từ tool (Hand tool có quantity = -1 nên convert thành 1)
             int toolQuantity = draggedSlot.currentTool.quantity > 0 ? draggedSlot.currentTool.quantity : 1;
             
-            // Add to inventory với quantity từ tool
+            // Add toàn bộ quantity từ tool vào inventory
             inventoryUI.player.inventory.AddItemByType(
                 collectableType, 
                 draggedSlot.currentTool.toolIcon, 
-                toolQuantity
+                toolQuantity  // Move toàn bộ quantity
             );
             
             // Remove tool from toolbar
@@ -258,28 +273,33 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     private void SwapInventorySlots(DragDropHandler draggedSlot, InventoryUI inventoryUI)
     {
-        // Swap inventory items
         var inventory = inventoryUI.player.inventory;
+        
+        // Get actual inventory slots (not DragDropHandler references which can be null)
+        var targetSlot = inventory.slots[slotIndex];
+        var sourceSlot = inventory.slots[draggedSlot.slotIndex];
+        
+        // Create temp slot to store target data
         var tempSlot = new Inventory.Slot();
+        tempSlot.type = targetSlot.type;
+        tempSlot.count = targetSlot.count;
+        tempSlot.icon = targetSlot.icon;
+        tempSlot.maxAllowed = targetSlot.maxAllowed;
 
-        // Copy current slot to temp
-        tempSlot.type = currentSlot.type;
-        tempSlot.count = currentSlot.count;
-        tempSlot.icon = currentSlot.icon;
-        tempSlot.maxAllowed = currentSlot.maxAllowed;
+        // Copy source to target
+        targetSlot.type = sourceSlot.type;
+        targetSlot.count = sourceSlot.count;
+        targetSlot.icon = sourceSlot.icon;
+        targetSlot.maxAllowed = sourceSlot.maxAllowed;
 
-        // Copy dragged slot to current
-        inventory.slots[slotIndex].type = draggedSlot.currentSlot.type;
-        inventory.slots[slotIndex].count = draggedSlot.currentSlot.count;
-        inventory.slots[slotIndex].icon = draggedSlot.currentSlot.icon;
-        inventory.slots[slotIndex].maxAllowed = draggedSlot.currentSlot.maxAllowed;
+        // Copy temp (original target) to source
+        sourceSlot.type = tempSlot.type;
+        sourceSlot.count = tempSlot.count;
+        sourceSlot.icon = tempSlot.icon;
+        sourceSlot.maxAllowed = tempSlot.maxAllowed;
 
-        // Copy temp to dragged slot
-        inventory.slots[draggedSlot.slotIndex].type = tempSlot.type;
-        inventory.slots[draggedSlot.slotIndex].count = tempSlot.count;
-        inventory.slots[draggedSlot.slotIndex].icon = tempSlot.icon;
-        inventory.slots[draggedSlot.slotIndex].maxAllowed = tempSlot.maxAllowed;
-
+        // Trigger inventory changed event
+        inventory.NotifyInventoryChanged();
         inventoryUI.Refresh();
     }
 

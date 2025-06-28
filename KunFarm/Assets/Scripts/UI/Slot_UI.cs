@@ -68,7 +68,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
         itemIcon.color = new Color(1, 1, 1, 0);
         quantityText.text = "";
         
-        // Clear drag drop handler
+        // Force clear drag drop handler data
         if (dragDropHandler != null)
         {
             dragDropHandler.SetSlotData(null);
