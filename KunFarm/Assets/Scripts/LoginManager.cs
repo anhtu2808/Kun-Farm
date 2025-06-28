@@ -62,7 +62,7 @@ public class LoginManager : MonoBehaviour
         
         // Setup login button
         if (loginButton != null) 
-            loginButton.onClick.AddListener(OnLogin);
+        loginButton.onClick.AddListener(OnLogin);
             
         // Ensure ApiClient exists
         if (ApiClient.Instance == null)
@@ -99,34 +99,34 @@ public class LoginManager : MonoBehaviour
         if (loginButton != null) loginButton.interactable = false;
 
         try
-        {
-            /* 1) Build payload */
+    {
+        /* 1) Build payload */
             var rq = new LoginRequest { 
                 usernameOrEmail = usernameInput.text.Trim(), 
                 password = passwordInput.text 
             };
-            string jsonPayload = JsonUtility.ToJson(rq);
+        string jsonPayload = JsonUtility.ToJson(rq);
 
-            if (showDebug) Debug.Log($"[Login] POST {loginUrl}\nPayload: {jsonPayload}");
+        if (showDebug) Debug.Log($"[Login] POST {loginUrl}\nPayload: {jsonPayload}");
 
-            /* 2) Send request */
-            using var req = new UnityWebRequest(loginUrl, "POST");
+        /* 2) Send request */
+        using var req = new UnityWebRequest(loginUrl, "POST");
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonPayload));
-            req.downloadHandler = new DownloadHandlerBuffer();
-            req.SetRequestHeader("Content-Type", "application/json");
+        req.downloadHandler = new DownloadHandlerBuffer();
+        req.SetRequestHeader("Content-Type", "application/json");
 
-            yield return req.SendWebRequest();
+        yield return req.SendWebRequest();
 
-            /* 3) Network error? */
-            if (req.result != UnityWebRequest.Result.Success)
-            {
+        /* 3) Network error? */
+        if (req.result != UnityWebRequest.Result.Success)
+        {
                 if (errorText != null) errorText.text = $"Network error: {req.error}";
-                yield break;
-            }
+            yield break;
+        }
 
-            /* 4) Parse JSON */
-            string rawJson = req.downloadHandler.text;
-            if (showDebug) Debug.Log($"[Login] HTTP {req.responseCode}\nResponse: {rawJson}");
+        /* 4) Parse JSON */
+        string rawJson = req.downloadHandler.text;
+        if (showDebug) Debug.Log($"[Login] HTTP {req.responseCode}\nResponse: {rawJson}");
 
             if (string.IsNullOrEmpty(rawJson))
             {
@@ -163,7 +163,7 @@ public class LoginManager : MonoBehaviour
                 }
 
                 if (resp.data.user == null)
-                {
+        {
                     if (errorText != null) errorText.text = "Invalid response: missing user data";
                     yield break;
                 }
@@ -175,25 +175,25 @@ public class LoginManager : MonoBehaviour
                 }
 
                 // Save login data
-                PlayerPrefs.SetString("JWT_TOKEN", resp.data.token);
+            PlayerPrefs.SetString("JWT_TOKEN", resp.data.token);
                 PlayerPrefs.SetInt("PLAYER_ID", resp.data.user.id);
                 PlayerPrefs.SetString("PLAYER_NAME", resp.data.user.username ?? "");
                 PlayerPrefs.SetString("PLAYER_DISPLAYNAME", resp.data.user.displayName ?? "");
-                PlayerPrefs.Save();
+            PlayerPrefs.Save();
 
                 // Set token in ApiClient
                 if (ApiClient.Instance != null)
                 {
-                    ApiClient.Instance.SetToken(resp.data.token);
+            ApiClient.Instance.SetToken(resp.data.token);
                 }
 
-                if (showDebug) Debug.Log($"✅ Login successful! Welcome {resp.data.user.displayName}");
+            if (showDebug) Debug.Log($"✅ Login successful! Welcome {resp.data.user.displayName}");
 
                 // Load main scene
-                SceneManager.LoadScene("MainScene");
-            }
-            else
-            {
+            SceneManager.LoadScene("MainScene");
+        }
+        else
+        {
                 // Login failed
                 string errorMsg = resp.message ?? "Login failed";
                 if (showDebug) Debug.LogWarning($"[Login] Failed: {errorMsg}");

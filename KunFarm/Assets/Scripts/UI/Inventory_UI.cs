@@ -33,9 +33,15 @@ public class InventoryUI: MonoBehaviour
     {
         inventoryPanel.SetActive(false);
         player.inventory.onInventoryChanged += Refresh;
+        
+        // Initialize drag drop for inventory slots
+        for (int i = 0; i < slots.Count; i++)
+        {
+            slots[i].InitializeDragDrop(SlotType.Inventory, i);
+        }
     }
 
-    void Refresh()
+    public void Refresh()
     {
         if (slots.Count == player.inventory.slots.Count)
         {

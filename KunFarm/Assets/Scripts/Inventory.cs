@@ -93,4 +93,33 @@ public class Inventory
         slots[index].RemoveItem();
     }
 
+    public void AddItemByType(CollectableType type, Sprite icon, int count = 1)
+    {
+        // Find existing slot with same type
+        foreach (Slot slot in slots)
+        {
+            if (slot.type == type && slot.CanAddItem())
+            {
+                slot.type = type;
+                slot.icon = icon;
+                slot.count += count;
+                onInventoryChanged?.Invoke();
+                return;
+            }
+        }
+
+        // Find empty slot
+        foreach (Slot slot in slots)
+        {
+            if (slot.type == CollectableType.NONE)
+            {
+                slot.type = type;
+                slot.icon = icon;
+                slot.count = count;
+                onInventoryChanged?.Invoke();
+                return;
+            }
+        }
+    }
+
 }

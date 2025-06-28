@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74eb342d658590e44aa69039b4252658, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoSave: 1
+  showDebugInfo: 1
   itemManager: {fileID: 3889439660985576900}
   tileManager: {fileID: 7111629027074667479}
 --- !u!114 &7111629027074667479
@@ -75,4 +77,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 582357e4c1eada342b2902185151abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collectableItems: []
+  collectableItems:
+  - {fileID: 8980870103730399970, guid: 2a4415309e54e3645abec9f805f39a2c, type: 3}
+  - {fileID: 8980870103730399970, guid: 9b48d78018c9f874cba820d5b9e0cd98, type: 3}
+  - {fileID: 5810355559776978386, guid: 363dd4f498436cc4ab0aceae8ee85368, type: 3}
+  - {fileID: 8980870103730399970, guid: 049cb37e9e49e9144980142b62f3ad45, type: 3}
+  - {fileID: 8980870103730399970, guid: 049cb37e9e49e9144980142b62f3ad45, type: 3}
+  - {fileID: 8980870103730399970, guid: 5b510ec3cdc4dec4da4d5386ef0e340a, type: 3}
+  - {fileID: 8980870103730399970, guid: 4500fbc211fb0834ebf40015c7fbc6a6, type: 3}

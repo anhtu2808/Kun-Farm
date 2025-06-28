@@ -136,4 +136,12 @@ public class TileManager : MonoBehaviour
             plantedTrees.Remove(cellPosition);
         }
     }
+
+    /// <summary>
+    /// Lấy Tilemap để convert cell position thành world position
+    /// </summary>
+    public Tilemap GetTilemap()
+    {
+        return interactableMap;
+    }
 }

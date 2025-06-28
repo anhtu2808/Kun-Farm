@@ -70,7 +70,8 @@ public class GameSaver : MonoBehaviour
         }
         catch (Exception e)
         {
-            // Silent fail
+            Debug.LogError($"[GameSaver] Error parsing save response: {e.Message}");
+            return;
         }
     }
 
