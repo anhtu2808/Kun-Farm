@@ -24,8 +24,6 @@ obj/
 _ReSharper*/
 *.DotSettings.user
 
-# Entity Framework migrations
-Migrations/
 
 # NuGet packages
 *.nupkg
