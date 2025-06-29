@@ -36,7 +36,7 @@ public class Movement : MonoBehaviour
     {
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-        
+
         direction = new Vector3(horizontal, vertical, 0);
         
         // Store last movement direction for facing direction
@@ -60,7 +60,7 @@ public class Movement : MonoBehaviour
         {
             // Horizontal movement is stronger
             return dir.x > 0 ? Vector3.right : Vector3.left;
-        }
+    }
         else
         {
             // Vertical movement is stronger (or equal)
@@ -75,20 +75,20 @@ public class Movement : MonoBehaviour
     }
     
     void AnimateMovement(Vector3 direction)
-    {
-        if (animator != null)
-        {
-            if (direction.magnitude > 0)
+       {
+            if (animator != null)
             {
+                if (direction.magnitude > 0)
+                {
                 // Moving: use current movement direction
-                animator.SetBool("isMoving", true);
-                animator.SetFloat("horizontal", direction.x);
-                animator.SetFloat("vertical", direction.y);
-            }
-            else
-            {
+                    animator.SetBool("isMoving", true);
+                    animator.SetFloat("horizontal", direction.x);
+                    animator.SetFloat("vertical", direction.y);
+                }
+                else
+                {
                 // Idle: use last facing direction to maintain facing
-                animator.SetBool("isMoving", false);
+                    animator.SetBool("isMoving", false);
                 animator.SetFloat("horizontal", lastFacingDirection.x);
                 animator.SetFloat("vertical", lastFacingDirection.y);
             }

@@ -20,7 +20,7 @@ public class ToolManager : MonoBehaviour
     [SerializeField] private TileManager tileManager;
     [SerializeField] private Movement playerMovement; // Changed from playerAnimator to playerMovement
     [SerializeField] private InventoryUI inventoryUI;
-    
+
     private Tool[] tools; // Mảng tools trong toolbar (9 slots)
     private int selectedToolIndex = 0;
     private bool isUsingTool = false;
@@ -241,13 +241,13 @@ public class ToolManager : MonoBehaviour
     {
         // Handle tool consumption
         if (tool.IsConsumable())
-        {
-            bool stillUsable = tool.ConsumeOnUse();
-            
-            // If tool is depleted, remove it
-            if (!stillUsable)
             {
-                tools[selectedToolIndex] = null;
+            bool stillUsable = tool.ConsumeOnUse();
+                
+                // If tool is depleted, remove it
+                if (!stillUsable)
+                {
+                    tools[selectedToolIndex] = null;
                 
                 // Force refresh the specific slot to clear DragDropHandler cache
                 if (toolbarUI != null)
@@ -258,10 +258,10 @@ public class ToolManager : MonoBehaviour
                         toolbarSlots[selectedToolIndex].SetEmpty();
                     }
                 }
-            }
-            
-            // Update display để show quantity mới hoặc xóa tool
-            UpdateToolbarDisplay();
+                }
+                
+                // Update display để show quantity mới hoặc xóa tool
+                UpdateToolbarDisplay();
         }
     }
 

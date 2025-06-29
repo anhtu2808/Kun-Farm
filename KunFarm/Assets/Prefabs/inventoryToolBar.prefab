@@ -54,7 +54,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 238.88004}
+  m_AnchoredPosition: {x: 0, y: 238.85948}
   m_SizeDelta: {x: 1160, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &3412368736732991836
@@ -349,8 +349,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6702392483574162492}
   m_HandleRect: {fileID: 7867545152490713319}
   m_Direction: 2
-  m_Value: 0.9999998
-  m_Size: 0.55553484
+  m_Value: 1.0000536
+  m_Size: 0.5555091
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7341,6 +7341,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shopPanel: {fileID: 8751550036926184199}
+  shopSlotsContainer: {fileID: 0}
+  closeButton: {fileID: 0}
+  refreshButton: {fileID: 0}
+  shopSlotPrefab: {fileID: 0}
+  shopManager: {fileID: 0}
 --- !u!1 &4997316266545499083
 GameObject:
   m_ObjectHideFlags: 0
