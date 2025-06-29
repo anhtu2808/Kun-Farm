@@ -22,7 +22,7 @@ MonoBehaviour:
     sellPrice: 5
     showInShop: 1
     stockLimit: 50
-    currentStock: 50
+    currentStock: 12
   - collectableType: 6
     itemName: Grape Seed
     itemIcon: {fileID: 1453225863, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
@@ -32,17 +32,17 @@ MonoBehaviour:
     sellPrice: 10
     showInShop: 1
     stockLimit: 30
-    currentStock: 30
+    currentStock: 9
   - collectableType: 7
     itemName: Apple Tree Seed
-    itemIcon: {fileID: 1212611662, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
+    itemIcon: {fileID: 1573053575, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
     canBuy: 1
     buyPrice: 50
     canSell: 1
     sellPrice: 25
     showInShop: 1
     stockLimit: 10
-    currentStock: 10
+    currentStock: 0
   - collectableType: 2
     itemName: Wheat
     itemIcon: {fileID: 1605751755, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
@@ -63,9 +63,9 @@ MonoBehaviour:
     showInShop: 0
     stockLimit: -1
     currentStock: -1
-  - collectableType: 4
+  - collectableType: 10
     itemName: Apple
-    itemIcon: {fileID: 53366644, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
+    itemIcon: {fileID: 1212611662, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
     canBuy: 0
     buyPrice: 0
     canSell: 1

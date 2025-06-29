@@ -143,6 +143,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74977f11a7d1f2741ba3911bfb4c0fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 5
-  icon: {fileID: 0}
+  type: 2
+  icon: {fileID: 1605751755, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   rb2d: {fileID: 0}

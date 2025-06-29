@@ -302,9 +302,9 @@ MonoBehaviour:
   itemIcon: {fileID: 7419843583273118112}
   itemNameText: {fileID: 0}
   buyPriceText: {fileID: 8322732031356648860}
-  sellPriceText: {fileID: 0}
   stockText: {fileID: 0}
-  buyButton: {fileID: 0}
+  buyButtonObject: {fileID: 7012438734369551891}
+  sellPriceText: {fileID: 0}
   sellButton: {fileID: 0}
   sellAllButton: {fileID: 0}
   outOfStockOverlay: {fileID: 0}

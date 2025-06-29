@@ -60,5 +60,5 @@ public class Collectable : MonoBehaviour
 public enum CollectableType
 {
     NONE, EGG, WHEAT, GRAPE, APPLETREE, WHEATSEED, GRAPESEED, APPLETREESEED,
-    SHOVEL_TOOL, HAND_TOOL
+    SHOVEL_TOOL, HAND_TOOL, APPLE
 }

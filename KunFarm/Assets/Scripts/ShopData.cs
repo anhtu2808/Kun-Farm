@@ -65,19 +65,19 @@ public class ShopItem
     public CollectableType collectableType;
     public string itemName;
     public Sprite itemIcon;
-    
+
     [Header("Buy Settings")]
     public bool canBuy = true;
     public int buyPrice = 10;
-    
+
     [Header("Sell Settings")]
     public bool canSell = true;
     public int sellPrice = 5;
-    
+
     [Header("Shop Display")]
     [Tooltip("Có hiển thị trong shop không (để mua)")]
     public bool showInShop = true;
-    
+
     [Header("Stock Settings (Optional)")]
     [Tooltip("Giới hạn số lượng trong shop (-1 = vô hạn)")]
     public int stockLimit = -1;
@@ -112,4 +112,4 @@ public class ShopItem
             currentStock = stockLimit;
         }
     }
-} 
+}

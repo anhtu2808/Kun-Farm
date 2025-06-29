@@ -163,7 +163,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (draggedSlot.slotType == SlotType.Inventory && slotType == SlotType.Toolbar)
         {
             // Moving from inventory to toolbar
-            MoveInventoryToToolbar(draggedSlot, inventoryUI, toolManager);
+            MoveInventoryToToolbar(draggedSlot, inventoryUI, toolManager, slotIndex);
         }
         else if (draggedSlot.slotType == SlotType.Toolbar && slotType == SlotType.Inventory)
         {
@@ -181,80 +181,154 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             SwapInventorySlots(draggedSlot, inventoryUI);
         }
     }
+    
+private void MoveInventoryToToolbar(
+    DragDropHandler draggedSlot,
+    InventoryUI inventoryUI,
+    ToolManager toolManager,
+    int toolbarSlotIndex)
+{
+    // Null checks
+    if (draggedSlot == null ||
+        draggedSlot.currentSlot == null ||
+        inventoryUI == null ||
+        toolManager == null)
+        return;
+    
+    var slotData = draggedSlot.currentSlot;
+    // Check if slot is empty
+    if (slotData.type == CollectableType.NONE || slotData.count <= 0)
+        return;
+    
+    // Check if this item can become a tool
+    if (!ToolHelpers.CanBeTool(slotData.type))
+        return;
 
-    private void MoveInventoryToToolbar(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
+    int quantityToMove = slotData.count;
+    CollectableType type = slotData.type;
+
+    // Lấy tool hiện tại ở slot đích
+    Tool existingTool = toolManager.GetToolAtIndex(toolbarSlotIndex);
+
+    if (existingTool != null)
     {
-        // Null checks
-        if (draggedSlot == null || draggedSlot.currentSlot == null || inventoryUI == null || toolManager == null) return;
-        
-        // Check if slot is empty
-        if (draggedSlot.currentSlot.type == CollectableType.NONE || draggedSlot.currentSlot.count <= 0) return;
-        
-        // Check if this item can become a tool
-        if (!ToolHelpers.CanBeTool(draggedSlot.currentSlot.type)) return;
-        
-        // Convert collectable to tool với toàn bộ quantity từ inventory
-        Tool newTool = ToolHelpers.CreateToolFromCollectable(
-            draggedSlot.currentSlot.type, 
-            draggedSlot.currentSlot.icon, 
-            draggedSlot.currentSlot.count  // Move toàn bộ quantity
-        );
-        
-        if (newTool != null)
+        // Nếu cùng loại thì merge
+        if (ToolHelpers.GetCollectableFromTool(existingTool) == type)
         {
-            // Additional null checks
-            if (inventoryUI.player == null || inventoryUI.player.inventory == null) return;
+            existingTool.quantity += quantityToMove;
+            Debug.Log($"Merged {quantityToMove} of {type} into toolbar slot {toolbarSlotIndex}. New qty = {existingTool.quantity}");
             
-            // Handle existing tool in target slot
-            Tool existingTool = toolManager.GetToolAtIndex(slotIndex);
-            if (existingTool != null)
-            {
-                // Convert existing tool back to collectable and add to inventory
-                CollectableType existingType = ToolHelpers.GetCollectableFromTool(existingTool);
-                if (existingType != CollectableType.NONE)
-                {
-                    int existingQuantity = existingTool.quantity > 0 ? existingTool.quantity : 1;
-                    inventoryUI.player.inventory.AddItemByType(existingType, existingTool.toolIcon, existingQuantity);
-                }
-            }
-            
-            // Set new tool in toolbar
-            toolManager.SetToolAtIndex(slotIndex, newTool);
-            
-            // Remove toàn bộ item từ inventory slot
+            // Xoá toàn bộ số đó khỏi inventory
             inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
             inventoryUI.Refresh();
-            
-            // Update toolbar display
             toolManager.UpdateToolbarDisplay();
+            return;
+        }
+        
+        // Nếu khác loại, trả tool cũ về inventory như trước
+        CollectableType oldType = ToolHelpers.GetCollectableFromTool(existingTool);
+        if (oldType != CollectableType.NONE)
+        {
+            int oldQty = existingTool.quantity > 0 ? existingTool.quantity : 1;
+            inventoryUI.player.inventory.AddItemByType(oldType, existingTool.toolIcon, oldQty);
         }
     }
+
+    // Tạo tool mới từ toàn bộ số lượng trong inventory
+    Tool newTool = ToolHelpers.CreateToolFromCollectable(
+        type,
+        slotData.icon,
+        quantityToMove);
+
+    if (newTool != null)
+    {
+        // Đặt lên toolbar
+        toolManager.SetToolAtIndex(toolbarSlotIndex, newTool);
+        Debug.Log($"Moved {quantityToMove} of {type} to toolbar slot {toolbarSlotIndex}");
+
+        // Xoá slot inventory gốc
+        inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
+        inventoryUI.Refresh();
+        toolManager.UpdateToolbarDisplay();
+    }
+}
+
+        // private void MoveInventoryToToolbar(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
+    // {
+    //     // Null checks
+    //     if (draggedSlot == null || draggedSlot.currentSlot == null || inventoryUI == null || toolManager == null) return;
+
+    //     // Check if slot is empty
+    //     if (draggedSlot.currentSlot.type == CollectableType.NONE || draggedSlot.currentSlot.count <= 0) return;
+
+    //     // Check if this item can become a tool
+    //     if (!ToolHelpers.CanBeTool(draggedSlot.currentSlot.type)) return;
+
+    //     // Convert collectable to tool với toàn bộ quantity từ inventory
+    //     Tool newTool = ToolHelpers.CreateToolFromCollectable(
+    //         draggedSlot.currentSlot.type, 
+    //         draggedSlot.currentSlot.icon, 
+    //         draggedSlot.currentSlot.count  // Move toàn bộ quantity
+    //     );
+    //     Debug.Log($"Moving {draggedSlot.currentSlot.type} to toolbar slot {slotIndex}");
+    //     Debug.Log($"New tool created: {newTool?.toolName} with quantity {newTool?.quantity}");
+
+
+    //     if (newTool != null)
+    //     {
+    //         // Additional null checks
+    //         if (inventoryUI.player == null || inventoryUI.player.inventory == null) return;
+
+    //         // Handle existing tool in target slot
+    //         Tool existingTool = toolManager.GetToolAtIndex(slotIndex);
+    //         if (existingTool != null)
+    //         {
+    //             // Convert existing tool back to collectable and add to inventory
+    //             CollectableType existingType = ToolHelpers.GetCollectableFromTool(existingTool);
+    //             if (existingType != CollectableType.NONE)
+    //             {
+    //                 int existingQuantity = existingTool.quantity > 0 ? existingTool.quantity : 1;
+    //                 inventoryUI.player.inventory.AddItemByType(existingType, existingTool.toolIcon, existingQuantity);
+    //             }
+    //         }
+
+    //         // Set new tool in toolbar
+    //         toolManager.SetToolAtIndex(slotIndex, newTool);
+
+    //         // Remove toàn bộ item từ inventory slot
+    //         inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
+    //         inventoryUI.Refresh();
+
+    //         // Update toolbar display
+    //         toolManager.UpdateToolbarDisplay();
+    //     }
+    // }
 
     private void MoveToolbarToInventory(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
     {
         // Null checks
         if (draggedSlot == null || draggedSlot.currentTool == null || inventoryUI == null || toolManager == null) return;
-        
+
         if (inventoryUI.player == null || inventoryUI.player.inventory == null) return;
-        
+
         // Convert tool to collectable type
         CollectableType collectableType = ToolHelpers.GetCollectableFromTool(draggedSlot.currentTool);
-        
+
         if (collectableType != CollectableType.NONE)
         {
             // Get quantity từ tool (Hand tool có quantity = -1 nên convert thành 1)
             int toolQuantity = draggedSlot.currentTool.quantity > 0 ? draggedSlot.currentTool.quantity : 1;
-            
+
             // Add toàn bộ quantity từ tool vào inventory
             inventoryUI.player.inventory.AddItemByType(
-                collectableType, 
-                draggedSlot.currentTool.toolIcon, 
+                collectableType,
+                draggedSlot.currentTool.toolIcon,
                 toolQuantity  // Move toàn bộ quantity
             );
-            
+
             // Remove tool from toolbar
             toolManager.SetToolAtIndex(draggedSlot.slotIndex, null);
-            
+
             // Update displays
             inventoryUI.Refresh();
             toolManager.UpdateToolbarDisplay();

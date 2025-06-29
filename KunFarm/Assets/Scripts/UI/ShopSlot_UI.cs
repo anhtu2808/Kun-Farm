@@ -12,8 +12,8 @@ public class ShopSlot_UI : MonoBehaviour
     public TextMeshProUGUI itemNameText;
     public TextMeshProUGUI buyPriceText;
     public TextMeshProUGUI stockText;
-    public Button buyButton;
-    
+    public GameObject buyButtonObject;
+
     // ✅ SHOP CHỈ DÀNH CHO MUA - XÓA SELL FUNCTIONALITY
     [Header("Disabled Sell Features")]
     [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell")]
@@ -22,20 +22,20 @@ public class ShopSlot_UI : MonoBehaviour
     public Button sellButton;
     [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell")]
     public Button sellAllButton;
-    
+
     [Header("Visual States")]
     public GameObject outOfStockOverlay;
     public Color normalColor = Color.white;
     public Color outOfStockColor = Color.gray;
-    
+
     // Data
     private ShopItem currentShopItem;
     private ShopManager shopManager;
     private Player player;
-    
+
     // Events
     public System.Action<ShopSlot_UI> OnBuyClicked;
-    
+
     // ✅ SHOP CHỈ DÀNH CHO MUA - XÓA SELL EVENTS
     [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell events")]
     public System.Action<ShopSlot_UI> OnSellClicked;
@@ -44,22 +44,20 @@ public class ShopSlot_UI : MonoBehaviour
 
     private void Awake()
     {
-        // ✅ CHỈ SETUP BUY BUTTON CHO SHOP
-        if (buyButton != null)
-            buyButton.onClick.AddListener(() => OnBuyClicked?.Invoke(this));
-            
-        // ✅ DISABLE SELL BUTTONS VÌ SHOP CHỈ DÀNH CHO MUA
+        if (buyButtonObject != null)
+        {
+            var button = buyButtonObject.GetComponent<Button>();
+            if (button == null)
+                button = buyButtonObject.AddComponent<Button>();
+
+            button.onClick.AddListener(() => OnBuyClicked?.Invoke(this));
+        }
+
+        // Ẩn các nút bán như trước
         if (sellButton != null)
-        {
             sellButton.gameObject.SetActive(false);
-            Debug.Log("ShopSlot_UI: Disabled sell button - Shop chỉ dành cho mua");
-        }
-            
         if (sellAllButton != null)
-        {
             sellAllButton.gameObject.SetActive(false);
-            Debug.Log("ShopSlot_UI: Disabled sellAll button - Shop chỉ dành cho mua");
-        }
     }
 
     /// <summary>
@@ -70,7 +68,7 @@ public class ShopSlot_UI : MonoBehaviour
         currentShopItem = shopItem;
         shopManager = manager;
         player = playerRef;
-        
+
         UpdateDisplay();
     }
 
@@ -87,7 +85,7 @@ public class ShopSlot_UI : MonoBehaviour
             itemIcon.sprite = currentShopItem.itemIcon;
             itemIcon.color = currentShopItem.HasStock() ? normalColor : outOfStockColor;
         }
-        
+
         if (itemNameText != null)
             itemNameText.text = currentShopItem.itemName;
 
@@ -141,15 +139,19 @@ public class ShopSlot_UI : MonoBehaviour
         if (player == null || currentShopItem == null) return;
 
         // ✅ CHỈ CẬP NHẬT BUY BUTTON
-        if (buyButton != null)
+        if (buyButtonObject != null)
         {
-            bool canBuy = currentShopItem.canBuy && 
-                         currentShopItem.showInShop && 
-                         currentShopItem.HasStock() &&
-                         player.wallet.Money >= currentShopItem.buyPrice;
-            
-            buyButton.interactable = canBuy;
-            buyButton.gameObject.SetActive(currentShopItem.canBuy && currentShopItem.showInShop);
+            var button = buyButtonObject.GetComponent<Button>();
+            if (button != null)
+            {
+                bool canBuy = currentShopItem.canBuy &&
+                              currentShopItem.showInShop &&
+                              currentShopItem.HasStock() &&
+                              player.wallet.Money >= currentShopItem.buyPrice;
+
+                button.interactable = canBuy;
+                button.gameObject.SetActive(currentShopItem.canBuy && currentShopItem.showInShop);
+            }
         }
 
         // ✅ ĐẢM BẢO SELL BUTTONS LUÔN DISABLED
@@ -245,4 +247,4 @@ public class ShopSlot_UI : MonoBehaviour
     {
         UpdateDisplay();
     }
-} 
+}

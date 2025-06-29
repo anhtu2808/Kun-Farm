@@ -9,27 +9,27 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
     public Image itemIcon;
     public TextMeshProUGUI quantityText;
     [SerializeField] private GameObject highlight;
-    
+
     [Header("Sell Mode UI")]
     public GameObject sellOverlay;
     public TextMeshProUGUI sellPriceText;
     public Button sellButton;
     public Image slotBackground;
-    
+
     [Header("Sell Mode Colors")]
     public Color normalColor = Color.white;
     public Color sellModeColor = Color.yellow;
     public Color sellableItemColor = Color.green;
-    
+
     private DragDropHandler dragDropHandler;
     private System.Action<int> onSlotClicked;
     private int slotIndex;
-    
+
     // Sell functionality
     private bool isInSellMode = false;
     private Inventory.Slot currentSlot;
     private ShopManager shopManager;
-    
+
     void Awake()
     {
         // Add DragDropHandler if not present
@@ -40,22 +40,22 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
             dragDropHandler.itemIcon = itemIcon;
             dragDropHandler.quantityText = quantityText;
         }
-        
+
         // Find ShopManager for sell functionality
         shopManager = FindObjectOfType<ShopManager>();
-        
+
         // Setup sell button
         if (sellButton != null)
         {
             sellButton.onClick.AddListener(OnSellButtonClick);
         }
-        
+
         // Get slot background if not assigned
         if (slotBackground == null)
         {
             slotBackground = GetComponent<Image>();
         }
-        
+
         // Initially hide sell overlay
         SetSellOverlayVisible(false);
     }
@@ -63,32 +63,32 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
     public void SetItem(Inventory.Slot slot)
     {
         currentSlot = slot; // ✅ Store for sell functionality
-        
+
         if (slot != null)
         {
             itemIcon.sprite = slot.icon;
             itemIcon.color = new Color(1, 1, 1, 1);
             quantityText.text = slot.count.ToString();
-            
+
             // Update drag drop handler
             if (dragDropHandler != null)
                 dragDropHandler.SetSlotData(slot);
         }
-        
+
         // Update sell display if in sell mode
         if (isInSellMode)
         {
             UpdateSellDisplay();
         }
     }
-    
+
     public void SetTool(Tool tool)
     {
         if (tool != null)
         {
             itemIcon.sprite = tool.toolIcon;
             itemIcon.color = new Color(1, 1, 1, 1);
-            
+
             // Show quantity cho tools có quantity > 1 và consumable
             if (tool.IsConsumable() && tool.quantity > 1)
             {
@@ -98,19 +98,19 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
             {
                 quantityText.text = ""; // Hand tool hoặc quantity = 1
             }
-            
+
             // Update drag drop handler
             if (dragDropHandler != null)
                 dragDropHandler.SetToolData(tool);
         }
     }
-    
+
     public void SetEmpty()
     {
         itemIcon.sprite = null;
         itemIcon.color = new Color(1, 1, 1, 0);
         quantityText.text = "";
-        
+
         // Force clear drag drop handler data
         if (dragDropHandler != null)
         {
@@ -123,21 +123,21 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
     {
         highlight.SetActive(isOn);
     }
-    
+
     public void InitializeDragDrop(SlotType slotType, int index)
     {
         if (dragDropHandler != null)
             dragDropHandler.Initialize(slotType, index);
-        
+
         // Store slot index for click handling
         slotIndex = index;
     }
-    
+
     public void SetClickCallback(System.Action<int> callback)
     {
         onSlotClicked = callback;
     }
-    
+
     public void OnPointerClick(PointerEventData eventData)
     {
         // Handle sell mode clicks
@@ -149,16 +149,16 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
                 return;
             }
         }
-        
+
         // Normal click handling (only if not in sell mode)
         if (!isInSellMode && eventData.button == PointerEventData.InputButton.Left && !eventData.dragging)
         {
             onSlotClicked?.Invoke(slotIndex);
         }
     }
-    
+
     // ✅ SELL FUNCTIONALITY METHODS
-    
+
     /// <summary>
     /// Set sell mode for this slot
     /// </summary>
@@ -167,7 +167,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
         isInSellMode = enabled;
         UpdateSellDisplay();
     }
-    
+
     /// <summary>
     /// Update sell display based on current state
     /// </summary>
@@ -180,10 +180,10 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
             SetSlotBackgroundColor(normalColor);
             return;
         }
-        
+
         // Sell mode active
         bool canSell = CanSellCurrentItem();
-        
+
         // Update background color
         if (canSell)
         {
@@ -193,18 +193,18 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
         {
             SetSlotBackgroundColor(sellModeColor);
         }
-        
+
         // Update sell overlay
         SetSellOverlayVisible(canSell);
-        
+
         // Update sell price text
         if (canSell && sellPriceText != null)
         {
             int sellPrice = GetSellPrice();
-            sellPriceText.text = $"Bán: {sellPrice}G";
+            sellPriceText.text = $"Bán: {sellPrice}G (x{currentSlot.count})";
         }
     }
-    
+
     /// <summary>
     /// Check if current item can be sold
     /// </summary>
@@ -212,39 +212,47 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
     {
         if (currentSlot == null || currentSlot.type == CollectableType.NONE || currentSlot.count <= 0)
             return false;
-            
+
         if (shopManager == null || shopManager.shopData == null)
             return false;
-            
+
         ShopItem shopItem = shopManager.shopData.GetShopItem(currentSlot.type);
         return shopItem != null && shopItem.canSell;
     }
-    
+
     /// <summary>
     /// Get sell price for current item
     /// </summary>
     private int GetSellPrice()
     {
         if (!CanSellCurrentItem()) return 0;
-        
+
         ShopItem shopItem = shopManager.shopData.GetShopItem(currentSlot.type);
         return shopItem != null ? shopItem.sellPrice : 0;
     }
-    
+
     /// <summary>
     /// Sell one item from this slot
     /// </summary>
     private void SellOneItem()
     {
         if (!CanSellCurrentItem()) return;
-        
+
         bool success = shopManager.SellItem(slotIndex, 1);
         if (success)
         {
+            currentSlot.count -= 1;
+
+            if (currentSlot.count > 0)
+                quantityText.text = currentSlot.count.ToString();
+            else
+                quantityText.text = "";
+
+            UpdateSellDisplay(); // 🔄 Refresh UI hiển thị
             Debug.Log($"Slot_UI: Sold 1x {currentSlot.type} for {GetSellPrice()}G");
         }
     }
-    
+
     /// <summary>
     /// Handle sell button click
     /// </summary>
@@ -252,7 +260,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
     {
         SellOneItem();
     }
-    
+
     /// <summary>
     /// Set sell overlay visibility
     /// </summary>
@@ -261,7 +269,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
         if (sellOverlay != null)
             sellOverlay.SetActive(visible);
     }
-    
+
     /// <summary>
     /// Set slot background color
     /// </summary>
@@ -270,7 +278,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
         if (slotBackground != null)
             slotBackground.color = color;
     }
-    
+
     /// <summary>
     /// Get current slot data
     /// </summary>

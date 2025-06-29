@@ -8,7 +8,7 @@ using System;
 public class Wallet : MonoBehaviour
 {
     [Header("Runtime data")]
-    [SerializeField] private int money = 0;
+    [SerializeField] private int money = 1000;
 
     [Tooltip("Lấy từ PlayerPrefs sau login (PLAYER_ID)")]
     [SerializeField] private int userId = 0;
