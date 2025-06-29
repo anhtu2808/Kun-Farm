@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
     public Inventory inventory;
 
     [SerializeField]
-    private Wallet wallet;
+    public Wallet wallet;
 
     private void Update()
     {
