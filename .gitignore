@@ -7,7 +7,6 @@
 [Mm]emoryCaptures/
 
 # User-specific files
-*.csproj
 *.unityproj
 *.suo
 *.tmp
