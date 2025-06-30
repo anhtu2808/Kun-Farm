@@ -402,6 +402,7 @@ GameObject:
   - component: {fileID: 6249918915117277006}
   - component: {fileID: 5365407211950895852}
   - component: {fileID: 2903704720676308839}
+  - component: {fileID: 5702064716573420083}
   m_Layer: 5
   m_Name: Sell_Item
   m_TagString: Untagged
@@ -470,6 +471,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5702064716573420083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3789389364738505968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b0346ee9f82ec84db299d4290d396b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemIcon: {fileID: 5554339758751773959}
+  quantityText: {fileID: 5396014436605539821}
+  priceText: {fileID: 8075331540966590594}
+  sellButton: {fileID: 7482352200732124730}
+  highlightObject: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  sellableColor: {r: 0, g: 1, b: 0, a: 1}
+  unsellableColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &6210344260223488297
 GameObject:
   m_ObjectHideFlags: 0

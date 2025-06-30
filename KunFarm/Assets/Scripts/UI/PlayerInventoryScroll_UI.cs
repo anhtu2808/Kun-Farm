@@ -12,11 +12,11 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
     public ShopManager shopManager;
     public Player player;
     public Transform playerItemsContainer; // Player_Items container
-    
+
     [Header("Item Slot Structure")]
-    [Tooltip("Prefab structure: Item/icon(Image), Item/buybutton(Button), Item/price(TextMeshProUGUI)")]
+    [Tooltip("Prefab structure: Item/icon(Image), Item/buybutton(Button), Item/price(TextMeshProUGUI), Item/quantity(TextMeshProUGUI)")]
     public List<PlayerScrollItem> itemSlots = new List<PlayerScrollItem>();
-    
+
     [System.Serializable]
     public class PlayerScrollItem
     {
@@ -24,19 +24,21 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
         public Image iconImage;
         public Button sellButton; // buybutton thực chất là sell button
         public TextMeshProUGUI priceText;
+
+        public TextMeshProUGUI quantityText;
         public CollectableType currentItemType = CollectableType.NONE;
         public int currentItemCount = 0;
     }
-    
+
     private void Awake()
     {
         // Auto-find references nếu chưa gán
         if (shopManager == null)
             shopManager = FindObjectOfType<ShopManager>();
-            
+
         if (player == null)
             player = FindObjectOfType<Player>();
-            
+
         // Tìm Player_Items container nếu chưa gán
         if (playerItemsContainer == null)
         {
@@ -47,33 +49,33 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 return;
             }
         }
-        
+
         InitializeItemSlots();
     }
-    
+
     private void Start()
     {
         RefreshDisplay();
     }
-    
+
     /// <summary>
     /// Khởi tạo các item slots từ children của Player_Items
     /// </summary>
     private void InitializeItemSlots()
     {
         itemSlots.Clear();
-        
+
         // Lấy tất cả children của Player_Items
         for (int i = 0; i < playerItemsContainer.childCount; i++)
         {
             Transform itemTransform = playerItemsContainer.GetChild(i);
             GameObject itemObject = itemTransform.gameObject;
-            
+
             // Tìm components trong item
             Image iconImage = null;
             Button sellButton = null;
             TextMeshProUGUI priceText = null;
-            
+            TextMeshProUGUI quantityText = null;
             // Tìm icon (có thể có nested structure)
             iconImage = itemTransform.GetComponentInChildren<Image>();
             if (iconImage == itemObject.GetComponent<Image>()) // Skip background image
@@ -81,7 +83,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 Image[] images = itemTransform.GetComponentsInChildren<Image>();
                 iconImage = images.Length > 1 ? images[1] : images[0];
             }
-            
+
             // Tìm buybutton (sell button)
             Button[] buttons = itemTransform.GetComponentsInChildren<Button>();
             foreach (Button btn in buttons)
@@ -92,7 +94,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                     break;
                 }
             }
-            
+
             // Tìm price text
             TextMeshProUGUI[] texts = itemTransform.GetComponentsInChildren<TextMeshProUGUI>();
             foreach (TextMeshProUGUI txt in texts)
@@ -103,18 +105,19 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                     break;
                 }
             }
-            
+
             // Tạo PlayerScrollItem
             PlayerScrollItem scrollItem = new PlayerScrollItem
             {
                 itemObject = itemObject,
                 iconImage = iconImage,
                 sellButton = sellButton,
-                priceText = priceText
+                priceText = priceText,
+                quantityText = quantityText
             };
-            
+
             itemSlots.Add(scrollItem);
-            
+
             // Setup sell button event
             if (sellButton != null)
             {
@@ -122,13 +125,13 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 sellButton.onClick.RemoveAllListeners();
                 sellButton.onClick.AddListener(() => OnSellButtonClicked(slotIndex));
             }
-            
+
             Debug.Log($"PlayerInventoryScroll_UI: Initialized slot {i} - Icon: {(iconImage != null)}, Button: {(sellButton != null)}, Price: {(priceText != null)}");
         }
-        
+
         Debug.Log($"PlayerInventoryScroll_UI: Initialized {itemSlots.Count} item slots");
     }
-    
+
     /// <summary>
     /// Refresh hiển thị tất cả items
     /// </summary>
@@ -139,7 +142,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             Debug.LogWarning("PlayerInventoryScroll_UI: Missing references for refresh");
             return;
         }
-        
+
         // Lấy danh sách items từ inventory
         List<Inventory.Slot> inventoryItems = new List<Inventory.Slot>();
         foreach (var slot in player.inventory.slots)
@@ -149,7 +152,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 inventoryItems.Add(slot);
             }
         }
-        
+
         // Cập nhật từng slot
         for (int i = 0; i < itemSlots.Count; i++)
         {
@@ -164,24 +167,24 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 ClearSlot(i);
             }
         }
-        
+
         Debug.Log($"PlayerInventoryScroll_UI: Refreshed display with {inventoryItems.Count} items");
     }
-    
+
     /// <summary>
     /// Cập nhật một slot với item data
     /// </summary>
     private void UpdateSlot(int slotIndex, Inventory.Slot inventorySlot)
     {
         if (slotIndex >= itemSlots.Count) return;
-        
+
         PlayerScrollItem scrollItem = itemSlots[slotIndex];
         scrollItem.currentItemType = inventorySlot.type;
         scrollItem.currentItemCount = inventorySlot.count;
-        
+
         // Lấy shop item data
         ShopItem shopItem = shopManager.shopData.GetShopItem(inventorySlot.type);
-        
+
         // Cập nhật icon
         if (scrollItem.iconImage != null && shopItem != null)
         {
@@ -189,7 +192,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             scrollItem.iconImage.color = Color.white;
             scrollItem.iconImage.gameObject.SetActive(true);
         }
-        
+
         // Cập nhật price text
         if (scrollItem.priceText != null)
         {
@@ -206,14 +209,14 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             }
             scrollItem.priceText.gameObject.SetActive(true);
         }
-        
+
         // Cập nhật sell button
         if (scrollItem.sellButton != null)
         {
             bool canSell = shopItem != null && shopItem.canSell;
             scrollItem.sellButton.interactable = canSell;
             scrollItem.sellButton.gameObject.SetActive(true);
-            
+
             // Cập nhật text của button nếu có
             TextMeshProUGUI buttonText = scrollItem.sellButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
@@ -221,60 +224,69 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 buttonText.text = canSell ? "Bán" : "Không thể bán";
             }
         }
-        
+
+        if (scrollItem.quantityText != null)
+        {
+            scrollItem.quantityText.text = $"x{inventorySlot.count}";
+            scrollItem.quantityText.gameObject.SetActive(true);
+        }
+
         // Show item object
         scrollItem.itemObject.SetActive(true);
     }
-    
+
     /// <summary>
     /// Xóa hiển thị của một slot
     /// </summary>
     private void ClearSlot(int slotIndex)
     {
         if (slotIndex >= itemSlots.Count) return;
-        
+
         PlayerScrollItem scrollItem = itemSlots[slotIndex];
         scrollItem.currentItemType = CollectableType.NONE;
         scrollItem.currentItemCount = 0;
-        
+
         // Ẩn icon
         if (scrollItem.iconImage != null)
         {
             scrollItem.iconImage.sprite = null;
             scrollItem.iconImage.gameObject.SetActive(false);
         }
-        
+
         // Ẩn price text
         if (scrollItem.priceText != null)
         {
             scrollItem.priceText.gameObject.SetActive(false);
         }
-        
+
         // Ẩn sell button
         if (scrollItem.sellButton != null)
         {
             scrollItem.sellButton.gameObject.SetActive(false);
         }
-        
+
+        if (scrollItem.quantityText != null)
+            scrollItem.quantityText.gameObject.SetActive(false);
+
         // Hide item object
         scrollItem.itemObject.SetActive(false);
     }
-    
+
     /// <summary>
     /// Xử lý khi click sell button
     /// </summary>
     private void OnSellButtonClicked(int slotIndex)
     {
         if (slotIndex >= itemSlots.Count) return;
-        
+
         PlayerScrollItem scrollItem = itemSlots[slotIndex];
-        
+
         if (scrollItem.currentItemType == CollectableType.NONE || scrollItem.currentItemCount <= 0)
         {
             Debug.LogWarning("PlayerInventoryScroll_UI: No item to sell in slot " + slotIndex);
             return;
         }
-        
+
         // Find the actual inventory slot index for this item type
         int inventorySlotIndex = FindInventorySlotIndex(scrollItem.currentItemType);
         if (inventorySlotIndex == -1)
@@ -282,17 +294,17 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             Debug.LogWarning($"PlayerInventoryScroll_UI: Could not find inventory slot for {scrollItem.currentItemType}");
             return;
         }
-        
+
         // Bán toàn bộ stack
         bool success = shopManager.SellItem(inventorySlotIndex, scrollItem.currentItemCount);
-        
+
         if (success)
         {
             ShopItem shopItem = shopManager.shopData.GetShopItem(scrollItem.currentItemType);
             int totalEarned = shopItem.sellPrice * scrollItem.currentItemCount;
-            
+
             Debug.Log($"PlayerInventoryScroll_UI: Sold {scrollItem.currentItemCount}x {scrollItem.currentItemType} for {totalEarned}G");
-            
+
             // Refresh display sau khi bán
             RefreshDisplay();
         }
@@ -301,7 +313,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             Debug.LogWarning($"PlayerInventoryScroll_UI: Failed to sell {scrollItem.currentItemType}");
         }
     }
-    
+
     /// <summary>
     /// Lấy thông tin item tại slot
     /// </summary>
@@ -311,17 +323,17 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             return itemSlots[slotIndex];
         return null;
     }
-    
+
     /// <summary>
     /// Bán tất cả items có thể bán
     /// </summary>
     public void SellAllItems()
     {
         if (player == null || player.inventory == null) return;
-        
+
         int totalSold = 0;
         float totalEarned = 0f;
-        
+
         // Bán tất cả items - process from back to front to avoid index shifting
         for (int i = player.inventory.slots.Count - 1; i >= 0; i--)
         {
@@ -339,7 +351,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 }
             }
         }
-        
+
         if (totalSold > 0)
         {
             Debug.Log($"PlayerInventoryScroll_UI: Sold {totalSold} items for {totalEarned}G total");
@@ -350,7 +362,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             Debug.Log("PlayerInventoryScroll_UI: No items were sold");
         }
     }
-    
+
     /// <summary>
     /// Auto-refresh khi inventory thay đổi
     /// </summary>
@@ -362,14 +374,14 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             RefreshDisplay();
         }
     }
-    
+
     /// <summary>
     /// Find inventory slot index for a specific item type
     /// </summary>
     private int FindInventorySlotIndex(CollectableType itemType)
     {
         if (player == null || player.inventory == null) return -1;
-        
+
         for (int i = 0; i < player.inventory.slots.Count; i++)
         {
             var slot = player.inventory.slots[i];
