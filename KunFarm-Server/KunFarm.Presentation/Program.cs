@@ -13,7 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // Database configuration - MySQL
 builder.Services.AddDbContext<KunFarmDbContext>(options =>
@@ -22,10 +26,12 @@ builder.Services.AddDbContext<KunFarmDbContext>(options =>
 
 // Repository pattern registration
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPlayerStateRepository, PlayerStateRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 // Business logic services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<KunFarm.BLL.Services.DatabaseSeederService>();
 
 // JWT Authentication

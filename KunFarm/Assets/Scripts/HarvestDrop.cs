@@ -1,8 +1,8 @@
 using UnityEngine;
 
-[System.Serializable]
+[System.Serializable] // Rất quan trọng để hiển thị trong Inspector
 public class HarvestDrop
 {
-    public GameObject itemPrefab;
-    public int quantity;
+    public GameObject itemPrefab; // Prefab của vật phẩm sẽ rơi ra (ví dụ: củ cà rốt, hạt giống mới)
+    public int quantity;          // Số lượng vật phẩm
 }

@@ -60,6 +60,11 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
+  eggPrefab: {fileID: 29784602559576804, guid: 37d7a59d81b592745acf3f26b57a93fe, type: 3}
+  eggLayInterval: 30
+  layEggsOnlyWhenIdle: 1
+  eggOffset: {x: 0, y: 0, z: 0}
+  maxEggsPerChicken: 5
   showDebugInfo: 0
 --- !u!212 &6333239139150405167
 SpriteRenderer:

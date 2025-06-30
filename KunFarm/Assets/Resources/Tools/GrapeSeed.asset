@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e809919182b6c437f92e7fd38fcd3b97, type: 3}
+  m_Name: GrapeSeed
+  m_EditorClassIdentifier: 
+  toolName: GreepSeed
+  toolIcon: {fileID: 1453225863, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
+  toolType: 2
+  animatorToolIndex: 2
+  cropData: {fileID: 11400000, guid: d4561d96a8db53d489a776f7ab6be58f, type: 2}

@@ -1,0 +1,25 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace KunFarm.DAL.Entities
+{
+    public class PlayerState
+    {
+        [Key]
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+        
+        public int Money { get; set; } = 0;
+        
+        public float PosX { get; set; } = 0f;
+        
+        public float PosY { get; set; } = 0f;
+        
+        public float PosZ { get; set; } = 0f;
+        
+        public DateTime LastSaved { get; set; } = DateTime.Now;
+        
+        // Navigation property
+        public User User { get; set; } = null!;
+    }
+} 

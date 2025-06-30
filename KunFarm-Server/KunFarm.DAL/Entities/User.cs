@@ -26,10 +26,7 @@ namespace KunFarm.DAL.Entities
         
         public Role Role { get; set; } = Role.PLAYER;
         
-        // Game specific properties
-        public int Level { get; set; } = 1;
-        public int Experience { get; set; } = 0;
-        public decimal Coins { get; set; } = 1000; // Starting coins
-        public decimal Gems { get; set; } = 10; // Starting gems
+        // Navigation property
+        public PlayerState? PlayerState { get; set; }
     }
 } 

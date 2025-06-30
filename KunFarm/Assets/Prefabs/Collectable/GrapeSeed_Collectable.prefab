@@ -144,5 +144,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 6
-  icon: {fileID: 0}
+  icon: {fileID: 1453225863, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
   rb2d: {fileID: 0}

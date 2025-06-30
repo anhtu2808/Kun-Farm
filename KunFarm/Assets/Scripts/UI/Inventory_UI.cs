@@ -8,6 +8,9 @@ public class InventoryUI: MonoBehaviour
     public Player player;
     public List<Slot_UI> slots = new();
 
+    // Property để check inventory có đang mở không
+    public bool IsOpen => inventoryPanel.activeSelf;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -33,9 +36,15 @@ public class InventoryUI: MonoBehaviour
     {
         inventoryPanel.SetActive(false);
         player.inventory.onInventoryChanged += Refresh;
+        
+        // Initialize drag drop for inventory slots
+        for (int i = 0; i < slots.Count; i++)
+        {
+            slots[i].InitializeDragDrop(SlotType.Inventory, i);
+        }
     }
 
-    void Refresh()
+    public void Refresh()
     {
         if (slots.Count == player.inventory.slots.Count)
         {
@@ -55,18 +64,15 @@ public class InventoryUI: MonoBehaviour
 
     public void Remove(int slotID)
     {
-        Debug.Log("Remove() được gọi với slotID: " + slotID);
         var type = player.inventory.slots[slotID].type;
-        Debug.Log("Loại vật phẩm trong slot là: " + type);
-
         var itemToDrop = GameManager.instance.itemManager.GetItemByType(type);
+        
         if (itemToDrop == null)
         {
             Debug.LogWarning("Không tìm thấy item tương ứng để drop!");
             return;
         }
 
-        Debug.Log("Chuẩn bị gọi DropItem với: " + itemToDrop.name);
         player.DropItem(itemToDrop);
         player.inventory.Remove(slotID);
         Refresh();

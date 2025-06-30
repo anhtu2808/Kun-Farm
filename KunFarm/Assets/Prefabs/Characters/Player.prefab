@@ -13,6 +13,10 @@ GameObject:
   - component: {fileID: 2978502120985998042}
   - component: {fileID: 956549553512798498}
   - component: {fileID: 6099918374191354116}
+  - component: {fileID: 6140523322584365488}
+  - component: {fileID: 5656207814825896208}
+  - component: {fileID: 944264181672840308}
+  - component: {fileID: 2083536048103807085}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -48,7 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602a2975709224210a59d4319341f774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
+  speed: 7
   animator: {fileID: 3303522334341118072}
 --- !u!61 &2978502120985998042
 BoxCollider2D:
@@ -136,6 +140,69 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventory:
     slots: []
+  wallet: {fileID: 6140523322584365488}
+--- !u!114 &6140523322584365488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d97ff64a2a154eaa92b6dc87a1ba2e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  money: 0
+  userId: 0
+--- !u!114 &5656207814825896208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12ad7b97074dc4ec2bde43b29e424d6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moneyText: {fileID: 0}
+--- !u!114 &944264181672840308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffcc8212d818c42f8bfc7d2b2096b0cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toolDataArray:
+  - {fileID: 11400000, guid: 7e51e6fbf737e464da2455fda77dc848, type: 2}
+  - {fileID: 11400000, guid: 813f4a49664af459ebd5023c76b49b08, type: 2}
+  hoeAnimationSpeed: 0.7
+  maxInteractionDistance: 1.5
+  toolbarUI: {fileID: 0}
+  tileManager: {fileID: 0}
+  playerMovement: {fileID: 0}
+--- !u!114 &2083536048103807085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a09e4592dc9148d2905bce0152dbe8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactableMap: {fileID: 0}
+  toolManager: {fileID: 944264181672840308}
+  player: {fileID: 6099918374191354116}
 --- !u!1 &4358920708629238525
 GameObject:
   m_ObjectHideFlags: 0

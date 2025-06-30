@@ -29,44 +29,36 @@ namespace KunFarm.Presentation.Controllers
         /// <response code="400">Dữ liệu đầu vào không hợp lệ</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(LoginResponse), 200)]
-        [ProducesResponseType(typeof(LoginResponse), 401)]
-        [ProducesResponseType(typeof(LoginResponse), 400)]
-        [ProducesResponseType(typeof(LoginResponse), 500)]
-        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        [ProducesResponseType(typeof(ApiResponse<AuthResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody] LoginRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Dữ liệu đầu vào không hợp lệ"
-                    });
+                    return BadRequest(ApiResponse<object>.Error("Dữ liệu đầu vào không hợp lệ", 400));
                 }
 
                 var result = await _authService.LoginAsync(request);
                 
-                if (result.Success)
+                if (result != null)
                 {
                     _logger.LogInformation("User {Username} logged in successfully", request.UsernameOrEmail);
-                    return Ok(result);
+                    return Ok(ApiResponse<AuthResponse>.Success(result, "Đăng nhập thành công"));
                 }
                 else
                 {
                     _logger.LogWarning("Failed login attempt for {Username}", request.UsernameOrEmail);
-                    return Unauthorized(result);
+                    return Unauthorized(ApiResponse<object>.Error("Thông tin đăng nhập không chính xác", 401));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during login for {Username}", request.UsernameOrEmail);
-                return StatusCode(500, new LoginResponse
-                {
-                    Success = false,
-                    Message = "Có lỗi xảy ra trên server"
-                });
+                return StatusCode(500, ApiResponse<object>.Error("Có lỗi xảy ra trên server", 500));
             }
         }
 
@@ -79,43 +71,35 @@ namespace KunFarm.Presentation.Controllers
         /// <response code="400">Username/Email đã tồn tại hoặc dữ liệu không hợp lệ</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(LoginResponse), 200)]
-        [ProducesResponseType(typeof(LoginResponse), 400)]
-        [ProducesResponseType(typeof(LoginResponse), 500)]
-        public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
+        [ProducesResponseType(typeof(ApiResponse<AuthResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<AuthResponse>>> Register([FromBody] RegisterRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Dữ liệu đầu vào không hợp lệ"
-                    });
+                    return BadRequest(ApiResponse<object>.Error("Dữ liệu đầu vào không hợp lệ", 400));
                 }
 
                 var result = await _authService.RegisterAsync(request);
                 
-                if (result.Success)
+                if (result != null)
                 {
                     _logger.LogInformation("User {Username} registered successfully", request.Username);
-                    return Ok(result);
+                    return Ok(ApiResponse<AuthResponse>.Success(result, "Đăng ký thành công"));
                 }
                 else
                 {
                     _logger.LogWarning("Failed registration attempt for {Username}", request.Username);
-                    return BadRequest(result);
+                    return BadRequest(ApiResponse<object>.Error("Username hoặc Email đã tồn tại", 400));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during registration for {Username}", request.Username);
-                return StatusCode(500, new LoginResponse
-                {
-                    Success = false,
-                    Message = "Có lỗi xảy ra trên server"
-                });
+                return StatusCode(500, ApiResponse<object>.Error("Có lỗi xảy ra trên server", 500));
             }
         }
 
@@ -127,19 +111,19 @@ namespace KunFarm.Presentation.Controllers
         /// <response code="200">Token hợp lệ</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("validate-token")]
-        [ProducesResponseType(typeof(object), 200)]
-        [ProducesResponseType(typeof(object), 500)]
-        public async Task<ActionResult<object>> ValidateToken([FromBody] string token)
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<object>>> ValidateToken([FromBody] string token)
         {
             try
             {
                 var isValid = await _authService.ValidateTokenAsync(token);
-                return Ok(new { valid = isValid });
+                return Ok(ApiResponse<object>.Success(new { valid = isValid }, "Token validation completed"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating token");
-                return StatusCode(500, new { valid = false, message = "Có lỗi xảy ra khi xác thực token" });
+                return StatusCode(500, ApiResponse<object>.Error("Có lỗi xảy ra khi xác thực token", 500));
             }
         }
 
@@ -149,14 +133,14 @@ namespace KunFarm.Presentation.Controllers
         /// <returns>API status</returns>
         /// <response code="200">API đang hoạt động bình thường</response>
         [HttpGet("health")]
-        [ProducesResponseType(typeof(object), 200)]
-        public ActionResult<object> Health()
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        public ActionResult<ApiResponse<object>> Health()
         {
-            return Ok(new { 
+            return Ok(ApiResponse<object>.Success(new { 
                 status = "healthy", 
                 timestamp = DateTime.UtcNow,
                 service = "KunFarm Auth API"
-            });
+            }, "API is healthy"));
         }
     }
 } 

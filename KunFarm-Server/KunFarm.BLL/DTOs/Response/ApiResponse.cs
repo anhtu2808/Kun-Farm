@@ -19,11 +19,6 @@ namespace KunFarm.BLL.DTOs.Response
         /// </summary>
         public T? Data { get; set; }
 
-        /// <summary>
-        /// Timestamp của response
-        /// </summary>
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
         public static ApiResponse<T> Success(T data, string message = "Success", int code = 200)
         {
             return new ApiResponse<T>
@@ -35,6 +30,16 @@ namespace KunFarm.BLL.DTOs.Response
         }
 
         public static ApiResponse<T> Error(string message, int code = 500, T? data = default)
+        {
+            return new ApiResponse<T>
+            {
+                Code = code,
+                Message = message,
+                Data = data
+            };
+        }
+
+        public static ApiResponse<T> Failure(string message, int code = 400, T? data = default)
         {
             return new ApiResponse<T>
             {
