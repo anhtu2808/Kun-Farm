@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using System.Text;
+using System.Collections.Generic;
 
 public class ApiClient : MonoBehaviour
 {
@@ -98,14 +99,15 @@ public class ApiClient : MonoBehaviour
     public void LoadFarmState(int userId, Action<FarmSaveData> onComplete)
     {
         Debug.Log($"[ApiClient] Loading farm state for user {userId}");
-        
+
         StartCoroutine(Get($"/game/farm/load/{userId}",
-            response => {
+            response =>
+            {
                 try
                 {
                     Debug.Log($"[ApiClient] Raw load response: {response}");
                     var apiResponse = JsonUtility.FromJson<ApiResponseWrapper<FarmStateServerResponse>>(response);
-                    
+
                     // Debug server response structure
                     Debug.Log($"[ApiClient] API Response - Success: {apiResponse.success}, Code: {apiResponse.code}");
                     if (apiResponse.data != null)
@@ -113,7 +115,7 @@ public class ApiClient : MonoBehaviour
                         Debug.Log($"[ApiClient] Server data - UserId: {apiResponse.data.userId}");
                         Debug.Log($"[ApiClient] Server data - TileStates: {apiResponse.data.tileStates?.Length ?? 0}");
                         Debug.Log($"[ApiClient] Server data - Plants: {apiResponse.data.plants?.Length ?? 0}");
-                        
+
                         // Debug first few plants
                         if (apiResponse.data.plants != null && apiResponse.data.plants.Length > 0)
                         {
@@ -124,7 +126,7 @@ public class ApiClient : MonoBehaviour
                             }
                         }
                     }
-                    
+
                     if (apiResponse.success && apiResponse.data != null)
                     {
                         // Convert server response to Unity format
@@ -161,7 +163,7 @@ public class ApiClient : MonoBehaviour
                                     Debug.LogWarning($"[ApiClient] Skipping plant at ({plant.x}, {plant.y}, {plant.z}) - empty cropType from server");
                                     continue;
                                 }
-                                
+
                                 farmData.plants.Add(new PlantData
                                 {
                                     x = plant.x,
@@ -190,10 +192,128 @@ public class ApiClient : MonoBehaviour
                     onComplete?.Invoke(null);
                 }
             },
-            error => {
+            error =>
+            {
                 Debug.LogError($"[ApiClient] ❌ Network error loading farm state: {error}");
                 onComplete?.Invoke(null);
             }));
+    }
+    /* ------------ Marketplace API ------------ */
+
+        /// <summary>
+        /// Tạo marketplace item mới
+        /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<MarketplaceItemResponse>> CreateMarketplaceItem(CreateMarketplaceItemRequest request)
+    {
+        var json = JsonUtility.ToJson(request);
+        var response = await PostJsonAsync("/api/marketplace/create", json);
+
+        if (response.Success)
+        {
+            var itemResponse = JsonUtility.FromJson<MarketplaceItemResponse>(response.Data);
+            return new ApiResponse<MarketplaceItemResponse> { Success = true, Data = itemResponse };
+        }
+
+        return new ApiResponse<MarketplaceItemResponse> { Success = false, Message = response.Message };
+    }
+
+    /// <summary>
+    /// Mua marketplace item
+    /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<MarketplaceItemResponse>> BuyMarketplaceItem(BuyMarketplaceItemRequest request)
+    {
+        var json = JsonUtility.ToJson(request);
+        var response = await PostJsonAsync("/api/marketplace/buy", json);
+        
+        if (response.Success)
+        {
+            var itemResponse = JsonUtility.FromJson<MarketplaceItemResponse>(response.Data);
+            return new ApiResponse<MarketplaceItemResponse> { Success = true, Data = itemResponse };
+        }
+        
+        return new ApiResponse<MarketplaceItemResponse> { Success = false, Message = response.Message };
+    }
+
+    /// <summary>
+    /// Lấy danh sách items đang hoạt động
+    /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<List<MarketplaceItemResponse>>> GetActiveMarketplaceItems()
+    {
+        var response = await GetAsync("/api/marketplace/items");
+        
+        if (response.Success)
+        {
+            var itemsResponse = JsonUtility.FromJson<MarketplaceItemsResponse>(response.Data);
+            return new ApiResponse<List<MarketplaceItemResponse>> { Success = true, Data = itemsResponse.Items };
+        }
+        
+        return new ApiResponse<List<MarketplaceItemResponse>> { Success = false, Message = response.Message };
+    }
+
+    /// <summary>
+    /// Tìm kiếm marketplace items
+    /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<List<MarketplaceItemResponse>>> SearchMarketplaceItems(string searchTerm)
+    {
+        var response = await GetAsync($"/api/marketplace/search?term={UnityWebRequest.EscapeURL(searchTerm)}");
+        
+        if (response.Success)
+        {
+            var itemsResponse = JsonUtility.FromJson<MarketplaceItemsResponse>(response.Data);
+            return new ApiResponse<List<MarketplaceItemResponse>> { Success = true, Data = itemsResponse.Items };
+        }
+        
+        return new ApiResponse<List<MarketplaceItemResponse>> { Success = false, Message = response.Message };
+    }
+
+    /// <summary>
+    /// Lấy lịch sử giao dịch của user
+    /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<List<MarketplaceTransactionResponse>>> GetUserMarketplaceTransactions()
+    {
+        var response = await GetAsync("/api/marketplace/transactions");
+        
+        if (response.Success)
+        {
+            var transactionsResponse = JsonUtility.FromJson<MarketplaceTransactionsResponse>(response.Data);
+            return new ApiResponse<List<MarketplaceTransactionResponse>> { Success = true, Data = transactionsResponse.Transactions };
+        }
+        
+        return new ApiResponse<List<MarketplaceTransactionResponse>> { Success = false, Message = response.Message };
+    }
+
+    /// <summary>
+    /// Hủy marketplace item
+    /// </summary>
+    public async System.Threading.Tasks.Task<ApiResponse<bool>> CancelMarketplaceItem(int itemId)
+    {
+        var response = await PostJsonAsync($"/api/marketplace/cancel/{itemId}", "");
+        
+        return new ApiResponse<bool> { Success = response.Success, Data = response.Success, Message = response.Message };
+    }
+
+    /* ------------ Async Helpers ------------ */
+
+    private async System.Threading.Tasks.Task<ApiResponse<string>> PostJsonAsync(string path, string json)
+    {
+        var tcs = new System.Threading.Tasks.TaskCompletionSource<ApiResponse<string>>();
+        
+        StartCoroutine(PostJson(path, json, 
+            result => tcs.SetResult(new ApiResponse<string> { Success = true, Data = result }),
+            error => tcs.SetResult(new ApiResponse<string> { Success = false, Message = error })));
+        
+        return await tcs.Task;
+    }
+
+    private async System.Threading.Tasks.Task<ApiResponse<string>> GetAsync(string path)
+    {
+        var tcs = new System.Threading.Tasks.TaskCompletionSource<ApiResponse<string>>();
+        
+        StartCoroutine(Get(path, 
+            result => tcs.SetResult(new ApiResponse<string> { Success = true, Data = result }),
+            error => tcs.SetResult(new ApiResponse<string> { Success = false, Message = error })));
+        
+        return await tcs.Task;
     }
 
     /* ------------ Helpers ------------ */
