@@ -11,6 +11,7 @@ namespace KunFarm.DAL.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<PlayerState> PlayerStates { get; set; }
+        public DbSet<FarmState> FarmStates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +41,23 @@ namespace KunFarm.DAL.Data
                       
                 entity.Property(e => e.Money)
                       .HasDefaultValue(0);
+            });
+
+            // FarmState entity configuration
+            modelBuilder.Entity<FarmState>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasIndex(e => e.UserId);
+                
+                entity.Property(e => e.LastSaved)
+                      .HasDefaultValue(DateTime.UtcNow);
+                      
+                // One-to-many relationship with User
+                entity.HasOne(f => f.User)
+                      .WithMany()
+                      .HasForeignKey(f => f.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Seed data

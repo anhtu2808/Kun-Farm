@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
 
     public ItemManager itemManager;
     public TileManager tileManager;
+    public FarmManager farmManager;
 
     private void Awake()
     {
@@ -28,9 +29,11 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
         itemManager = GetComponent<ItemManager>();
         tileManager = GetComponent<TileManager>();
+        farmManager = GetComponent<FarmManager>();
         
-        // Ensure GameSaver exists
+        // Ensure components exist
         EnsureGameSaver();
+        EnsureFarmManager();
     }
 
     private void Start()
@@ -45,6 +48,15 @@ public class GameManager : MonoBehaviour
             GameObject gameSaverGO = new GameObject("GameSaver");
             gameSaverGO.AddComponent<GameSaver>();
             DontDestroyOnLoad(gameSaverGO);
+        }
+    }
+
+    private void EnsureFarmManager()
+    {
+        if (farmManager == null)
+        {
+            farmManager = gameObject.AddComponent<FarmManager>();
+            Debug.Log("FarmManager added to GameManager for auto-save functionality");
         }
     }
 }

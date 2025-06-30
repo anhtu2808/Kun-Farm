@@ -109,9 +109,12 @@ public static class ToolHelpers
         CropGrower cropGrower = newPlant.GetComponent<CropGrower>();
         if (cropGrower != null)
         {
+            // IMPORTANT: Explicitly set cropData on the instantiated plant
+            cropGrower.cropData = cropData;
             cropGrower.SetTilePosition(cellPosition);
             tileManager.RegisterPlant(cellPosition, newPlant);
             tileManager.SetTileState(cellPosition, TileState.Planted);
+            Debug.Log($"[ToolHelpers] ✅ Planted {cropData.name} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
             return true;
         }
         else

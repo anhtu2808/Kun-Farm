@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Quản lý logic mua/bán items trong shop
@@ -98,8 +99,8 @@ public class ShopManager : MonoBehaviour
             
             Debug.Log($"Đã mua {quantity} {shopItem.itemName} với giá {totalPrice}G");
             
-            // Trigger event
-            OnShopUpdated?.Invoke();
+            // Trigger event với delay
+            StartCoroutine(TriggerShopUpdatedWithDelay());
             return true;
         }
 
@@ -167,9 +168,18 @@ public class ShopManager : MonoBehaviour
         
         Debug.Log($"Đã bán {quantity} {shopItem.itemName} với giá {totalSellPrice}G");
         
-        // Trigger event
-        OnShopUpdated?.Invoke();
+        // Trigger event với delay để tránh race condition
+        StartCoroutine(TriggerShopUpdatedWithDelay());
         return true;
+    }
+    
+    /// <summary>
+    /// Trigger OnShopUpdated with small delay to avoid race conditions
+    /// </summary>
+    private System.Collections.IEnumerator TriggerShopUpdatedWithDelay()
+    {
+        yield return new WaitForEndOfFrame();
+        OnShopUpdated?.Invoke();
     }
 
     /// <summary>
@@ -228,7 +238,8 @@ public class ShopManager : MonoBehaviour
         
         Debug.Log($"Đã bán tất cả {totalQuantity} {shopItem.itemName} với giá {totalValue}G");
         
-        OnShopUpdated?.Invoke();
+        // Trigger event với delay
+        StartCoroutine(TriggerShopUpdatedWithDelay());
         return true;
     }
 
@@ -244,7 +255,8 @@ public class ShopManager : MonoBehaviour
             item.RestoreStock();
         }
         
-        OnShopUpdated?.Invoke();
+        // Trigger event với delay
+        StartCoroutine(TriggerShopUpdatedWithDelay());
         Debug.Log("Shop stock đã được refresh!");
     }
 

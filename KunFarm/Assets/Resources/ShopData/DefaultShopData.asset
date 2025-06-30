@@ -21,8 +21,8 @@ MonoBehaviour:
     canSell: 1
     sellPrice: 5
     showInShop: 1
-    stockLimit: 50
-    currentStock: 12
+    stockLimit: -1
+    currentStock: 0
   - collectableType: 6
     itemName: Grape Seed
     itemIcon: {fileID: 1453225863, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
@@ -31,8 +31,8 @@ MonoBehaviour:
     canSell: 1
     sellPrice: 10
     showInShop: 1
-    stockLimit: 30
-    currentStock: 9
+    stockLimit: -1
+    currentStock: 0
   - collectableType: 7
     itemName: Apple Tree Seed
     itemIcon: {fileID: 1573053575, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}

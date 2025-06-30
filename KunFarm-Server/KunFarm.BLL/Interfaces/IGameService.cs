@@ -7,5 +7,7 @@ namespace KunFarm.BLL.Interfaces
     {
         Task<PlayerStateResponse?> LoadGameAsync(int userId);
         Task<bool> SaveGameAsync(int userId, SaveGameRequest request);
+        Task<FarmStateResponse?> LoadFarmStateAsync(int userId);
+        Task<bool> SaveFarmStateAsync(int userId, SaveFarmStateRequest request);
     }
 } 

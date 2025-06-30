@@ -94,6 +94,46 @@ public class CropGrower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Lấy current stage để lưu vào server
+    /// </summary>
+    public int GetCurrentStage()
+    {
+        return currentStage;
+    }
+
+    /// <summary>
+    /// Lấy timer để lưu vào server
+    /// </summary>
+    public float GetTimer()
+    {
+        return timer;
+    }
+
+    /// <summary>
+    /// Restore plant state từ server data
+    /// </summary>
+    public void RestoreFromSaveData(PlantData plantData)
+    {
+        currentStage = plantData.currentStage;
+        timer = plantData.timer;
+        isMature = plantData.isMature;
+
+        // Set sprite tương ứng với stage
+        if (cropData != null && cropData.growthStages != null && 
+            currentStage < cropData.growthStages.Length && 
+            spriteRenderer != null)
+        {
+            spriteRenderer.sprite = cropData.growthStages[currentStage];
+        }
+
+        // Update tile state nếu mature
+        if (isMature && tileManager != null)
+        {
+            tileManager.SetTileState(myCellPosition, TileState.Harvested);
+        }
+    }
+
     // Hàm Harvest() được gọi từ PlayerInteraction
     public void Harvest() // Đảm bảo là public
     {
