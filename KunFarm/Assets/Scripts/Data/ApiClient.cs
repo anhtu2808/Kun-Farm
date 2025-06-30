@@ -67,8 +67,6 @@ public class ApiClient : MonoBehaviour
         else
             onError?.Invoke(req.error);
     }
-<<<<<<< HEAD
-=======
 
     // Farm State API methods
     public void SaveFarmState(FarmSaveData farmData, Action<bool> onComplete)
@@ -284,7 +282,6 @@ public class ApiClient : MonoBehaviour
         return new ApiResponse<List<MarketplaceTransactionResponse>> { Success = false, Message = response.Message };
     }
 
->>>>>>> 7a750a37a1bd4771e4fe658bbd4cf8cea032764a
     /// <summary>
     /// Hủy marketplace item
     /// </summary>
@@ -352,8 +349,6 @@ public class ApiResponseWrapper<T>
     // Helper property to check if request was successful
     public bool success => code == 200;
 }
-<<<<<<< HEAD
-=======
 
 [System.Serializable]
 public class FarmStateServerResponse
@@ -384,4 +379,3 @@ public class ServerPlantData
     public float timer;
     public bool isMature;
 }
->>>>>>> 7a750a37a1bd4771e4fe658bbd4cf8cea032764a
