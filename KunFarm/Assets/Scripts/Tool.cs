@@ -98,9 +98,12 @@ public class SeedTool : Tool
         CropGrower cropGrower = newPlant.GetComponent<CropGrower>();
         if (cropGrower != null)
         {
+            // IMPORTANT: Explicitly set cropData on the instantiated plant
+            cropGrower.cropData = cropData;
             cropGrower.SetTilePosition(cellPosition);
             tileManager.RegisterPlant(cellPosition, newPlant);
             tileManager.SetTileState(cellPosition, TileState.Planted);
+            Debug.Log($"[SeedTool] ✅ Planted {cropData.name} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
         }
         else
         {

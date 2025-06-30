@@ -78,6 +78,7 @@
     <Compile Include="Assets/Scripts/Inventory.cs" />
     <Compile Include="Assets/Scripts/Data/ApiClient.cs" />
     <Compile Include="Assets/Scripts/InventoryManager.cs" />
+    <Compile Include="Assets/Scripts/Data/FarmSaveData.cs" />
     <Compile Include="Assets/Scripts/UI/MoneyUI.cs" />
     <Compile Include="Assets/Scripts/ShopManager.cs" />
     <Compile Include="Assets/Scripts/Movement.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Assets/Scripts/Collectable.cs" />
     <Compile Include="Assets/Scripts/Tool.cs" />
     <Compile Include="Assets/Scripts/TileManager.cs" />
+    <Compile Include="Assets/Scripts/FarmManager.cs" />
     <Compile Include="Assets/Scripts/UI/InventorySlot_Sellable.cs" />
     <Compile Include="Assets/Scripts/ShopData.cs" />
     <Compile Include="Assets/Scripts/ItemManager.cs" />

@@ -4,6 +4,7 @@ using KunFarm.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KunFarm.DAL.Migrations
 {
     [DbContext(typeof(KunFarmDbContext))]
-    partial class KunFarmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250629164006_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,37 +24,6 @@ namespace KunFarm.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("KunFarm.DAL.Entities.FarmState", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("LastSaved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 6, 29, 17, 21, 3, 860, DateTimeKind.Utc).AddTicks(5540));
-
-                    b.Property<string>("PlantsJson")
-                        .IsRequired()
-                        .HasColumnType("json");
-
-                    b.Property<string>("TileStatesJson")
-                        .IsRequired()
-                        .HasColumnType("json");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("FarmStates");
-                });
 
             modelBuilder.Entity("KunFarm.DAL.Entities.PlayerState", b =>
                 {
@@ -61,7 +33,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 6, 30, 0, 21, 3, 860, DateTimeKind.Local).AddTicks(4680));
+                        .HasDefaultValue(new DateTime(2025, 6, 29, 23, 40, 6, 676, DateTimeKind.Local).AddTicks(3120));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()
@@ -137,17 +109,6 @@ namespace KunFarm.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("KunFarm.DAL.Entities.FarmState", b =>
-                {
-                    b.HasOne("KunFarm.DAL.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("KunFarm.DAL.Entities.PlayerState", b =>

@@ -89,5 +89,74 @@ namespace KunFarm.Presentation.Controllers
                 return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
             }
         }
+
+        [HttpPost("farm/save")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<bool>>> SaveFarmState([FromBody] SaveFarmStateRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid request data", 400));
+                }
+
+                var userId = request.userId;
+                
+                if (userId <= 0)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid user ID", 400));
+                }
+
+                var success = await _gameService.SaveFarmStateAsync(userId, request);
+                
+                if (success)
+                {
+                    return Ok(ApiResponse<bool>.Success(true, "Farm state saved successfully"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<bool>.Error("Failed to save farm state", 400));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SaveFarmState endpoint");
+                return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
+            }
+        }
+
+        [HttpGet("farm/load/{userId}")]
+        [ProducesResponseType(typeof(ApiResponse<FarmStateResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<FarmStateResponse>>> LoadFarmState(int userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid user ID", 400));
+                }
+
+                var farmState = await _gameService.LoadFarmStateAsync(userId);
+                
+                if (farmState != null)
+                {
+                    return Ok(ApiResponse<FarmStateResponse>.Success(farmState, "Farm state loaded successfully"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<FarmStateResponse>.Error("Failed to load farm state", 400));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LoadFarmState endpoint");
+                return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
+            }
+        }
     }
 } 
