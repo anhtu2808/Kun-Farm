@@ -13,10 +13,12 @@ namespace KunFarm.DAL.Repositories
     public class PlayerRegularShopSlotRepository : IPlayerRegularShopSlotRepository
     {
         private readonly KunFarmDbContext _context;
+        private readonly DbSet<PlayerRegularShopSlot> _dbSet;
 
         public PlayerRegularShopSlotRepository(KunFarmDbContext context)
         {
             _context = context;
+            _dbSet = context.Set<PlayerRegularShopSlot>();
         }
 
         public async Task<PlayerRegularShopSlot?> PlayerRegularShopSlot(int palyerId, int shopSlotId)
@@ -25,5 +27,13 @@ namespace KunFarm.DAL.Repositories
                 .Where(s => s.PlayerStateId == palyerId && s.RegularShopSlotId == shopSlotId)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task UpdateAsync(PlayerRegularShopSlot entity)
+        {
+            
+            _dbSet.Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

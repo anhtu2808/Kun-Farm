@@ -25,5 +25,11 @@ namespace KunFarm.DAL.Repositories
                 .Include(s => s.Item)
                 .ToListAsync(); 
         }
+
+        public async Task<RegularShopSlot?> GetById(int slotId)
+        {
+            return await _context.RegularShopSlots
+                .FirstOrDefaultAsync(s => s.Id == slotId);
+        }
     }
 }

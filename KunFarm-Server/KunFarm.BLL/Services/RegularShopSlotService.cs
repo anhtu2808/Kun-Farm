@@ -1,4 +1,5 @@
-﻿using KunFarm.BLL.DTOs.Response;
+﻿using KunFarm.BLL.DTOs.Request;
+using KunFarm.BLL.DTOs.Response;
 using KunFarm.BLL.Interfaces;
 using KunFarm.DAL.Interfaces;
 using System;
@@ -20,6 +21,45 @@ namespace KunFarm.BLL.Services
             _regularShopSlotRepository = regularShopSlotRepository;
             _itemRepository = itemRepository;
             _playerRegularShopSlotRepository = playerRegularShopSlotRepository;
+        }
+
+        public Task<ApiResponse<bool>> BuyItem(int playerId, BuyItemRequest request)
+        {
+           var playerSlot = _playerRegularShopSlotRepository.PlayerRegularShopSlot(playerId, request.SlotId).Result;
+
+            return Task.Run(async () =>
+            {
+                var slot = await _regularShopSlotRepository.GetById(request.SlotId);
+                if (slot == null || !slot.CanBuy)
+                {
+                    return new ApiResponse<bool>
+                    {
+                        Data = false,
+                        Message = "Item cannot be bought."
+                    };
+                }
+
+                var item = await _itemRepository.GetItemById(slot.ItemId);
+                if (item == null)
+                {
+                    return new ApiResponse<bool>
+                    {
+                        Data = false,
+                        Message = "Item not found."
+                    };
+                }
+
+                playerSlot.CurrentStock += request.Quantity;
+                
+                // Update the player's shop slot
+                await _playerRegularShopSlotRepository.UpdateAsync(playerSlot);
+
+                return new ApiResponse<bool>
+                {
+                    Data = true,
+                    Message = "Item bought successfully."
+                };
+            });
         }
 
         public Task<ApiResponse<List<ShopItemResponse>>> GetShopItem(int player)

@@ -182,30 +182,30 @@ public class SellShopScroll_UI : MonoBehaviour
     /// <summary>
     /// Thêm item đã bán vào lịch sử
     /// </summary>
-    public void AddSoldItem(CollectableType itemType, int quantity, int earnings)
-    {
-        // Lấy thông tin item từ shop data
-        ShopItem shopItem = shopManager?.shopData?.GetShopItem(itemType);
-        string itemName = shopItem != null ? shopItem.itemName : itemType.ToString();
-        Sprite itemIcon = shopItem != null ? shopItem.itemIcon : null;
+    // public void AddSoldItem(CollectableType itemType, int quantity, int earnings)
+    // {
+    //     // Lấy thông tin item từ shop data
+    //     // ShopItem shopItem = shopManager?.shopData?.GetShopItem(itemType);
+    //     // string itemName = shopItem != null ? shopItem.itemName : itemType.ToString();
+    //     // Sprite itemIcon = shopItem != null ? shopItem.itemIcon : null;
         
-        // Tạo sold item data
-        SoldItemData soldItem = new SoldItemData(itemType, itemName, quantity, earnings, itemIcon);
+    //     // Tạo sold item data
+    //     SoldItemData soldItem = new SoldItemData(itemType, itemName, quantity, earnings, itemIcon);
         
-        // Thêm vào đầu danh sách (mới nhất lên đầu)
-        soldItemsHistory.Insert(0, soldItem);
+    //     // Thêm vào đầu danh sách (mới nhất lên đầu)
+    //     soldItemsHistory.Insert(0, soldItem);
         
-        // Giới hạn số lượng items trong lịch sử
-        if (soldItemsHistory.Count > maxHistoryItems)
-        {
-            soldItemsHistory.RemoveAt(soldItemsHistory.Count - 1);
-        }
+    //     // Giới hạn số lượng items trong lịch sử
+    //     if (soldItemsHistory.Count > maxHistoryItems)
+    //     {
+    //         soldItemsHistory.RemoveAt(soldItemsHistory.Count - 1);
+    //     }
         
-        // Refresh display
-        RefreshDisplay();
+    //     // Refresh display
+    //     RefreshDisplay();
         
-        Debug.Log($"SellShopScroll_UI: Added {quantity}x {itemName} to history for {earnings}G");
-    }
+    //     Debug.Log($"SellShopScroll_UI: Added {quantity}x {itemName} to history for {earnings}G");
+    // }
     
     /// <summary>
     /// Refresh display với sold items history

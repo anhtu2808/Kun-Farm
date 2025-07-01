@@ -220,7 +220,6 @@ GameObject:
   - component: {fileID: 7869662927438931542}
   - component: {fileID: 8826599833663138744}
   - component: {fileID: 6064169243218227529}
-  - component: {fileID: 3532301656233481387}
   m_Layer: 5
   m_Name: ShopSell_Slot
   m_TagString: Untagged
@@ -288,25 +287,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3532301656233481387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6720336812612130337}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be40f7122041da459282ae34204dc49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemIcon: {fileID: 6837573171775827689}
-  quantityText: {fileID: 1064323515825518372}
-  earningsText: {fileID: 8804317535550694562}
-  highlightObject: {fileID: 0}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  recentColor: {r: 0, g: 1, b: 0, a: 1}
-  oldColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &7963883549044633796
 GameObject:
   m_ObjectHideFlags: 0

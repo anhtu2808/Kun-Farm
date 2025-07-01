@@ -301,16 +301,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemIcon: {fileID: 7419843583273118112}
-  itemNameText: {fileID: 0}
-  buyPriceText: {fileID: 8322732031356648860}
+  nameText: {fileID: 0}
+  priceText: {fileID: 8322732031356648860}
   stockText: {fileID: 0}
-  buyButtonObject: {fileID: 7012438734369551891}
-  sellPriceText: {fileID: 0}
-  sellButton: {fileID: 0}
-  sellAllButton: {fileID: 0}
-  outOfStockOverlay: {fileID: 0}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  outOfStockColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &-6708843800359965180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -351,7 +344,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 8140226478546617528}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []

@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\CropData.cs" />
     <Compile Include="Assets\Scripts\ChickenWalk.cs" />
     <Compile Include="Assets\Scripts\HarvestDrop.cs" />
+    <Compile Include="Assets\Scripts\Data\ShopResponse.cs" />
     <Compile Include="Assets\Scripts\LoginManager.cs" />
     <Compile Include="Assets\Scripts\UI\ShopSlot_UI.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory_UI.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Assets\Scripts\Data\ApiClient.cs" />
     <Compile Include="Assets\Scripts\InventoryManager.cs" />
     <Compile Include="Assets\Scripts\Data\FarmSaveData.cs" />
-    <Compile Include="Assets\Scripts\Data\ShopApiClient.cs" />
     <Compile Include="Assets\Scripts\UI\MoneyUI.cs" />
     <Compile Include="Assets\Scripts\ShopManager.cs" />
     <Compile Include="Assets\Scripts\Movement.cs" />
@@ -94,6 +94,7 @@
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\CropGrower.cs" />
+    <Compile Include="Assets\Scripts\Helper\JsonHelper.cs" />
     <Compile Include="Assets\Scripts\Data\GameSaver.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerInventoryScroll_UI.cs" />
     <Compile Include="Assets\Scripts\Collectable.cs" />

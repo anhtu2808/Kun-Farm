@@ -10,5 +10,6 @@ namespace KunFarm.DAL.Interfaces
     public interface IPlayerRegularShopSlotRepository
     {
         Task<PlayerRegularShopSlot?> PlayerRegularShopSlot(int palyerId, int shopSlotId);
+        Task UpdateAsync(PlayerRegularShopSlot playerRegularShopSlot);
     }
 }
