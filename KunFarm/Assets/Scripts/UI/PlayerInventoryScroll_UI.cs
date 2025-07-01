@@ -102,7 +102,9 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
                 if (txt.name.ToLower().Contains("price"))
                 {
                     priceText = txt;
-                    break;
+                } else if (txt.name.ToLower().Contains("quantity") || txt.name.ToLower().Contains("count"))
+                {
+                    quantityText = txt;
                 }
             }
 

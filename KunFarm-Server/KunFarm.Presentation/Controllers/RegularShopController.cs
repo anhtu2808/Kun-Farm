@@ -1,0 +1,27 @@
+﻿using KunFarm.BLL.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace KunFarm.Presentation.Controllers
+{
+    [Route("/regular-shop")]
+    [ApiController]
+    public class RegularShopController : ControllerBase
+    {
+        private readonly IRegularShopSlotService _regularShopService;
+
+        public RegularShopController(IRegularShopSlotService regularShopService)
+        {
+            _regularShopService = regularShopService;
+        }
+
+        [HttpGet]            
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _regularShopService.GetShopItem();
+            if (result.Data is { } && result.Data.Count > 0)
+                return Ok(result);       
+            return NotFound(result);
+        }
+    }
+}

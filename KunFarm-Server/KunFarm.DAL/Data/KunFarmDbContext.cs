@@ -12,6 +12,8 @@ namespace KunFarm.DAL.Data
         public DbSet<User> Users { get; set; }
         public DbSet<PlayerState> PlayerStates { get; set; }
         public DbSet<FarmState> FarmStates { get; set; }
+        public DbSet<Item> Items { get; set; }
+        public DbSet<RegularShopSlot> RegularShopSlots { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +61,11 @@ namespace KunFarm.DAL.Data
                       .HasForeignKey(f => f.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Item>()
+                        .HasOne(i => i.RegularShop)
+                        .WithOne(rs => rs.Item)
+                        .HasForeignKey<RegularShopSlot>(rs => rs.ItemId);
 
             // Seed data
             SeedData(modelBuilder);
