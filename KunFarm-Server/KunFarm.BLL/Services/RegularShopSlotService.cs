@@ -13,14 +13,16 @@ namespace KunFarm.BLL.Services
     {
         private readonly IRegularShopSlotRepository _regularShopSlotRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IPlayerRegularShopSlotRepository _playerRegularShopSlotRepository;
 
-        public RegularShopSlotService(IRegularShopSlotRepository regularShopSlotRepository, IItemRepository itemRepository)
+        public RegularShopSlotService(IRegularShopSlotRepository regularShopSlotRepository, IItemRepository itemRepository, IPlayerRegularShopSlotRepository playerRegularShopSlotRepository)
         {
             _regularShopSlotRepository = regularShopSlotRepository;
             _itemRepository = itemRepository;
+            _playerRegularShopSlotRepository = playerRegularShopSlotRepository;
         }
 
-        public Task<ApiResponse<List<ShopItemResponse>>> GetShopItem()
+        public Task<ApiResponse<List<ShopItemResponse>>> GetShopItem(int player)
         {
             return Task.Run(async () =>
            {
@@ -30,6 +32,7 @@ namespace KunFarm.BLL.Services
                foreach (var slot in slots)
                {
                    var item = await _itemRepository.GetItemById(slot.ItemId);
+                   var playerSlot = _playerRegularShopSlotRepository.PlayerRegularShopSlot(player, slot.Id).Result;
                    if (item != null)
                    {
                        shopItems.Add(new ShopItemResponse
@@ -40,11 +43,8 @@ namespace KunFarm.BLL.Services
                            BuyPrice = slot.BuyPrice,
                            CanBuy = slot.CanBuy,
                            Icon = item.Icon,
-                           SellPrice = slot.SellPrice,
-                           CanSell = slot.CanSell,
-                           ShowInShop = slot.ShowInShop,
                            StockLimit = slot.StockLimit,
-                           CurrentStock = slot.CurrentStock
+                           CurrentStock = playerSlot.CurrentStock,
                        });
                    }
                }

@@ -15,9 +15,6 @@ namespace KunFarm.BLL.DTOs.Response
 
         public bool CanBuy { get; set; }
         public int BuyPrice { get; set; }
-        public int SellPrice { get; set; }
-        public bool CanSell { get; set; }
-        public bool ShowInShop { get; set; }
         public int? StockLimit { get; set; }
         public int? CurrentStock { get; set; }
     }

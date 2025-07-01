@@ -16,23 +16,14 @@ namespace KunFarm.DAL.Entities
         [Required]
         public int BuyPrice { get; set; }
 
-        [Required]
-        public bool CanSell { get; set; }
-
-        [Required]
-        public int SellPrice { get; set; }
-
-        [Required]
-        public bool ShowInShop { get; set; }
-
         public int? StockLimit { get; set; }
-
-        public int? CurrentStock { get; set; }
 
         [Required]
         public int ItemId { get; set; }
 
         [ForeignKey(nameof(ItemId))]
         public Item Item { get; set; }
+
+        public ICollection<PlayerRegularShopSlot> PlayerRegularShopSlots { get; set; } = new List<PlayerRegularShopSlot>();
     }
 }

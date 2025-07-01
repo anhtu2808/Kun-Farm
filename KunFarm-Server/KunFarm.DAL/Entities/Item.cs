@@ -22,5 +22,8 @@ namespace KunFarm.DAL.Entities
         public string Icon { get; set; }
 
         public RegularShopSlot RegularShop { get; set; }
+        public ICollection<InventorySlot> InventorySlots { get; set; } = new List<InventorySlot>();
+
+        public ICollection<OnlineShopSlot> OnlineShopSlots { get; set; } = new List<OnlineShopSlot>();
     }
 }

@@ -9,6 +9,6 @@ namespace KunFarm.BLL.Interfaces
 {
     public interface IRegularShopSlotService
     {
-        Task<ApiResponse<List<ShopItemResponse>>> GetShopItem();
+        Task<ApiResponse<List<ShopItemResponse>>> GetShopItem(int playerId);
     }
 }

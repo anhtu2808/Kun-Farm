@@ -30,6 +30,7 @@ builder.Services.AddScoped<IPlayerStateRepository, PlayerStateRepository>();
 builder.Services.AddScoped<IFarmStateRepository, FarmStateRepository>();
 builder.Services.AddScoped<IRegularShopSlotRepository, RegularShopSlotRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<IPlayerRegularShopSlotRepository, PlayerRegularShopSlotRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 // Business logic services

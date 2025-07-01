@@ -15,10 +15,10 @@ namespace KunFarm.Presentation.Controllers
             _regularShopService = regularShopService;
         }
 
-        [HttpGet]            
-        public async Task<IActionResult> GetAll()
+        [HttpGet("{playerId:int}")]            
+        public async Task<IActionResult> GetAll([FromRoute] int playerId)
         {
-            var result = await _regularShopService.GetShopItem();
+            var result = await _regularShopService.GetShopItem(playerId);
             if (result.Data is { } && result.Data.Count > 0)
                 return Ok(result);       
             return NotFound(result);
