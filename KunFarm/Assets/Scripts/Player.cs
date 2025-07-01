@@ -30,9 +30,10 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        inventory = new Inventory(27);
         if (wallet == null)
             wallet = FindObjectOfType<Wallet>();
+        if (inventory == null)
+            inventory = FindObjectOfType<Inventory>();
     }
 
     public void DropItem(Collectable item)

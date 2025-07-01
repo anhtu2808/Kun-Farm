@@ -24,6 +24,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private int slotIndex;
     private Inventory.Slot currentSlot;
     private Tool currentTool;
+    public Inventory inventoryUI;
 
     // Static reference to track what's being dragged
     private static DragDropHandler draggedItem;
@@ -38,13 +39,14 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (canvas == null)
             canvas = GetComponentInParent<Canvas>();
-            
+
     }
 
     public void Initialize(SlotType type, int index)
     {
         slotType = type;
         slotIndex = index;
+        Debug.Log($"inventoryUI: {inventoryUI != null}");
     }
 
     public void SetSlotData(Inventory.Slot slot)
@@ -66,7 +68,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (currentSlot != null && currentSlot.type == CollectableType.NONE) return;
 
         draggedItem = this;
-
+        Debug.Log($"[OnBeginDrag] Dragging item from slot {slotIndex} of type {slotType}");
         // Create drag object
         CreateDragObject();
 
@@ -153,10 +155,9 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         // Null check for dragged slot
         if (draggedSlot == null) return;
 
-        // Get references to managers
-        InventoryUI inventoryUI = FindObjectOfType<InventoryUI>();
-        ToolManager toolManager = FindObjectOfType<ToolManager>();
 
+        ToolManager toolManager = FindObjectOfType<ToolManager>();
+        Debug.Log($"[HandleDrop] inventoryUI: {inventoryUI != null}");
         if (inventoryUI == null || toolManager == null) return;
 
         // Handle different drop scenarios
@@ -181,79 +182,83 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             SwapInventorySlots(draggedSlot, inventoryUI);
         }
     }
-    
-private void MoveInventoryToToolbar(
-    DragDropHandler draggedSlot,
-    InventoryUI inventoryUI,
-    ToolManager toolManager,
-    int toolbarSlotIndex)
-{
-    // Null checks
-    if (draggedSlot == null ||
-        draggedSlot.currentSlot == null ||
-        inventoryUI == null ||
-        toolManager == null)
-        return;
-    
-    var slotData = draggedSlot.currentSlot;
-    // Check if slot is empty
-    if (slotData.type == CollectableType.NONE || slotData.count <= 0)
-        return;
-    
-    // Check if this item can become a tool
-    if (!ToolHelpers.CanBeTool(slotData.type))
-        return;
 
-    int quantityToMove = slotData.count;
-    CollectableType type = slotData.type;
-
-    // Lấy tool hiện tại ở slot đích
-    Tool existingTool = toolManager.GetToolAtIndex(toolbarSlotIndex);
-
-    if (existingTool != null)
+    private void MoveInventoryToToolbar(
+        DragDropHandler draggedSlot,
+        Inventory inventoryUI,
+        ToolManager toolManager,
+        int toolbarSlotIndex)
     {
-        // Nếu cùng loại thì merge
-        if (ToolHelpers.GetCollectableFromTool(existingTool) == type)
+        // Null checks
+        if (draggedSlot == null ||
+            draggedSlot.currentSlot == null ||
+            inventoryUI == null ||
+            toolManager == null)
+            return;
+
+        var slotData = draggedSlot.currentSlot;
+        // Check if slot is empty
+        if (slotData.type == CollectableType.NONE || slotData.count <= 0)
+            return;
+
+        // Check if this item can become a tool
+        if (!ToolHelpers.CanBeTool(slotData.type))
+            return;
+
+        int quantityToMove = slotData.count;
+        CollectableType type = slotData.type;
+
+        // Lấy tool hiện tại ở slot đích
+        Tool existingTool = toolManager.GetToolAtIndex(toolbarSlotIndex);
+
+        if (existingTool != null)
         {
-            existingTool.quantity += quantityToMove;
-            Debug.Log($"Merged {quantityToMove} of {type} into toolbar slot {toolbarSlotIndex}. New qty = {existingTool.quantity}");
-            
-            // Xoá toàn bộ số đó khỏi inventory
+            // Nếu cùng loại thì merge
+            if (ToolHelpers.GetCollectableFromTool(existingTool) == type)
+            {
+                existingTool.quantity += quantityToMove;
+                Debug.Log($"Merged {quantityToMove} of {type} into toolbar slot {toolbarSlotIndex}. New qty = {existingTool.quantity}");
+
+                // Xoá toàn bộ số đó khỏi inventory
+                inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
+                inventoryUI.Refresh();
+                toolManager.UpdateToolbarDisplay();
+                return;
+            }
+
+            // Nếu khác loại, trả tool cũ về inventory như trước
+            CollectableType oldType = ToolHelpers.GetCollectableFromTool(existingTool);
+            Debug.Log($"{oldType} tool found in toolbar slot {toolbarSlotIndex}. Moving back to inventory.");
+            if (oldType != CollectableType.NONE)
+            {
+                int oldQty = existingTool.quantity > 0 ? existingTool.quantity : 1;
+                inventoryUI.player.inventory.AddItemByType(oldType, existingTool.toolIcon, oldQty);
+            }
+        }
+
+        // Tạo tool mới từ toàn bộ số lượng trong inventory
+        Tool newTool = ToolHelpers.CreateToolFromCollectable(
+            type,
+            slotData.icon,
+            quantityToMove);
+
+        if (newTool != null)
+        {
+            // Đặt lên toolbar
+            toolManager.SetToolAtIndex(toolbarSlotIndex, newTool);
+            Debug.Log($"Moved {quantityToMove} of {type} to toolbar slot {toolbarSlotIndex}");
+
+            // Xoá slot inventory gốc
+            Debug.Log($"Null: {inventoryUI ?? false}");
+            Debug.Log($"inventoryUI.player null? {inventoryUI.player == null}");
+            Debug.Log($"inventoryUI.player.inventory null? {inventoryUI.player?.inventory == null}");
             inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
             inventoryUI.Refresh();
             toolManager.UpdateToolbarDisplay();
-            return;
-        }
-        
-        // Nếu khác loại, trả tool cũ về inventory như trước
-        CollectableType oldType = ToolHelpers.GetCollectableFromTool(existingTool);
-        if (oldType != CollectableType.NONE)
-        {
-            int oldQty = existingTool.quantity > 0 ? existingTool.quantity : 1;
-            inventoryUI.player.inventory.AddItemByType(oldType, existingTool.toolIcon, oldQty);
         }
     }
 
-    // Tạo tool mới từ toàn bộ số lượng trong inventory
-    Tool newTool = ToolHelpers.CreateToolFromCollectable(
-        type,
-        slotData.icon,
-        quantityToMove);
-
-    if (newTool != null)
-    {
-        // Đặt lên toolbar
-        toolManager.SetToolAtIndex(toolbarSlotIndex, newTool);
-        Debug.Log($"Moved {quantityToMove} of {type} to toolbar slot {toolbarSlotIndex}");
-
-        // Xoá slot inventory gốc
-        inventoryUI.player.inventory.ClearSlot(draggedSlot.slotIndex);
-        inventoryUI.Refresh();
-        toolManager.UpdateToolbarDisplay();
-    }
-}
-
-        // private void MoveInventoryToToolbar(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
+    // private void MoveInventoryToToolbar(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
     // {
     //     // Null checks
     //     if (draggedSlot == null || draggedSlot.currentSlot == null || inventoryUI == null || toolManager == null) return;
@@ -304,7 +309,7 @@ private void MoveInventoryToToolbar(
     //     }
     // }
 
-    private void MoveToolbarToInventory(DragDropHandler draggedSlot, InventoryUI inventoryUI, ToolManager toolManager)
+    private void MoveToolbarToInventory(DragDropHandler draggedSlot, Inventory inventoryUI, ToolManager toolManager)
     {
         // Null checks
         if (draggedSlot == null || draggedSlot.currentTool == null || inventoryUI == null || toolManager == null) return;
@@ -345,14 +350,14 @@ private void MoveInventoryToToolbar(
         toolManager.UpdateToolbarDisplay();
     }
 
-    private void SwapInventorySlots(DragDropHandler draggedSlot, InventoryUI inventoryUI)
+    private void SwapInventorySlots(DragDropHandler draggedSlot, Inventory inventoryUI)
     {
         var inventory = inventoryUI.player.inventory;
-        
+
         // Get actual inventory slots (not DragDropHandler references which can be null)
         var targetSlot = inventory.slots[slotIndex];
         var sourceSlot = inventory.slots[draggedSlot.slotIndex];
-        
+
         // Create temp slot to store target data
         var tempSlot = new Inventory.Slot();
         tempSlot.type = targetSlot.type;

@@ -27,7 +27,7 @@ public class ShopManager : MonoBehaviour
 
         if (itemManager == null)
             itemManager = FindObjectOfType<ItemManager>();
-
+        shopPanel.SetActive(false);
         StartCoroutine(GetShopData(1));
     }
 

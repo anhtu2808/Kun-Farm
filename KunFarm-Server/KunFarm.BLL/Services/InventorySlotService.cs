@@ -39,7 +39,7 @@ namespace KunFarm.BLL.Services
                     ItemId = slot.ItemId ?? 0,
                     Quantity = slot.Quantity,
                     CollectableType = item != null ? item.CollectableType : "NONE",
-                    Icon = item != null ? item.CollectableType : "NONE",
+                    Icon = item != null ? item.Icon : "NONE",
                     SlotIndex = slot.SlotIndex
                 };
                 inventorySlotResponses.Add(response);

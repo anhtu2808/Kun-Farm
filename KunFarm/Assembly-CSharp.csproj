@@ -95,6 +95,7 @@
     <Compile Include="Assets\Scripts\CropGrower.cs" />
     <Compile Include="Assets\Scripts\Helper\JsonHelper.cs" />
     <Compile Include="Assets\Scripts\Data\GameSaver.cs" />
+    <Compile Include="Assets\Scripts\Data\InventoryResponse.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerInventoryScroll_UI.cs" />
     <Compile Include="Assets\Scripts\Collectable.cs" />
     <Compile Include="Assets\Scripts\Tool.cs" />

@@ -9,15 +9,11 @@ public class Slot_UI : MonoBehaviour
     public Image itemIcon;
     public TextMeshProUGUI quantityText;
     [SerializeField] private GameObject highlight;
-
+    public GameObject emptyOverlay;
     private DragDropHandler dragDropHandler;
     private System.Action<int> onSlotClicked;
     private int slotIndex;
-
-    // Sell functionality
-    private bool isInSellMode = false;
     private Inventory.Slot currentSlot;
-    private ShopManager shopManager;
 
     void Awake()
     {
@@ -29,9 +25,32 @@ public class Slot_UI : MonoBehaviour
             dragDropHandler.itemIcon = itemIcon;
             dragDropHandler.quantityText = quantityText;
         }
+    }
 
-        // Find ShopManager for sell functionality
-        shopManager = FindObjectOfType<ShopManager>();
+    public void Setup(InventorySlotData data)
+    {
+        Debug.Log($"Setting up slot {data.slotIndex} with data: {data.icon}, quantity: {data.quantity}");
+        if (data.collectableType == "NONE" || data.quantity <= 0)
+        {
+            itemIcon.sprite = null;
+            itemIcon.color = new Color(1, 1, 1, 0); // ẩn icon
+
+            quantityText.text = "";
+            if (emptyOverlay != null)
+                emptyOverlay.SetActive(true);
+        }
+        else
+        {
+            itemIcon.sprite = Resources.Load<Sprite>($"Sprites/{data.icon}");
+            quantityText.text = data.quantity.ToString();
+            if (emptyOverlay != null)
+                emptyOverlay.SetActive(false);
+        }
+
+        if (dragDropHandler != null)
+        {
+            dragDropHandler.inventoryUI = FindObjectOfType<Inventory>();
+        }
     }
 
     public void SetItem(Inventory.Slot slot)
@@ -47,13 +66,9 @@ public class Slot_UI : MonoBehaviour
             // Update drag drop handler
             if (dragDropHandler != null)
                 dragDropHandler.SetSlotData(slot);
+
         }
 
-        // Update sell display if in sell mode
-        if (isInSellMode)
-        {
-            // UpdateSellDisplay();
-        }
     }
 
     public void SetTool(Tool tool)
@@ -100,10 +115,20 @@ public class Slot_UI : MonoBehaviour
 
     public void InitializeDragDrop(SlotType slotType, int index)
     {
-        if (dragDropHandler != null)
-            dragDropHandler.Initialize(slotType, index);
+        if (dragDropHandler == null)
+        {
+            dragDropHandler = GetComponent<DragDropHandler>(); // Ép gán lại lần nữa
+            if (dragDropHandler == null)
+            {
+                Debug.LogError($"[InitializeDragDrop] dragDropHandler is STILL null in slot {index}!");
+                return;
+            }
+        }
 
-        // Store slot index for click handling
+        dragDropHandler.Initialize(slotType, index);
+        dragDropHandler.inventoryUI = FindObjectOfType<Inventory>();
+        Debug.Log($"[InitializeDragDrop] inventoryUI assigned: {dragDropHandler.inventoryUI != null}");
+
         slotIndex = index;
     }
 
@@ -112,9 +137,9 @@ public class Slot_UI : MonoBehaviour
         onSlotClicked = callback;
     }
 
-    /// <summary>
-    /// Get current slot data
-    /// </summary>
+    // / <summary>
+    // / Get current slot data
+    // / </summary>
     public Inventory.Slot GetCurrentSlot()
     {
         return currentSlot;
