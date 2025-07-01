@@ -88,7 +88,8 @@ namespace KunFarm.DAL.Data
                 .HasOne(s => s.Item)
                 .WithMany(i => i.InventorySlots)
                 .HasForeignKey(s => s.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull)   // hoặc Restrict tuỳ logic
+                .IsRequired(false);
 
 
             modelBuilder.Entity<PlayerRegularShopSlot>(entity =>

@@ -80,7 +80,6 @@
     <Compile Include="Assets\Scripts\UI\DragDropHandler.cs" />
     <Compile Include="Assets\Scripts\Inventory.cs" />
     <Compile Include="Assets\Scripts\Data\ApiClient.cs" />
-    <Compile Include="Assets\Scripts\InventoryManager.cs" />
     <Compile Include="Assets\Scripts\Data\FarmSaveData.cs" />
     <Compile Include="Assets\Scripts\UI\MoneyUI.cs" />
     <Compile Include="Assets\Scripts\ShopManager.cs" />

@@ -4,6 +4,7 @@ using KunFarm.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KunFarm.DAL.Migrations
 {
     [DbContext(typeof(KunFarmDbContext))]
-    partial class KunFarmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250701144830_MakeInventorySlotItemOptional")]
+    partial class MakeInventorySlotItemOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +36,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 1, 14, 56, 4, 758, DateTimeKind.Utc).AddTicks(6818));
+                        .HasDefaultValue(new DateTime(2025, 7, 1, 14, 48, 30, 54, DateTimeKind.Utc).AddTicks(9622));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -67,7 +70,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("ItemId")
+                    b.Property<int>("ItemId")
                         .HasColumnType("int");
 
                     b.Property<int>("PlayerStateId")
@@ -197,7 +200,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 1, 21, 56, 4, 758, DateTimeKind.Local).AddTicks(4226));
+                        .HasDefaultValue(new DateTime(2025, 7, 1, 21, 48, 30, 54, DateTimeKind.Local).AddTicks(6845));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()

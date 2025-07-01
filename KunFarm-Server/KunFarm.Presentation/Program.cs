@@ -31,12 +31,14 @@ builder.Services.AddScoped<IFarmStateRepository, FarmStateRepository>();
 builder.Services.AddScoped<IRegularShopSlotRepository, RegularShopSlotRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IPlayerRegularShopSlotRepository, PlayerRegularShopSlotRepository>();
+builder.Services.AddScoped<IInventorySlotRepository, InventorySlotRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 // Business logic services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IRegularShopSlotService, RegularShopSlotService>();
+builder.Services.AddScoped<IInventorySlotService, InventorySlotService>();
 builder.Services.AddScoped<KunFarm.BLL.Services.DatabaseSeederService>();
 
 // JWT Authentication

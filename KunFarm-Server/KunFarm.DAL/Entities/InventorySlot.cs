@@ -14,7 +14,7 @@ namespace KunFarm.DAL.Entities
         public int PlayerStateId { get; set; }
         public PlayerState PlayerState { get; set; } = null!;
 
-        public int ItemId { get; set; }
-        public Item Item { get; set; } = null!;
+        public int? ItemId { get; set; }
+        public Item? Item { get; set; }
     }
 }
