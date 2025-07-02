@@ -6,7 +6,7 @@ using System.Collections;
 public class SimpleNotificationPopup : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI messageText;
-    [SerializeField] private float displayDuration = 5f;
+    [SerializeField] private float displayDuration = 4f;
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private float fadeOutDuration = 0.5f;
 
@@ -70,6 +70,10 @@ public class SimpleNotificationPopup : MonoBehaviour
         if (Instance != null)
         {
             Instance.ShowNotification(message);
+        }
+        else
+        {
+            Debug.LogWarning("SimpleNotificationPopup instance not found! Message: " + message);
         }
     }
 }
