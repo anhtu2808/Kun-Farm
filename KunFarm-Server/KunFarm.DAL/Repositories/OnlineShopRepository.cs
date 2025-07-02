@@ -22,5 +22,13 @@ namespace KunFarm.DAL.Repositories
                 .Where(o => o.SellerId != playerId && o.CanBuy == true && o.IsDeleted == false)
                 .ToListAsync();
         }
+
+        public async Task<List<OnlineShopSlot>> GetBySellerId(int sellerId)
+        {
+            return await _context.OnlineShopSlots
+                .Where(slot => slot.SellerId == sellerId && !slot.IsDeleted)
+                .OrderByDescending(slot => slot.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

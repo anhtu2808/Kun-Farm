@@ -16,7 +16,7 @@ public class InputQuantityUI : MonoBehaviour
     [SerializeField] private int maxQuantity = 999;
     
     [Header("Animation")]
-    [SerializeField] private bool useAnimation = false;
+    // [SerializeField] private bool useAnimation = false; // Unused field - commented out to avoid warning
     
     private bool isShowing = false;
 

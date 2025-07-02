@@ -301,12 +301,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemIcon: {fileID: 6837573171775827689}
+  itemNameText: {fileID: 8804317535550694562}
   quantityText: {fileID: 1064323515825518372}
-  earningsText: {fileID: 8804317535550694562}
-  highlightObject: {fileID: 0}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  recentColor: {r: 0, g: 1, b: 0, a: 1}
-  oldColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  priceText: {fileID: 8804317535550694562}
+  statusText: {fileID: 0}
+  claimButton: {fileID: 0}
 --- !u!1 &7963883549044633796
 GameObject:
   m_ObjectHideFlags: 0

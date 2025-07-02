@@ -73,6 +73,25 @@ public class ShopManager : MonoBehaviour
     {
         isOpen = true;
         shopPanel.SetActive(true);
+        
+        // Refresh inventory UI để hiển thị items hiện tại
+        if (playerInventoryScrollUI != null)
+        {
+            StartCoroutine(RefreshInventoryWithDelay());
+        }
+    }
+
+    /// <summary>
+    /// Refresh inventory với delay nhỏ để đảm bảo UI đã active
+    /// </summary>
+    private System.Collections.IEnumerator RefreshInventoryWithDelay()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame(); // Double frame wait for safety
+        if (playerInventoryScrollUI != null)
+        {
+            playerInventoryScrollUI.RefreshInventoryUI();
+        }
     }
 
     private IEnumerator GetShopData(int playerId)
@@ -99,7 +118,7 @@ public class ShopManager : MonoBehaviour
         {
             Debug.LogError("API lỗi: " + request.error);
         }
-        playerInventoryScrollUI.RefreshInventoryUI();
+        // Removed refresh call from here - now done in OpenShop()
     }
 
     /// <summary>

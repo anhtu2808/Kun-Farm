@@ -9,8 +9,7 @@ namespace KunFarm.DAL.Interfaces
 {
     public interface IOnlineShopRepository : IBaseRepository<OnlineShopSlot>
     {
-
         Task<List<OnlineShopSlot>> GetAllWithoutSellerId(int playerId);
-
+        Task<List<OnlineShopSlot>> GetBySellerId(int sellerId);
     }
 }

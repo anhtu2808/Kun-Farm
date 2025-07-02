@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 
 /// <summary>
 /// UI Manager cho Player_Scroll - hiển thị inventory items với sell functionality
@@ -54,14 +55,40 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
 
     private void Start()
     {
+        // Initial setup - OnEnable will handle the subscription
+    }
+    
+    private void OnEnable()
+    {
+        // Đăng ký event listener khi component được kích hoạt
         if (player != null && player.inventory != null)
         {
+            player.inventory.onInventoryChanged -= RefreshInventoryUI; // Remove to avoid duplicate
             player.inventory.onInventoryChanged += RefreshInventoryUI;
+            
+            // Gọi refresh trực tiếp thay vì qua coroutine để tránh lỗi inactive object
+            RefreshInventoryUI();
+        }
+    }
+    
+    private void OnDisable()
+    {
+        // Clean up event listener khi component bị vô hiệu hóa
+        if (player != null && player.inventory != null)
+        {
+            player.inventory.onInventoryChanged -= RefreshInventoryUI;
         }
     }
 
     public void RefreshInventoryUI()
     {
+        // Check if we're in a valid state
+        if (playerItemsContainer == null)
+        {
+            Debug.LogWarning("PlayerInventoryScroll_UI: playerItemsContainer is null, cannot refresh");
+            return;
+        }
+
         foreach (Transform child in playerItemsContainer)
         {
             Destroy(child.gameObject);
@@ -73,6 +100,7 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
             Debug.LogWarning("PlayerInventoryScroll_UI: Player or inventory is not set!");
             return;
         }
+        
         foreach (var slot in player.inventory.slots)
         {
             if (slot.type == CollectableType.NONE || slot.count <= 0)
@@ -92,6 +120,33 @@ public class PlayerInventoryScroll_UI : MonoBehaviour
 
             itemSlots.Add(scrollItem);
         }
+        
+        Debug.Log($"PlayerInventoryScroll_UI: Refreshed with {itemSlots.Count} items");
+    }
+    
+    /// <summary>
+    /// Force refresh với delay - sử dụng khi có timing issues
+    /// </summary>
+    public void ForceRefreshWithDelay()
+    {
+        // Kiểm tra nếu GameObject đang active trước khi start coroutine
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(ForceRefreshCoroutine());
+        }
+        else
+        {
+            // Nếu object inactive, gọi refresh trực tiếp khi có thể
+            Debug.LogWarning("PlayerInventoryScroll_UI: GameObject inactive, calling direct refresh");
+            RefreshInventoryUI();
+        }
+    }
+    
+    private System.Collections.IEnumerator ForceRefreshCoroutine()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame(); // Double frame wait for safety
+        RefreshInventoryUI();
     }
 
 }

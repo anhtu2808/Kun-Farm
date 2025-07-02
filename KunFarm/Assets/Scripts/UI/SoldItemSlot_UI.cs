@@ -1,298 +1,177 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 /// <summary>
-/// Individual sold item slot UI cho SellShop_Scroll
+/// UI component cho items đã đăng bán online
+/// Hiển thị thông tin item + button claim nếu đã bán
 /// </summary>
 public class SoldItemSlot_UI : MonoBehaviour
 {
     [Header("UI References")]
-    public Image itemIcon;
-    public TextMeshProUGUI quantityText;
-    public TextMeshProUGUI earningsText;
+    [SerializeField] private Image itemIcon;
+    [SerializeField] private TextMeshProUGUI itemNameText;
+    [SerializeField] private TextMeshProUGUI quantityText;
+    [SerializeField] private TextMeshProUGUI priceText;
+    [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private Button claimButton;
 
-    [Header("Visual States")]
-    public GameObject highlightObject;
-    public Color normalColor = Color.white;
-    public Color recentColor = Color.green; // For recently sold items
-    public Color oldColor = Color.gray; // For older items
-
-    // Data
-    private CollectableType currentItemType = CollectableType.NONE;
-    private string currentItemName = "";
-    private int currentQuantity = 0;
-    private int currentEarnings = 0;
-    private System.DateTime sellTime;
-
-    private void Awake()
-    {
-        SetEmpty();
-    }
+    private SellItemResponse itemData;
+    private OnlSellShopManager shopManager;
+    private Action<SellItemResponse> onClaimCallback;
 
     /// <summary>
-    /// Set sold item data cho slot
+    /// Setup UI slot với data từ server
     /// </summary>
-    public void SetSoldItem(CollectableType itemType, Sprite icon, int quantity, int earnings, System.DateTime time)
+    public void Setup(SellItemResponse data, OnlSellShopManager manager, Action<SellItemResponse> claimCallback)
     {
-        currentItemType = itemType;
-        currentQuantity = quantity;
-        currentEarnings = earnings;
-        sellTime = time;
+        itemData = data;
+        shopManager = manager;
+        onClaimCallback = claimCallback;
 
-        // Update icon
-        if (itemIcon != null && icon != null)
-        {
-            itemIcon.sprite = icon;
-            itemIcon.color = normalColor;
-            itemIcon.gameObject.SetActive(true);
-        }
-        // Update quantity
+        UpdateUI();
+        SetupClaimButton();
+    }
+
+    private void UpdateUI()
+    {
+        if (itemData == null) return;
+
+        // Set item name
+        if (itemNameText != null)
+            itemNameText.text = itemData.collectableType;
+
+        // Set quantity  
         if (quantityText != null)
-        {
-            quantityText.text = $"x{quantity}";
-            quantityText.gameObject.SetActive(true);
-        }
+            quantityText.text = $"x{itemData.quantity}";
 
-        // Update earnings
-        if (earningsText != null)
-        {
-            earningsText.text = $"+{earnings}G";
-            earningsText.color = Color.green;
-            earningsText.gameObject.SetActive(true);
-        }
-        // Update visual state
-        UpdateVisualState();
+        // Set price
+        if (priceText != null)
+            priceText.text = $"{itemData.price}G";
 
-        // Show slot
-        gameObject.SetActive(true);
-    }
-
-    /// <summary>
-    /// Set slot as empty
-    /// </summary>
-    public void SetEmpty()
-    {
-        currentItemType = CollectableType.NONE;
-        currentItemName = "";
-        currentQuantity = 0;
-        currentEarnings = 0;
-        sellTime = System.DateTime.MinValue;
-
-        // Hide all UI elements
+        // Set icon từ ItemManager
         if (itemIcon != null)
-            itemIcon.gameObject.SetActive(false);
-        if (quantityText != null)
-            quantityText.gameObject.SetActive(false);
-        if (earningsText != null)
-            earningsText.gameObject.SetActive(false);
+        {
+            LoadItemIcon();
+        }
 
-        // Hide slot
-        gameObject.SetActive(false);
+        // Set status và button state
+        UpdateStatusAndButton();
     }
 
     /// <summary>
-    /// Format time since item was sold
+    /// Load icon từ ItemManager dựa trên collectableType
     /// </summary>
-    private string FormatTimeSinceSold(System.DateTime sellTime)
+    private void LoadItemIcon()
     {
-        System.TimeSpan timeSpan = System.DateTime.Now - sellTime;
-
-        if (timeSpan.TotalMinutes < 1)
+        try
         {
-            return "Vừa xong";
-        }
-        else if (timeSpan.TotalMinutes < 60)
-        {
-            return $"{(int)timeSpan.TotalMinutes} phút trước";
-        }
-        else if (timeSpan.TotalHours < 24)
-        {
-            return $"{(int)timeSpan.TotalHours} giờ trước";
-        }
-        else
-        {
-            return $"{(int)timeSpan.TotalDays} ngày trước";
-        }
-    }
-
-    /// <summary>
-    /// Update visual state based on time
-    /// </summary>
-    private void UpdateVisualState()
-    {
-        if (highlightObject != null)
-        {
-            // Highlight recent items (sold within last 5 minutes)
-            System.TimeSpan timeSinceSold = System.DateTime.Now - sellTime;
-            bool isRecent = timeSinceSold.TotalMinutes < 5;
-            highlightObject.SetActive(isRecent);
-        }
-
-        // Update background color based on age
-        Image background = GetComponent<Image>();
-        if (background != null)
-        {
-            System.TimeSpan timeSinceSold = System.DateTime.Now - sellTime;
-
-            if (currentItemType == CollectableType.NONE)
+            // Parse CollectableType từ string
+            if (System.Enum.TryParse<CollectableType>(itemData.collectableType, ignoreCase: true, out var parsedType))
             {
-                background.color = normalColor;
-            }
-            else if (timeSinceSold.TotalMinutes < 5)
-            {
-                background.color = recentColor;
-            }
-            else if (timeSinceSold.TotalHours < 1)
-            {
-                background.color = Color.Lerp(recentColor, normalColor, (float)(timeSinceSold.TotalMinutes / 60.0));
+                // Tìm ItemManager trong scene
+                ItemManager itemManager = FindObjectOfType<ItemManager>();
+                if (itemManager != null)
+                {
+                    // Lấy Collectable từ ItemManager
+                    var collectable = itemManager.GetItemByType(parsedType);
+                    if (collectable != null && collectable.icon != null)
+                    {
+                        itemIcon.sprite = collectable.icon;
+                        itemIcon.gameObject.SetActive(true);
+                        Debug.Log($"✅ [SoldItemSlot] Loaded icon for {itemData.collectableType}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"⚠️ [SoldItemSlot] No icon found for {itemData.collectableType}");
+                        itemIcon.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("❌ [SoldItemSlot] ItemManager not found in scene!");
+                    itemIcon.gameObject.SetActive(false);
+                }
             }
             else
             {
-                background.color = oldColor;
+                Debug.LogError($"❌ [SoldItemSlot] Cannot parse CollectableType: {itemData.collectableType}");
+                itemIcon.gameObject.SetActive(false);
             }
         }
-    }
-
-    /// <summary>
-    /// Get current item type
-    /// </summary>
-    public CollectableType GetItemType()
-    {
-        return currentItemType;
-    }
-
-    /// <summary>
-    /// Get current item name
-    /// </summary>
-    public string GetItemName()
-    {
-        return currentItemName;
-    }
-
-    /// <summary>
-    /// Get current quantity
-    /// </summary>
-    public int GetQuantity()
-    {
-        return currentQuantity;
-    }
-
-    /// <summary>
-    /// Get current earnings
-    /// </summary>
-    public int GetEarnings()
-    {
-        return currentEarnings;
-    }
-
-    /// <summary>
-    /// Get sell time
-    /// </summary>
-    public System.DateTime GetSellTime()
-    {
-        return sellTime;
-    }
-
-    /// <summary>
-    /// Check if slot is empty
-    /// </summary>
-    public bool IsEmpty()
-    {
-        return currentItemType == CollectableType.NONE;
-    }
-
-    /// <summary>
-    /// Check if item was sold recently (within 5 minutes)
-    /// </summary>
-    public bool IsRecentlySold()
-    {
-        if (IsEmpty()) return false;
-
-        System.TimeSpan timeSinceSold = System.DateTime.Now - sellTime;
-        return timeSinceSold.TotalMinutes < 5;
-    }
-
-    /// <summary>
-    /// Set highlight state
-    /// </summary>
-    public void SetHighlight(bool highlighted)
-    {
-        if (highlightObject != null)
+        catch (System.Exception e)
         {
-            highlightObject.SetActive(highlighted);
+            Debug.LogError($"❌ [SoldItemSlot] Error loading icon: {e.Message}");
+            itemIcon.gameObject.SetActive(false);
         }
     }
 
-    /// <summary>
-    /// Animate new item appearance
-    /// </summary>
-    public void AnimateNewItem()
+    private void UpdateStatusAndButton()
     {
-        StartCoroutine(AnimateNewItemCoroutine());
-    }
-
-    private System.Collections.IEnumerator AnimateNewItemCoroutine()
-    {
-        // Start with scale 0 and fade in
-        Vector3 originalScale = transform.localScale;
-        Color originalColor = GetComponent<Image>()?.color ?? Color.white;
-
-        transform.localScale = Vector3.zero;
-
-        Image bg = GetComponent<Image>();
-        if (bg != null)
+        if (itemData.canBuy)
         {
-            Color newColor = bg.color;
-            newColor.a = 0f;
-            bg.color = newColor;
-        }
+            // Item vẫn đang bán
+            if (statusText != null)
+                statusText.text = "Đang bán";
 
-        // Animate in
-        float duration = 0.5f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / duration;
-
-            // Ease out bounce effect
-            float scaleProgress = 1f - Mathf.Pow(1f - progress, 3f);
-            transform.localScale = Vector3.Lerp(Vector3.zero, originalScale, scaleProgress);
-
-            // Fade in
-            if (bg != null)
+            if (claimButton != null)
             {
-                Color newColor = bg.color;
-                newColor.a = Mathf.Lerp(0f, originalColor.a, progress);
-                bg.color = newColor;
+                claimButton.gameObject.SetActive(false);
             }
-
-            yield return null;
         }
-
-        // Ensure final state
-        transform.localScale = originalScale;
-        if (bg != null)
+        else
         {
-            bg.color = originalColor;
+            // Item đã được bán, có thể claim
+            if (statusText != null)
+                statusText.text = "Đã bán";
+
+            if (claimButton != null)
+            {
+                claimButton.gameObject.SetActive(true);
+                var buttonText = claimButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (buttonText != null)
+                    buttonText.text = $"Claim {itemData.price}G";
+            }
         }
     }
 
-    /// <summary>
-    /// Get formatted time string
-    /// </summary>
-    public string GetFormattedTime()
+    private void SetupClaimButton()
     {
-        return FormatTimeSinceSold(sellTime);
+        if (claimButton != null)
+        {
+            // Clear existing listeners
+            claimButton.onClick.RemoveAllListeners();
+            
+            // Add click event
+            claimButton.onClick.AddListener(OnClaimButtonClick);
+        }
+    }
+
+    private void OnClaimButtonClick()
+    {
+        if (itemData == null || itemData.canBuy)
+        {
+            Debug.LogWarning($"[SoldItemSlot_UI] Cannot claim item {itemData?.collectableType} - still for sale");
+            return;
+        }
+
+        Debug.Log($"[SoldItemSlot_UI] Claiming item: {itemData.collectableType} for {itemData.price}G");
+        
+        // Disable button để tránh double-click
+        if (claimButton != null)
+            claimButton.interactable = false;
+
+        // Call callback
+        onClaimCallback?.Invoke(itemData);
     }
 
     /// <summary>
-    /// Get time since sold as TimeSpan
+    /// Re-enable claim button (gọi khi claim thất bại)
     /// </summary>
-    public System.TimeSpan GetTimeSinceSold()
+    public void EnableClaimButton()
     {
-        return System.DateTime.Now - sellTime;
+        if (claimButton != null)
+            claimButton.interactable = true;
     }
 }

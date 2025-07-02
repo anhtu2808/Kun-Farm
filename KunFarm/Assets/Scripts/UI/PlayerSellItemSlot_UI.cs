@@ -57,14 +57,13 @@ public class PlayerSellItemSlot_UI : MonoBehaviour
 
         OnSellClicked = (slotUI) =>
         {
-            shopManager.SellItemOnline(currentItemType, quantity, currentPrice); // mỗi lần bán 1 item
-            currentQuantity--;
-            quantityText.text = $"x{currentQuantity}";
-
-            if (currentQuantity <= 0)
-            {
-                gameObject.SetActive(false); // ẩn nếu hết
-            }
+            // OnlSellShopManager sẽ tự trừ inventory và trigger refresh
+            shopManager.SellItemOnline(currentItemType, quantity, currentPrice);
+            
+            // Không cần update UI manually vì inventory sẽ tự refresh
+            // currentQuantity--;
+            // quantityText.text = $"x{currentQuantity}";
+            // if (currentQuantity <= 0) gameObject.SetActive(false);
         };
     }
 
@@ -95,14 +94,13 @@ public class PlayerSellItemSlot_UI : MonoBehaviour
                         // Callback sau khi người dùng confirm
                         Debug.Log($"[PlayerSellItemSlot] Confirmed sell {quantity} x {currentItemType} at {price}G");
 
+                        // OnlSellShopManager sẽ tự trừ inventory và trigger refresh
                         shopManager.SellItemOnline(currentItemType, quantity, price);
-                        currentQuantity -= quantity;
-                        quantityText.text = $"x{currentQuantity}";
-
-                        if (currentQuantity <= 0)
-                        {
-                            gameObject.SetActive(false);
-                        }
+                        
+                        // Không cần update UI manually vì inventory sẽ tự refresh
+                        // currentQuantity -= quantity;
+                        // quantityText.text = $"x{currentQuantity}";
+                        // if (currentQuantity <= 0) gameObject.SetActive(false);
                     });
 
                     inputQuantityUI.SetCancelCallback(() =>

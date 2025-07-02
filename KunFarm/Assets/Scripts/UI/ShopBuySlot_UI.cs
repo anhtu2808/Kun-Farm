@@ -37,7 +37,16 @@ public class ShopBuySlot_UI : MonoBehaviour
                 return;
             }
             shopManager.BuyItem(slotData);
-            Destroy(gameObject);
+            // Không destroy ngay vì OnlBuyShopManager sẽ handle việc ẩn sau khi API success
+            // Destroy(gameObject);
         }
+    }
+    
+    /// <summary>
+    /// Lấy itemId của slot này
+    /// </summary>
+    public int GetItemId()
+    {
+        return slotData?.id ?? -1;
     }
 }

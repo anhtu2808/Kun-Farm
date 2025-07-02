@@ -36,13 +36,25 @@ namespace KunFarm.Presentation.Controllers
         }
 
 
-        [HttpPost("buy/{playerId:int}")]
-        public async Task<IActionResult> BuyItems([FromRoute] int playerId, [FromBody] List<int> request)
+        [HttpPost("buy/{playerId}")]
+        public async Task<IActionResult> BuyItem(int playerId, [FromBody] List<int> request)
         {
             var result = await _onlineShopService.BuyItem(playerId, request);
-            if (result.Code == 200)
-                return Ok(result);
-            return NotFound(result);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpGet("sold-items/{playerId}")]
+        public async Task<IActionResult> GetSoldItemsByPlayer(int playerId)
+        {
+            var result = await _onlineShopService.GetSoldItemsByPlayer(playerId);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpPost("claim-money/{playerId}")]
+        public async Task<IActionResult> ClaimMoney(int playerId, [FromBody] List<int> soldItemIds)
+        {
+            var result = await _onlineShopService.ClaimMoney(playerId, soldItemIds);
+            return StatusCode(result.Code, result);
         }
 
     }

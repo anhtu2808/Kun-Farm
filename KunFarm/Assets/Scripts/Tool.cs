@@ -180,7 +180,7 @@ public class HandTool : Tool
     {
         return false; // Hand tool vĩnh viễn
     }
-}
+} 
 
 /// <summary>
 /// Tool để ăn food và restore health/hunger
