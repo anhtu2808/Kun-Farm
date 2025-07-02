@@ -353,16 +353,9 @@ public class ToolManager : MonoBehaviour
     /// </summary>
     public void SetToolAtIndex(int index, Tool tool)
     {
-        Debug.Log($"[ToolManager] SetToolAtIndex: index={index}, tool={tool?.toolName ?? "null"}, quantity={tool?.quantity ?? 0}");
-        
         if (index >= 0 && index < tools.Length)
         {
             tools[index] = tool;
-            Debug.Log($"[ToolManager] ✅ Successfully set tool at index {index}: {tool?.toolName ?? "null"}");
-        }
-        else
-        {
-            Debug.LogError($"[ToolManager] ❌ Invalid index {index} for SetToolAtIndex. Array length: {tools.Length}");
         }
     }
 
@@ -371,19 +364,11 @@ public class ToolManager : MonoBehaviour
     /// </summary>
     public Tool GetToolAtIndex(int index)
     {
-        Tool tool = null;
-        
         if (index >= 0 && index < tools.Length)
         {
-            tool = tools[index];
-            Debug.Log($"[ToolManager] GetToolAtIndex: index={index} -> {tool?.toolName ?? "null"} (quantity: {tool?.quantity ?? 0})");
+            return tools[index];
         }
-        else
-        {
-            Debug.LogError($"[ToolManager] ❌ Invalid index {index} for GetToolAtIndex. Array length: {tools.Length}");
-        }
-        
-        return tool;
+        return null;
     }
 
     public void UpdateToolbarDisplay()

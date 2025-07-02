@@ -11,36 +11,30 @@ public static class ToolHelpers
     public static Tool CreateToolFromCollectable(CollectableType collectableType, Sprite icon = null, int quantity = 1)
     {
         Tool tool = null;
-        Debug.Log($"[CreateToolFromCollectable] Creating tool from {collectableType} with quantity {quantity}");
         
         switch (collectableType)
         {
             case CollectableType.SHOVEL_TOOL:
                 tool = new ShovelTool(quantity); // Durability = quantity
-                Debug.Log($"[CreateToolFromCollectable] ✅ Created ShovelTool with durability {quantity}");
                 break;
                 
             case CollectableType.HAND_TOOL:
                 tool = new HandTool(); // Infinite use
-                Debug.Log($"[CreateToolFromCollectable] ✅ Created HandTool (infinite use)");
                 break;
                 
             case CollectableType.WHEATSEED:
             case CollectableType.GRAPESEED:
             case CollectableType.APPLETREESEED:
                 tool = CreateSeedToolFromType(collectableType, quantity);
-                Debug.Log($"[CreateToolFromCollectable] ✅ Created SeedTool for {collectableType} with quantity {quantity}");
                 break;
                 
             case CollectableType.APPLE:
             case CollectableType.WHEAT:
             case CollectableType.GRAPE:
                 tool = new FoodTool(quantity);
-                Debug.Log($"[CreateToolFromCollectable] ✅ Created FoodTool from {collectableType} with quantity {quantity}");
                 break;
                 
             default:
-                Debug.LogWarning($"[CreateToolFromCollectable] ❌ Cannot create tool from {collectableType}");
                 break;
         }
 
@@ -49,12 +43,6 @@ public static class ToolHelpers
             tool.toolIcon = icon;
             string toolTypeName = GetToolTypeName(collectableType);
             tool.toolName = $"{toolTypeName}";
-            
-            Debug.Log($"[CreateToolFromCollectable] ✅ Final tool: {tool.toolName} (icon: {icon != null}) quantity: {tool.quantity}");
-        }
-        else
-        {
-            Debug.LogError($"[CreateToolFromCollectable] ❌ Failed to create tool from {collectableType}");
         }
 
         return tool;
@@ -130,7 +118,6 @@ public static class ToolHelpers
                 break;
         }
         
-        Debug.Log($"[CanBeTool] {collectableType} -> {canBeTool}");
         return canBeTool;
     }
     
@@ -182,7 +169,6 @@ public static class ToolHelpers
             cropGrower.SetTilePosition(cellPosition);
             tileManager.RegisterPlant(cellPosition, newPlant);
             tileManager.SetTileState(cellPosition, TileState.Planted);
-            Debug.Log($"[ToolHelpers] ✅ Planted {cropData.name} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
             return true;
         }
         else
@@ -240,30 +226,14 @@ public static class ToolHelpers
         {
             case CollectableType.WHEATSEED:
                 cropData = Resources.Load<CropData>("CropData/Wheat");
-                if (cropData == null)
-                {
-                    Debug.LogWarning("Wheat CropData not found in Resources/CropData/");
-                }
                 break;
                 
             case CollectableType.GRAPESEED:
                 cropData = Resources.Load<CropData>("CropData/Grapes");
-                if (cropData == null)
-                {
-                    Debug.LogWarning("Grapes CropData not found in Resources/CropData/");
-                }
                 break;
                 
             case CollectableType.APPLETREESEED:
                 cropData = Resources.Load<CropData>("CropData/AppleTree");
-                if (cropData == null)
-                {
-                    Debug.LogWarning("AppleTree CropData not found in Resources/CropData/");
-                }
-                break;
-                
-            default:
-                Debug.LogWarning($"No CropData mapping for {collectableType}");
                 break;
         }
         
