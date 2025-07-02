@@ -19,7 +19,7 @@ public class PlayerSellItemSlot_UI : MonoBehaviour
     public Color sellableColor = Color.green;
     public Color unsellableColor = Color.red;
 
-
+    public InputQuantityUI inputQuantityUI;
     public Transform sellSlotContainer;
     public GameObject shopSellSlotPrefab;
 
@@ -37,33 +37,36 @@ public class PlayerSellItemSlot_UI : MonoBehaviour
     {
         player = FindObjectOfType<Player>();
         shopManager = FindObjectOfType<OnlSellShopManager>();
+
+        if (inputQuantityUI == null)
+            inputQuantityUI = FindObjectOfType<InputQuantityUI>();
         SetupButton();
     }
 
-public void Setup(CollectableType type, int quantity, Sprite icon, OnlSellShopManager manager)
-{
-    currentItemType = type;
-    currentQuantity = quantity;
-    itemIcon.sprite = icon;
-    itemIcon.gameObject.SetActive(true);
-    quantityText.text = $"x{quantity}";
-
-    isSellable = true;
-    shopManager = manager;
-    gameObject.SetActive(true);
-
-    OnSellClicked = (slotUI) =>
+    public void Setup(CollectableType type, int quantity, Sprite icon, OnlSellShopManager manager)
     {
-        shopManager.SellItemOnline(currentItemType, quantity, currentPrice); // mỗi lần bán 1 item
-        currentQuantity--;
-        quantityText.text = $"x{currentQuantity}";
+        currentItemType = type;
+        currentQuantity = quantity;
+        itemIcon.sprite = icon;
+        itemIcon.gameObject.SetActive(true);
+        quantityText.text = $"x{quantity}";
 
-        if (currentQuantity <= 0)
+        isSellable = true;
+        shopManager = manager;
+        gameObject.SetActive(true);
+
+        OnSellClicked = (slotUI) =>
         {
-            gameObject.SetActive(false); // ẩn nếu hết
-        }
-    };
-}
+            shopManager.SellItemOnline(currentItemType, quantity, currentPrice); // mỗi lần bán 1 item
+            currentQuantity--;
+            quantityText.text = $"x{currentQuantity}";
+
+            if (currentQuantity <= 0)
+            {
+                gameObject.SetActive(false); // ẩn nếu hết
+            }
+        };
+    }
 
     /// <summary>
     /// Setup sell button
@@ -77,8 +80,30 @@ public void Setup(CollectableType type, int quantity, Sprite icon, OnlSellShopMa
             {
                 if (currentItemType != CollectableType.NONE && currentQuantity > 0)
                 {
-                    Debug.Log($"[SellItemSlot] Sell {currentQuantity} x {currentItemType} at {currentPrice}G");
-                    shopManager.SellItemOnline(currentItemType, currentQuantity, currentPrice);
+                    Debug.Log($"[SellItemSlot] Open input for {currentItemType}");
+                    // Gọi UI để nhập số lượng và giá
+                    inputQuantityUI.SetConfirmCallback((quantity, price) =>
+                    {
+                        // Callback sau khi người dùng confirm
+                        Debug.Log($"[PlayerSellItemSlot] Confirmed sell {quantity} x {currentItemType} at {price}G");
+
+                        shopManager.SellItemOnline(currentItemType, quantity, price);
+                        currentQuantity -= quantity;
+                        quantityText.text = $"x{currentQuantity}";
+
+                        if (currentQuantity <= 0)
+                        {
+                            gameObject.SetActive(false);
+                        }
+                    });
+
+                    inputQuantityUI.SetCancelCallback(() =>
+                    {
+                        Debug.Log("[PlayerSellItemSlot] User canceled input.");
+                    });
+
+                    // Hiện UI nhập với giá trị mặc định
+                    inputQuantityUI.Show(1, currentQuantity); // default=1, max=currentQuantity
                 }
                 else
                 {

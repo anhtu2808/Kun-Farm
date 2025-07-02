@@ -8,13 +8,14 @@ public class InputQuantityUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private TMP_InputField quantityInputField;
+    [SerializeField] private TMP_InputField priceInputField;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button cancelButton;
     [SerializeField] private int defaultQuantity = 1;
     [SerializeField] private int maxQuantity = 999;
 
     // Delegate for callback events
-    public delegate void OnQuantityConfirmedDelegate(int quantity);
+    public delegate void OnQuantityConfirmedDelegate(int quantity, int price);
     public delegate void OnCancelledDelegate();
 
     // Events that can be subscribed to
@@ -23,6 +24,7 @@ public class InputQuantityUI : MonoBehaviour
 
     private void Awake()
     {
+
         // Initialize UI elements if not set
         if (quantityInputField == null)
             quantityInputField = GetComponentInChildren<TMP_InputField>();
@@ -49,16 +51,16 @@ public class InputQuantityUI : MonoBehaviour
         quantityInputField.onValueChanged.AddListener(ValidateInput);
     }
 
-    private void ValidateInput(string input)
+    private void ValidateInput(string inputQuantity)
     {
         // Ensure input is valid and within range
-        if (string.IsNullOrEmpty(input))
+        if (string.IsNullOrEmpty(inputQuantity))
         {
             quantityInputField.text = defaultQuantity.ToString();
             return;
         }
 
-        if (int.TryParse(input, out int quantity))
+        if (int.TryParse(inputQuantity, out int quantity))
         {
             if (quantity <= 0)
                 quantityInputField.text = "1";
@@ -73,14 +75,14 @@ public class InputQuantityUI : MonoBehaviour
 
     private void ConfirmQuantity()
     {
-        if (int.TryParse(quantityInputField.text, out int quantity))
+        if (int.TryParse(quantityInputField.text, out int quantity) && int.TryParse(priceInputField.text, out int price))
         {
             // Trigger the confirm event
-            onQuantityConfirmed?.Invoke(quantity);
+            onQuantityConfirmed?.Invoke(quantity, price);
         }
         else
         {
-            onQuantityConfirmed?.Invoke(defaultQuantity);
+            onQuantityConfirmed?.Invoke(defaultQuantity, 10);
         }
 
         // Hide panel after confirming

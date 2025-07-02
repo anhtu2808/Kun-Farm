@@ -491,6 +491,7 @@ MonoBehaviour:
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   sellableColor: {r: 0, g: 1, b: 0, a: 1}
   unsellableColor: {r: 1, g: 0, b: 0, a: 1}
+  inputQuantityUI: {fileID: 0}
   sellSlotContainer: {fileID: 0}
   shopSellSlotPrefab: {fileID: 0}
 --- !u!1 &6210344260223488297
