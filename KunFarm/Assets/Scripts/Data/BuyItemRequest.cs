@@ -11,12 +11,7 @@ public class BuyItemRequest
 }
 
 [System.Serializable]
-public class BuyItemList
+public class BuyItemRequestList
 {
-    public List<BuyItemRequest> data;
-
-    public BuyItemList(List<BuyItemRequest> list)
-    {
-        data = list;
-    }
+    public List<BuyItemRequest> Items = new List<BuyItemRequest>();
 }
