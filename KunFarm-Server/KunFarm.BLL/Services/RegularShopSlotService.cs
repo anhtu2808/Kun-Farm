@@ -23,22 +23,21 @@ namespace KunFarm.BLL.Services
             _playerRegularShopSlotRepository = playerRegularShopSlotRepository;
         }
 
-        public Task<ApiResponse<bool>> BuyItem(int playerId, BuyItemRequest request)
+        public async Task<ApiResponse<bool>> BuyItem(int playerId, List<BuyItemRequest> requests)
         {
-           var playerSlot = _playerRegularShopSlotRepository.PlayerRegularShopSlot(playerId, request.SlotId).Result;
-
-            return Task.Run(async () =>
+            foreach (var request in requests)
             {
+                var playerSlot = await _playerRegularShopSlotRepository.PlayerRegularShopSlot(playerId, request.SlotId);
                 var slot = await _regularShopSlotRepository.GetById(request.SlotId);
+
                 if (slot == null || !slot.CanBuy)
                 {
                     return new ApiResponse<bool>
                     {
                         Data = false,
-                        Message = "Item cannot be bought."
+                        Message = $"Item with SlotId {request.SlotId} cannot be bought."
                     };
                 }
-
                 var item = await _itemRepository.GetItemById(slot.ItemId);
                 if (item == null)
                 {
@@ -49,19 +48,30 @@ namespace KunFarm.BLL.Services
                     };
                 }
 
-                playerSlot.CurrentStock += request.Quantity;
-                slot.CanBuy = request.CanBuy;
-                
+                int totalCount = playerSlot.CurrentStock.Value + request.Quantity;
+
+                if (totalCount >= slot.StockLimit)
+                {
+                    playerSlot.CurrentStock = slot.StockLimit;
+                    slot.CanBuy = false;
+                }
+                else
+                {
+                    playerSlot.CurrentStock = totalCount;
+                }
+
                 // Update the player's shop slot
                 await _playerRegularShopSlotRepository.UpdateAsync(playerSlot);
                 await _regularShopSlotRepository.UpdateAsync(slot);
+            }
 
-                return new ApiResponse<bool>
-                {
-                    Data = true,
-                    Message = "Item bought successfully."
-                };
-            });
+            return new ApiResponse<bool>
+            {
+                Code = 200,
+                Data = true,
+                Message = "Tất cả item đã được mua thành công."
+            };
+
         }
 
         public Task<ApiResponse<List<ShopItemResponse>>> GetShopItem(int player)

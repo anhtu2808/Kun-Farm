@@ -51,18 +51,21 @@ public class ShopManager : MonoBehaviour
 
     public void ToggleShop()
     {
-        isOpen = !isOpen;
-        shopPanel.SetActive(isOpen);
-    }
-
-    public void CloseShop()
-    {
+        Debug.Log($"Đóng shop - hasBuyItem: {hasBuyItem}");
         if (hasBuyItem)
         {
             StartCoroutine(SendBuyRequest(list));
         }
 
         hasBuyItem = false;
+        list = null;
+        isOpen = !isOpen;
+        shopPanel.SetActive(isOpen);
+    }
+
+    public void CloseShop()
+    {
+
         isOpen = false;
         shopPanel.SetActive(false);
 
@@ -107,7 +110,7 @@ public class ShopManager : MonoBehaviour
     public void BuyItem(ShopSlotData data)
     {
         Debug.Log($"Mua item: {data.itemName} - Giá: {data.buyPrice} - Số lượng hiện tại: {data.currentStock}/{data.stockLimit}");
-        if (data.currentStock >= data.stockLimit)
+        if (data.currentStock > data.stockLimit)
         {
             Debug.LogWarning("Đã hết hàng!");
             return;
@@ -139,10 +142,14 @@ public class ShopManager : MonoBehaviour
 
     private IEnumerator SendBuyRequest(List<BuyItemRequest> requestList)
     {
-        string apiUrl = "https://localhost:7067/regular-shop/buy/1"; // ví dụ: /shop/buy/{playerId}
+        string apiUrl = "https://localhost:7067/regular-shop/buy/1";
 
-        var wrapper = new { items = requestList };
-        string json = JsonUtility.ToJson(wrapper); // HOẶC dùng Newtonsoft.Json nếu cần
+        // ✅ Sử dụng class rõ ràng thay vì anonymous
+        BuyItemRequestList wrapper = new BuyItemRequestList();
+        wrapper.Items = requestList;
+
+        string json = JsonUtility.ToJson(wrapper);
+        Debug.Log("📤 Sending Buy Request: " + json); // kiểm tra JSON trước khi gửi
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         UnityWebRequest request = new UnityWebRequest(apiUrl, "POST");
@@ -150,7 +157,6 @@ public class ShopManager : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        Debug.Log("📤 Sending Buy Request: " + json);
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)

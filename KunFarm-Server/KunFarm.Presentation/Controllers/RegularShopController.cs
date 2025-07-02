@@ -29,7 +29,7 @@ namespace KunFarm.Presentation.Controllers
         public async Task<IActionResult> BuyItems([FromRoute] int playerId, [FromBody] BuyItemRequestList request)
         {
             var result = await _regularShopService.BuyItem(playerId, request.Items);
-            if (result.Data is { } && result.Data.Count > 0)
+            if (result.Code == 200)
                 return Ok(result);
             return NotFound(result);
         }
