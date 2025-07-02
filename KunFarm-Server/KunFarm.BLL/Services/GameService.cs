@@ -56,6 +56,8 @@ namespace KunFarm.BLL.Services
                         PosX = 0f,
                         PosY = 0f,
                         PosZ = 0f,
+                        Health = 100f,
+                        Hunger = 100f,
                         LastSaved = DateTime.UtcNow
                     };
 
@@ -67,6 +69,8 @@ namespace KunFarm.BLL.Services
                         PosX = defaultState.PosX,
                         PosY = defaultState.PosY,
                         PosZ = defaultState.PosZ,
+                        Health = defaultState.Health,
+                        Hunger = defaultState.Hunger,
                         LastSaved = defaultState.LastSaved
                     };
                 }
@@ -79,6 +83,8 @@ namespace KunFarm.BLL.Services
                     PosX = playerState.PosX,
                     PosY = playerState.PosY,
                     PosZ = playerState.PosZ,
+                    Health = playerState.Health,
+                    Hunger = playerState.Hunger,
                     LastSaved = playerState.LastSaved
                 };
             }
@@ -109,7 +115,9 @@ namespace KunFarm.BLL.Services
                     request.money, 
                     request.posX, 
                     request.posY, 
-                    request.posZ);
+                    request.posZ,
+                    request.health,
+                    request.hunger);
 
                 if (success)
                 {

@@ -21,7 +21,7 @@ namespace KunFarm.DAL.Repositories
                 .FirstOrDefaultAsync(ps => ps.UserId == userId);
         }
 
-        public async Task<bool> SavePlayerStateAsync(int userId, int money, float posX, float posY, float posZ)
+        public async Task<bool> SavePlayerStateAsync(int userId, int money, float posX, float posY, float posZ, float health, float hunger)
         {
             try
             {
@@ -34,6 +34,8 @@ namespace KunFarm.DAL.Repositories
                     existingState.PosX = posX;
                     existingState.PosY = posY;
                     existingState.PosZ = posZ;
+                    existingState.Health = health;
+                    existingState.Hunger = hunger;
                     existingState.LastSaved = DateTime.UtcNow;
                     
                     _context.PlayerStates.Update(existingState);
@@ -48,6 +50,8 @@ namespace KunFarm.DAL.Repositories
                         PosX = posX,
                         PosY = posY,
                         PosZ = posZ,
+                        Health = health,
+                        Hunger = hunger,
                         LastSaved = DateTime.UtcNow
                     };
                     

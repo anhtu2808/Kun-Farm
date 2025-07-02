@@ -19,6 +19,14 @@ public class ApiClient : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            // Load token from PlayerPrefs if exists
+            string savedToken = PlayerPrefs.GetString("JWT_TOKEN", "");
+            if (!string.IsNullOrEmpty(savedToken))
+            {
+                SetToken(savedToken);
+                Debug.Log("[ApiClient] Token loaded from PlayerPrefs");
+            }
         }
     }
 

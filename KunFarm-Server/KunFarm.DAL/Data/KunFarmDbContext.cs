@@ -46,6 +46,12 @@ namespace KunFarm.DAL.Data
                       
                 entity.Property(e => e.Money)
                       .HasDefaultValue(0);
+                      
+                entity.Property(e => e.Health)
+                      .HasDefaultValue(100f);
+                      
+                entity.Property(e => e.Hunger)
+                      .HasDefaultValue(100f);
 
                 entity.HasMany(p => p.InventorySlots)
                     .WithOne(s => s.PlayerState)

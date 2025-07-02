@@ -33,7 +33,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 2, 9, 45, 17, 816, DateTimeKind.Utc).AddTicks(5861));
+                        .HasDefaultValue(new DateTime(2025, 7, 2, 21, 33, 31, 126, DateTimeKind.Utc).AddTicks(2990));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -197,10 +197,20 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<float>("Health")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f);
+
+                    b.Property<float>("Hunger")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f);
+
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 2, 16, 45, 17, 816, DateTimeKind.Local).AddTicks(1361));
+                        .HasDefaultValue(new DateTime(2025, 7, 3, 4, 33, 31, 126, DateTimeKind.Local).AddTicks(740));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()

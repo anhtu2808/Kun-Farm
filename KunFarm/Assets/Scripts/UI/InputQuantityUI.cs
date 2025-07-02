@@ -66,7 +66,7 @@ public class InputQuantityUI : MonoBehaviour
     {
         // Set up input validation once
         if (quantityInputField != null)
-            quantityInputField.onValueChanged.AddListener(ValidateInput);
+        quantityInputField.onValueChanged.AddListener(ValidateInput);
     }
     
     private void Update()
@@ -149,7 +149,7 @@ public class InputQuantityUI : MonoBehaviour
             isShowing = false;
         }
     }
-    
+
     // Show the panel with default settings
     public void Show()
     {
