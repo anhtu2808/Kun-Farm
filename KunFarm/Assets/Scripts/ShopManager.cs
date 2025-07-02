@@ -22,7 +22,7 @@ public class ShopManager : MonoBehaviour
     // Events
     public System.Action OnShopUpdated;
     private bool isOpen = false;
-    private string apiUrl = "https://localhost:7067/regular-shop/{playerId}";
+    private string apiUrl = "http://localhost:5270/regular-shop/{playerId}";
     private bool hasBuyItem = false;
     private List<BuyItemRequest> list;
 

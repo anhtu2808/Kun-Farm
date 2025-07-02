@@ -23,57 +23,102 @@ public static class ToolHelpers
                 break;
                 
             case CollectableType.WHEATSEED:
-                tool = CreateSeedTool("Wheat", icon, quantity);
-                break;
-                
             case CollectableType.GRAPESEED:
-                tool = CreateSeedTool("Grapes", icon, quantity);
+            case CollectableType.APPLETREESEED:
+                tool = CreateSeedToolFromType(collectableType, quantity);
                 break;
                 
-            case CollectableType.APPLETREESEED:
-                tool = CreateSeedTool("AppleTree", icon, quantity);
+            case CollectableType.APPLE:
+            case CollectableType.WHEAT:
+            case CollectableType.GRAPE:
+                tool = new FoodTool(quantity);
+                break;
+                
+            default:
                 break;
         }
-        
-        if (tool != null && icon != null)
+
+        if (tool != null)
         {
             tool.toolIcon = icon;
+            string toolTypeName = GetToolTypeName(collectableType);
+            tool.toolName = $"{toolTypeName}";
         }
-        
+
         return tool;
     }
     
     /// <summary>
-    /// Convert Tool object thành CollectableType
+    /// Convert Tool thành CollectableType (reverse operation)
     /// </summary>
     public static CollectableType GetCollectableFromTool(Tool tool)
     {
-        switch (tool)
+        if (tool == null) return CollectableType.NONE;
+        
+        if (tool is ShovelTool) return CollectableType.SHOVEL_TOOL;
+        if (tool is HandTool) return CollectableType.HAND_TOOL;
+        
+        // For SeedTool, determine type from cropData
+        if (tool is SeedTool seedTool && seedTool.cropData != null)
         {
-            case ShovelTool _:
-                return CollectableType.SHOVEL_TOOL;
-                
-            case HandTool _:
-                return CollectableType.HAND_TOOL;
-                
-            case SeedTool seedTool when seedTool.cropData != null:
-                return GetSeedCollectableFromCropData(seedTool.cropData);
-                
-            default:
-                return CollectableType.NONE;
+            string cropName = seedTool.cropData.name.ToLower();
+            if (cropName.Contains("wheat")) return CollectableType.WHEATSEED;
+            if (cropName.Contains("grape")) return CollectableType.GRAPESEED;
+            if (cropName.Contains("apple")) return CollectableType.APPLETREESEED;
+            return CollectableType.WHEATSEED; // Default fallback
         }
+        
+        // For FoodTool, we need to determine type from name
+        if (tool is FoodTool)
+        {
+            if (tool.toolName != null)
+            {
+                if (tool.toolName.Contains("Apple")) return CollectableType.APPLE;
+                if (tool.toolName.Contains("Wheat")) return CollectableType.WHEAT;
+                if (tool.toolName.Contains("Grape")) return CollectableType.GRAPE;
+            }
+            // Default fallback for FoodTool
+            return CollectableType.APPLE;
+        }
+        
+        return CollectableType.NONE;
     }
     
     /// <summary>
-    /// Check if CollectableType có thể thành tool
+    /// Kiểm tra xem CollectableType có thể trở thành Tool không
     /// </summary>
     public static bool CanBeTool(CollectableType collectableType)
     {
-        return collectableType == CollectableType.SHOVEL_TOOL ||
-               collectableType == CollectableType.HAND_TOOL ||
-               collectableType == CollectableType.WHEATSEED ||
-               collectableType == CollectableType.GRAPESEED ||
-               collectableType == CollectableType.APPLETREESEED;
+        bool canBeTool = false;
+        
+        switch (collectableType)
+        {
+            // Tool items
+            case CollectableType.SHOVEL_TOOL:
+            case CollectableType.HAND_TOOL:
+                canBeTool = true;
+                break;
+                
+            // Seed items có thể trở thành seed tools
+            case CollectableType.WHEATSEED:
+            case CollectableType.GRAPESEED:
+            case CollectableType.APPLETREESEED:
+                canBeTool = true;
+                break;
+                
+            // Food items có thể trở thành food tools
+            case CollectableType.APPLE:
+            case CollectableType.WHEAT:
+            case CollectableType.GRAPE:
+                canBeTool = true;
+                break;
+                
+            default:
+                canBeTool = false;
+                break;
+        }
+        
+        return canBeTool;
     }
     
     /// <summary>
@@ -87,6 +132,16 @@ public static class ToolHelpers
                collectableType == CollectableType.GRAPE ||
                collectableType == CollectableType.APPLETREESEED ||
                collectableType == CollectableType.APPLETREE;
+    }
+    
+    /// <summary>
+    /// Check if CollectableType là food
+    /// </summary>
+    public static bool IsFood(CollectableType collectableType)
+    {
+        return collectableType == CollectableType.APPLE ||
+               collectableType == CollectableType.WHEAT ||
+               collectableType == CollectableType.GRAPE;
     }
     
     /// <summary>
@@ -114,7 +169,6 @@ public static class ToolHelpers
             cropGrower.SetTilePosition(cellPosition);
             tileManager.RegisterPlant(cellPosition, newPlant);
             tileManager.SetTileState(cellPosition, TileState.Planted);
-            Debug.Log($"[ToolHelpers] ✅ Planted {cropData.name} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
             return true;
         }
         else
@@ -122,18 +176,6 @@ public static class ToolHelpers
             Object.Destroy(newPlant);
             return false;
         }
-    }
-    
-    private static Tool CreateSeedTool(string cropDataName, Sprite icon, int quantity)
-    {
-        CropData cropData = Resources.Load<CropData>($"CropData/{cropDataName}");
-        if (cropData != null)
-        {
-            var seedTool = new SeedTool(cropData, quantity);
-            seedTool.toolIcon = icon;
-            return seedTool;
-        }
-        return null;
     }
     
     private static CropData GetCropDataFromCollectable(CollectableType collectableType)
@@ -154,24 +196,52 @@ public static class ToolHelpers
         }
     }
     
-    private static CollectableType GetSeedCollectableFromCropData(CropData cropData)
+    /// <summary>
+    /// Lấy tên tool từ CollectableType
+    /// </summary>
+    private static string GetToolTypeName(CollectableType collectableType)
     {
-        // Dùng asset name thay vì cropName vì cropName có thể trống
-        string assetName = cropData.name.ToLower();
-        
-        if (assetName.Contains("wheat")) return CollectableType.WHEATSEED;
-        if (assetName.Contains("grape")) return CollectableType.GRAPESEED;
-        if (assetName.Contains("apple")) return CollectableType.APPLETREESEED;
-        
-        // Fallback: thử cropName nếu asset name không match
-        if (!string.IsNullOrEmpty(cropData.cropName))
+        switch (collectableType)
         {
-            string cropName = cropData.cropName.ToLower();
-            if (cropName.Contains("wheat")) return CollectableType.WHEATSEED;
-            if (cropName.Contains("grape")) return CollectableType.GRAPESEED;
-            if (cropName.Contains("apple")) return CollectableType.APPLETREESEED;
+            case CollectableType.SHOVEL_TOOL: return "Shovel";
+            case CollectableType.HAND_TOOL: return "Hand";
+            case CollectableType.WHEATSEED: return "Wheat Seed";
+            case CollectableType.GRAPESEED: return "Grape Seed";
+            case CollectableType.APPLETREESEED: return "Apple Tree Seed";
+            case CollectableType.APPLE: return "Apple";
+            case CollectableType.WHEAT: return "Wheat";
+            case CollectableType.GRAPE: return "Grape";
+            default: return collectableType.ToString();
+        }
+    }
+    
+    /// <summary>
+    /// Tạo SeedTool từ CollectableType
+    /// </summary>
+    private static Tool CreateSeedToolFromType(CollectableType collectableType, int quantity)
+    {
+        CropData cropData = null;
+        
+        switch (collectableType)
+        {
+            case CollectableType.WHEATSEED:
+                cropData = Resources.Load<CropData>("CropData/Wheat");
+                break;
+                
+            case CollectableType.GRAPESEED:
+                cropData = Resources.Load<CropData>("CropData/Grapes");
+                break;
+                
+            case CollectableType.APPLETREESEED:
+                cropData = Resources.Load<CropData>("CropData/AppleTree");
+                break;
         }
         
-        return CollectableType.NONE;
+        if (cropData != null)
+        {
+            return new SeedTool(cropData, quantity);
+        }
+        
+        return null;
     }
 } 

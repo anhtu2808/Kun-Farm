@@ -115,7 +115,7 @@ public class Inventory : MonoBehaviour
 
     private IEnumerator GetInventoryData(int playerId = 1)
     {
-        string apiUrl = "https://localhost:7067/inventory/{playerId}";
+        string apiUrl = "http://localhost:5270/inventory/{playerId}";
         UnityWebRequest request = UnityWebRequest.Get(apiUrl.Replace("{playerId}", playerId.ToString()));
         yield return request.SendWebRequest();
 
@@ -320,7 +320,7 @@ public class Inventory : MonoBehaviour
     {
         try
         {
-            string apiUrl = "https://localhost:7067/inventory/save/1";
+            string apiUrl = "http://localhost:5270/inventory/save/1";
             InventorySaveList requestBody = new InventorySaveList(saveRequests);
             string json = JsonUtility.ToJson(requestBody);
             Debug.Log("📤 [Blocking Send] JSON gửi: " + json);

@@ -30,6 +30,9 @@ public class ToolData : ScriptableObject
             case ToolType.Seed:
                 tool = new SeedTool(cropData);
                 break;
+            case ToolType.Food:
+                tool = new FoodTool();
+                break;
         }
 
         if (tool != null)
@@ -47,5 +50,6 @@ public enum ToolType
 {
     Shovel,
     Hand,
-    Seed
+    Seed,
+    Food
 } 

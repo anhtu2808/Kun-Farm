@@ -47,6 +47,9 @@ public class ToolManager : MonoBehaviour
     {
         // Listen for toolbar selection changes
         CheckToolSelection();
+        
+        // Listen for food eating (Space key)
+        CheckFoodEating();
     }
 
     private void InitializeTools()
@@ -84,6 +87,31 @@ public class ToolManager : MonoBehaviour
         if (newSelection != -1 && newSelection != selectedToolIndex)
         {
             SelectTool(newSelection);
+        }
+    }
+    
+    private void CheckFoodEating()
+    {
+        // Don't allow eating if inventory is open or tool is being used
+        if (inventoryUI != null && inventoryUI.IsOpen)
+            return;
+        if (isUsingTool)
+            return;
+            
+        // Check for Space key input
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Tool currentTool = SelectedTool;
+            if (currentTool is FoodTool foodTool && foodTool.quantity > 0)
+            {
+                // Eat the food
+                foodTool.EatFood();
+                
+                // Handle consumption
+                HandleToolConsumption(foodTool);
+                
+                Debug.Log($"[ToolManager] Player ate {foodTool.toolName}. Remaining: {foodTool.quantity}");
+            }
         }
     }
 
@@ -127,6 +155,13 @@ public class ToolManager : MonoBehaviour
         Tool currentTool = SelectedTool;
         if (currentTool != null && currentTool.CanUse(cellPosition, tileManager))
         {
+            // Don't use food tools through normal interaction (only through Space key)
+            if (currentTool is FoodTool)
+            {
+                Debug.Log("Use Space key to eat food!");
+                return;
+            }
+            
             // Check if this is a shovel tool for hoeing animation
             if (currentTool is ShovelTool)
             {
@@ -313,7 +348,9 @@ public class ToolManager : MonoBehaviour
         return SelectedTool as T;
     }
 
-    // Methods for drag & drop support
+    /// <summary>
+    /// Set tool tại index cụ thể
+    /// </summary>
     public void SetToolAtIndex(int index, Tool tool)
     {
         if (index >= 0 && index < tools.Length)
@@ -322,6 +359,9 @@ public class ToolManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get tool tại index cụ thể
+    /// </summary>
     public Tool GetToolAtIndex(int index)
     {
         if (index >= 0 && index < tools.Length)

@@ -13,7 +13,8 @@ public class LoginManager : MonoBehaviour
     public TMP_InputField usernameInput;
     public TMP_InputField passwordInput;
     public Button         loginButton;
-    public TMP_Text       errorText;
+    public Button         registerButton;
+    // public TMP_Text       errorText; // Không sử dụng nữa, thay bằng notification
 
     /* ---------- Settings ---------- */
     [Header("Settings")]
@@ -57,12 +58,13 @@ public class LoginManager : MonoBehaviour
     /* ---------- Unity ---------- */
     void Start()
     {
-        // Clear error text
-        if (errorText != null) errorText.text = "";
-        
         // Setup login button
         if (loginButton != null) 
         loginButton.onClick.AddListener(OnLogin);
+        
+        // Setup register button
+        if (registerButton != null)
+            registerButton.onClick.AddListener(GoToRegister);
             
         // Ensure ApiClient exists
         if (ApiClient.Instance == null)
@@ -75,18 +77,16 @@ public class LoginManager : MonoBehaviour
 
     void OnLogin()
     {
-        if (errorText != null) errorText.text = "";
-        
         // Validate inputs
         if (usernameInput == null || passwordInput == null)
         {
-            if (errorText != null) errorText.text = "UI components not properly assigned!";
+            SimpleNotificationPopup.Show("UI components not properly assigned!");
             return;
         }
         
         if (string.IsNullOrEmpty(usernameInput.text) || string.IsNullOrEmpty(passwordInput.text))
         {
-            if (errorText != null) errorText.text = "Please enter both username and password!";
+            SimpleNotificationPopup.Show("Please enter both username and password!");
             return;
         }
         
@@ -120,7 +120,7 @@ public class LoginManager : MonoBehaviour
         /* 3) Network error? */
         if (req.result != UnityWebRequest.Result.Success)
         {
-                if (errorText != null) errorText.text = $"Network error: {req.error}";
+                SimpleNotificationPopup.Show("Username or password is incorrect!");
             yield break;
         }
 
@@ -130,7 +130,7 @@ public class LoginManager : MonoBehaviour
 
             if (string.IsNullOrEmpty(rawJson))
             {
-                if (errorText != null) errorText.text = "Empty response from server";
+                SimpleNotificationPopup.Show("Empty response from server");
                 yield break;
             }
 
@@ -142,14 +142,14 @@ public class LoginManager : MonoBehaviour
             catch (Exception ex)
             {
                 if (showDebug) Debug.LogError($"JSON Parse Error: {ex.Message}");
-                if (errorText != null) errorText.text = "Failed to parse server response";
+                SimpleNotificationPopup.Show("Failed to parse server response");
                 yield break;
             }
 
             /* 5) Kiểm tra response */
             if (resp == null)
             {
-                if (errorText != null) errorText.text = "Failed to parse server response";
+                SimpleNotificationPopup.Show("Failed to parse server response");
                 yield break;
             }
 
@@ -158,19 +158,19 @@ public class LoginManager : MonoBehaviour
             {
                 if (resp.data == null)
                 {
-                    if (errorText != null) errorText.text = "Invalid response: missing data";
+                    SimpleNotificationPopup.Show("Invalid response: missing data");
                     yield break;
                 }
 
                 if (resp.data.user == null)
         {
-                    if (errorText != null) errorText.text = "Invalid response: missing user data";
+                    SimpleNotificationPopup.Show("Invalid response: missing user data");
                     yield break;
                 }
 
                 if (string.IsNullOrEmpty(resp.data.token))
                 {
-                    if (errorText != null) errorText.text = "Invalid response: missing token";
+                    SimpleNotificationPopup.Show("Invalid response: missing token");
                     yield break;
                 }
 
@@ -189,6 +189,12 @@ public class LoginManager : MonoBehaviour
 
             if (showDebug) Debug.Log($"✅ Login successful! Welcome {resp.data.user.displayName}");
 
+                // Show success notification
+                SimpleNotificationPopup.Show($"Welcome {resp.data.user.displayName}! Login successful!");
+
+                // Wait a moment before loading scene to let user see the success message
+                yield return new WaitForSeconds(1f);
+
                 // Load main scene
             SceneManager.LoadScene("MainScene");
         }
@@ -197,7 +203,7 @@ public class LoginManager : MonoBehaviour
                 // Login failed
                 string errorMsg = resp.message ?? "Login failed";
                 if (showDebug) Debug.LogWarning($"[Login] Failed: {errorMsg}");
-                if (errorText != null) errorText.text = errorMsg;
+                SimpleNotificationPopup.Show(errorMsg);
             }
         }
         finally
@@ -205,5 +211,11 @@ public class LoginManager : MonoBehaviour
             // Re-enable login button
             if (loginButton != null) loginButton.interactable = true;
         }
+    }
+
+    void GoToRegister()
+    {
+        if (showDebug) Debug.Log("[Login] Navigating to RegisterScene");
+        SceneManager.LoadScene("RegisterScene");
     }
 }
