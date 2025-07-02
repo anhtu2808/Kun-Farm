@@ -44,7 +44,7 @@ public class SoldItemSlot_UI : MonoBehaviour
         {
             backgroundImage = GetComponent<Image>();
             if (backgroundImage == null)
-            {
+        {
                 backgroundImage = gameObject.AddComponent<Image>();
             }
         }
@@ -60,7 +60,7 @@ public class SoldItemSlot_UI : MonoBehaviour
     {
         isEmpty = true;
         itemData = null;
-        
+
         // Ẩn tất cả UI elements
         if (itemIcon != null) itemIcon.gameObject.SetActive(false);
         if (itemNameText != null) itemNameText.text = "";
@@ -71,7 +71,7 @@ public class SoldItemSlot_UI : MonoBehaviour
         // Set background color cho slot rỗng
         if (backgroundImage != null)
             backgroundImage.color = emptyColor;
-        
+
         // Disable button cho slot rỗng
         if (slotButton != null)
         {
@@ -137,15 +137,15 @@ public class SoldItemSlot_UI : MonoBehaviour
                 // Tìm ItemManager trong scene
                 ItemManager itemManager = FindObjectOfType<ItemManager>();
                 if (itemManager != null)
-                {
+        {
                     // Lấy Collectable từ ItemManager
                     var collectable = itemManager.GetItemByType(parsedType);
                     if (collectable != null && collectable.icon != null)
-                    {
+            {
                         itemIcon.sprite = collectable.icon;
                         itemIcon.gameObject.SetActive(true);
                         Debug.Log($"✅ [SoldItemSlot] Loaded icon for {itemData.collectableType}");
-                    }
+            }
                     else
                     {
                         Debug.LogWarning($"⚠️ [SoldItemSlot] No icon found for {itemData.collectableType}");
@@ -165,10 +165,10 @@ public class SoldItemSlot_UI : MonoBehaviour
             }
         }
         catch (System.Exception e)
-        {
+    {
             Debug.LogError($"❌ [SoldItemSlot] Error loading icon: {e.Message}");
             itemIcon.gameObject.SetActive(false);
-        }
+    }
     }
 
     private void UpdateStatusAndVisual()
@@ -185,7 +185,7 @@ public class SoldItemSlot_UI : MonoBehaviour
             // Button vẫn clickable nhưng sẽ không làm gì
             if (slotButton != null)
                 slotButton.interactable = true;
-        }
+    }
         else
         {
             // Item đã được bán - màu xanh nhạt, có thể claim
@@ -197,7 +197,7 @@ public class SoldItemSlot_UI : MonoBehaviour
 
             if (slotButton != null)
                 slotButton.interactable = true;
-        }
+    }
     }
 
     private void SetupSlotButton()
@@ -215,17 +215,17 @@ public class SoldItemSlot_UI : MonoBehaviour
     private void OnSlotClick()
     {
         if (isEmpty || itemData == null)
-        {
+    {
             Debug.Log("[SoldItemSlot_UI] Slot rỗng - không làm gì");
             return;
-        }
+    }
 
         if (itemData.canBuy)
         {
             // Item đang bán - không làm gì, chỉ log
             Debug.Log($"[SoldItemSlot_UI] Item {itemData.collectableType} is still for sale");
             return;
-        }
+    }
 
         // Item đã bán - proceed với claim
         Debug.Log($"[SoldItemSlot_UI] Claiming item: {itemData.collectableType} for {itemData.price}G");
@@ -264,7 +264,7 @@ public class SoldItemSlot_UI : MonoBehaviour
         
         // Optional: Thêm animation trước khi destroy
         // StartCoroutine(DestroyWithAnimation());
-        
+
         // Immediate destroy cho đơn giản
         Destroy(gameObject);
     }

@@ -20,5 +20,13 @@ namespace KunFarm.BLL.DTOs.Request
 
         [Required]
         public float posZ { get; set; }
+
+        [Required]
+        [Range(0, float.MaxValue, ErrorMessage = "Health must be non-negative")]
+        public float health { get; set; }
+
+        [Required]
+        [Range(0, float.MaxValue, ErrorMessage = "Hunger must be non-negative")]
+        public float hunger { get; set; }
     }
 } 

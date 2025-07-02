@@ -31,14 +31,36 @@ public class GameManager : MonoBehaviour
         tileManager = GetComponent<TileManager>();
         farmManager = GetComponent<FarmManager>();
         
-        // Ensure components exist
+        // Ensure components exist in proper order
+        EnsureApiClient();     // ApiClient must be created first
         EnsureGameSaver();
+        EnsureGameLoader();
         EnsureFarmManager();
     }
 
     private void Start()
     {
         // Any initial setup
+    }
+
+    private void EnsureApiClient()
+    {
+        if (ApiClient.Instance == null)
+        {
+            GameObject apiClientGO = new GameObject("ApiClient");
+            apiClientGO.AddComponent<ApiClient>();
+            DontDestroyOnLoad(apiClientGO);
+            
+            // Try to get token from PlayerPrefs if it exists
+            string token = PlayerPrefs.GetString("JWT_TOKEN", "");
+            if (!string.IsNullOrEmpty(token))
+            {
+                ApiClient.Instance.SetToken(token);
+            }
+            
+            if (showDebugInfo)
+                Debug.Log("[GameManager] ApiClient created and token loaded from PlayerPrefs");
+        }
     }
 
     private void EnsureGameSaver()
@@ -48,6 +70,16 @@ public class GameManager : MonoBehaviour
             GameObject gameSaverGO = new GameObject("GameSaver");
             gameSaverGO.AddComponent<GameSaver>();
             DontDestroyOnLoad(gameSaverGO);
+        }
+    }
+
+    private void EnsureGameLoader()
+    {
+        if (GameLoader.Instance == null)
+        {
+            GameObject gameLoaderGO = new GameObject("GameLoader");
+            gameLoaderGO.AddComponent<GameLoader>();
+            DontDestroyOnLoad(gameLoaderGO);
         }
     }
 

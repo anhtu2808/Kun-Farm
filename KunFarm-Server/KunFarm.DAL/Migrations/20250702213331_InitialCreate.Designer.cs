@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KunFarm.DAL.Migrations
 {
     [DbContext(typeof(KunFarmDbContext))]
-    [Migration("20250701105552_CreateRelatedEntitiesOfShop")]
-    partial class CreateRelatedEntitiesOfShop
+    [Migration("20250702213331_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 1, 10, 55, 52, 369, DateTimeKind.Utc).AddTicks(7456));
+                        .HasDefaultValue(new DateTime(2025, 7, 2, 21, 33, 31, 126, DateTimeKind.Utc).AddTicks(2990));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -70,7 +70,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("ItemId")
+                    b.Property<int?>("ItemId")
                         .HasColumnType("int");
 
                     b.Property<int>("PlayerStateId")
@@ -142,7 +142,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("BuyPrice")
                         .HasColumnType("int");
 
-                    b.Property<int>("BuyerId")
+                    b.Property<int?>("BuyerId")
                         .HasColumnType("int");
 
                     b.Property<bool>("CanBuy")
@@ -157,7 +157,10 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SellerId")
+                    b.Property<int>("Quantiy")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SellerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -197,10 +200,20 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<float>("Health")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f);
+
+                    b.Property<float>("Hunger")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f);
+
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 1, 17, 55, 52, 369, DateTimeKind.Local).AddTicks(5053));
+                        .HasDefaultValue(new DateTime(2025, 7, 3, 4, 33, 31, 126, DateTimeKind.Local).AddTicks(740));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()
@@ -331,8 +344,7 @@ namespace KunFarm.DAL.Migrations
                     b.HasOne("KunFarm.DAL.Entities.Item", "Item")
                         .WithMany("InventorySlots")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("KunFarm.DAL.Entities.PlayerState", "PlayerState")
                         .WithMany("InventorySlots")
@@ -350,8 +362,7 @@ namespace KunFarm.DAL.Migrations
                     b.HasOne("KunFarm.DAL.Entities.PlayerState", "Buyer")
                         .WithMany("BuyingOnlineShopSlots")
                         .HasForeignKey("BuyerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("KunFarm.DAL.Entities.Item", "Item")
                         .WithMany("OnlineShopSlots")
@@ -362,8 +373,7 @@ namespace KunFarm.DAL.Migrations
                     b.HasOne("KunFarm.DAL.Entities.PlayerState", "Seller")
                         .WithMany("SellingOnlineShopSlots")
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Buyer");
 

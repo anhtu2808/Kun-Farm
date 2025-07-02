@@ -159,6 +159,7 @@ public class OnlSellShopManager : MonoBehaviour
         if (!HasSufficientItems(type, quantity))
         {
             Debug.LogWarning($"❌ [Online Sell] Không đủ {type} để bán! Cần: {quantity}, Có: {GetInventoryItemCount(type)}");
+            SimpleNotificationPopup.Show($"Không đủ {type} để bán! Cần: {quantity}, bạn có: {GetInventoryItemCount(type)}");
             return;
         }
 
@@ -193,6 +194,7 @@ public class OnlSellShopManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("✅ [Online Sell] Bán thành công: " + request.downloadHandler.text);
+            SimpleNotificationPopup.Show($"Bán thành công {quantity}x {itemType} với tổng giá {totalPrice}G!");
             
             // ✅ THỰC SỰ TRỪ ITEM KHỎI INVENTORY
             bool itemRemoved = RemoveItemFromInventory(itemType, quantity);
@@ -217,6 +219,7 @@ public class OnlSellShopManager : MonoBehaviour
         else
         {
             Debug.LogError("❌ [Online Sell] Lỗi khi gửi request: " + request.error);
+            SimpleNotificationPopup.Show($"Bán thất bại! Lỗi: {request.error}");
         }
     }
 
@@ -348,6 +351,7 @@ public class OnlSellShopManager : MonoBehaviour
         else
         {
             Debug.LogError($"❌ [Sell Shop] Load sold items failed: {request.error}");
+            SimpleNotificationPopup.Show($"Không thể tải danh sách items! Lỗi: {request.error}");
             // Reset về trạng thái rỗng nếu API lỗi
             ClearAllSlots();
         }
@@ -420,6 +424,7 @@ public class OnlSellShopManager : MonoBehaviour
         if (item.canBuy)
         {
             Debug.LogWarning($"⚠️ [Claim] Item {item.collectableType} vẫn đang bán (canBuy=true), không thể claim!");
+            SimpleNotificationPopup.Show($"{item.collectableType} vẫn đang bán, chưa thể claim!");
             return;
         }
         
@@ -457,6 +462,7 @@ public class OnlSellShopManager : MonoBehaviour
             {
                 player.wallet.Add(expectedAmount);
                 Debug.Log($"💰 [Sell Shop] Đã cộng {expectedAmount}G vào wallet, tổng: {player.wallet.Money}G");
+                SimpleNotificationPopup.Show($"Claim thành công {expectedAmount}G! Tổng tiền: {player.wallet.Money}G");
             }
             
             // Destroy specific slot sau khi claim thành công
@@ -467,6 +473,7 @@ public class OnlSellShopManager : MonoBehaviour
         else
         {
             Debug.LogError($"❌ [Sell Shop] Claim money failed: {request.error}");
+            SimpleNotificationPopup.Show($"Claim thất bại! Lỗi: {request.error}");
             
             // Re-enable slot button for failed items
             EnableSlotButtonsForItems(itemIds);

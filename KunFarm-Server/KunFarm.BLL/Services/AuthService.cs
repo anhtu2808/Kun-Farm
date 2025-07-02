@@ -115,6 +115,8 @@ namespace KunFarm.BLL.Services
                     PosX = 0f,
                     PosY = 0f,
                     PosZ = 0f,
+                    Health = 100f, // Starting health
+                    Hunger = 100f, // Starting hunger
                     LastSaved = DateTime.UtcNow
                 };
 

@@ -37,14 +37,14 @@ public static class ToolHelpers
             default:
                 break;
         }
-
+        
         if (tool != null)
         {
             tool.toolIcon = icon;
             string toolTypeName = GetToolTypeName(collectableType);
             tool.toolName = $"{toolTypeName}";
         }
-
+        
         return tool;
     }
     
@@ -57,7 +57,7 @@ public static class ToolHelpers
         
         if (tool is ShovelTool) return CollectableType.SHOVEL_TOOL;
         if (tool is HandTool) return CollectableType.HAND_TOOL;
-        
+                
         // For SeedTool, determine type from cropData
         if (tool is SeedTool seedTool && seedTool.cropData != null)
         {
@@ -81,7 +81,7 @@ public static class ToolHelpers
             return CollectableType.APPLE;
         }
         
-        return CollectableType.NONE;
+                return CollectableType.NONE;
     }
     
     /// <summary>
@@ -202,7 +202,7 @@ public static class ToolHelpers
     private static string GetToolTypeName(CollectableType collectableType)
     {
         switch (collectableType)
-        {
+    {
             case CollectableType.SHOVEL_TOOL: return "Shovel";
             case CollectableType.HAND_TOOL: return "Hand";
             case CollectableType.WHEATSEED: return "Wheat Seed";

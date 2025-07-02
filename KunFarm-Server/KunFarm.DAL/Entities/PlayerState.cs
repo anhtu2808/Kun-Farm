@@ -17,6 +17,10 @@ namespace KunFarm.DAL.Entities
         
         public float PosZ { get; set; } = 0f;
         
+        public float Health { get; set; } = 100f;
+        
+        public float Hunger { get; set; } = 100f;
+        
         public DateTime LastSaved { get; set; } = DateTime.Now;
         
         // Navigation property
