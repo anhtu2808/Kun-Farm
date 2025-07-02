@@ -8,24 +8,21 @@ public class HealthHungerUI : MonoBehaviour
 {
     [Header("Health Bar")]
     [SerializeField] private Image healthBarFill;
-    [SerializeField] private Color healthFullColor = Color.green;
-    [SerializeField] private Color healthLowColor = Color.red;
-    [SerializeField] private float healthLowThreshold = 0.3f;
+    [SerializeField] private Color healthColor = Color.red;
+    [SerializeField] private bool useStaticHealthColor = true;
     
     [Header("Hunger Bar")]  
     [SerializeField] private Image hungerBarFill;
     [SerializeField] private Color hungerFullColor = Color.yellow;
-    [SerializeField] private Color hungerLowColor = new Color(1f, 0.5f, 0f); // Orange color
+    [SerializeField] private Color hungerLowColor = new Color(1f, 0.5f, 0f);
     [SerializeField] private float hungerLowThreshold = 0.5f;
     
     [Header("Animation")]
     [SerializeField] private bool enableSmoothTransition = true;
     [SerializeField] private float transitionSpeed = 5f;
     
-    [Header("Debug")]
-    [SerializeField] private bool showDebugLogs = false;
-    
-    // Private fields for smooth transition
+
+
     private float targetHealthFill = 1f;
     private float targetHungerFill = 1f;
     private float currentHealthFill = 1f;
@@ -33,7 +30,6 @@ public class HealthHungerUI : MonoBehaviour
     
     void Awake()
     {
-        // Tự động tìm UI elements nếu chưa assign
         if (healthBarFill == null)
         {
             healthBarFill = GameObject.Find("HealthBarFill")?.GetComponent<Image>();
@@ -42,30 +38,35 @@ public class HealthHungerUI : MonoBehaviour
         if (hungerBarFill == null)
         {
             hungerBarFill = GameObject.Find("FoodBarFill")?.GetComponent<Image>();
+            
+            if (hungerBarFill == null)
+                hungerBarFill = GameObject.Find("HungerBarFill")?.GetComponent<Image>();
+            
+            if (hungerBarFill == null)
+                hungerBarFill = GameObject.Find("Hunger Bar Fill")?.GetComponent<Image>();
+                
+            if (hungerBarFill == null)
+                hungerBarFill = GameObject.Find("Food Bar Fill")?.GetComponent<Image>();
+                
+
         }
         
-        // Validate references
-        if (healthBarFill == null)
-        {
-            Debug.LogWarning("[HealthHungerUI] HealthBarFill not found! Please assign manually.");
-        }
-        
-        if (hungerBarFill == null)
-        {
-            Debug.LogWarning("[HealthHungerUI] HungerBarFill not found! Please assign manually.");
-        }
+
     }
     
     void OnEnable()
     {
-        // Subscribe to events - Pattern giống MoneyUI
         PlayerStats.OnHealthChanged += UpdateHealthBar;
         PlayerStats.OnHungerChanged += UpdateHungerBar;
     }
     
+    void Start()
+    {
+        ResetToFullColors();
+    }
+    
     void OnDisable()
     {
-        // Unsubscribe from events
         PlayerStats.OnHealthChanged -= UpdateHealthBar;
         PlayerStats.OnHungerChanged -= UpdateHungerBar;
     }
@@ -91,10 +92,7 @@ public class HealthHungerUI : MonoBehaviour
             ApplyHealthVisuals();
         }
         
-        if (showDebugLogs)
-        {
-            Debug.Log($"[HealthHungerUI] Health updated: {currentHealth:F1}/{maxHealth} ({healthPercent:P1})");
-        }
+
     }
     
     private void UpdateHungerBar(float currentHunger, float maxHunger)
@@ -110,10 +108,7 @@ public class HealthHungerUI : MonoBehaviour
             ApplyHungerVisuals();
         }
         
-        if (showDebugLogs)
-        {
-            Debug.Log($"[HealthHungerUI] Hunger updated: {currentHunger:F1}/{maxHunger} ({hungerPercent:P1})");
-        }
+
     }
     
     private void AnimateBars()
@@ -156,14 +151,13 @@ public class HealthHungerUI : MonoBehaviour
         
         healthBarFill.fillAmount = currentHealthFill;
         
-        // Color transition based on health level
-        if (currentHealthFill <= healthLowThreshold)
+        if (useStaticHealthColor)
         {
-            healthBarFill.color = Color.Lerp(healthLowColor, healthFullColor, currentHealthFill / healthLowThreshold);
+            healthBarFill.color = healthColor;
         }
         else
         {
-            healthBarFill.color = healthFullColor;
+            healthBarFill.color = healthColor;
         }
     }
     
@@ -173,10 +167,10 @@ public class HealthHungerUI : MonoBehaviour
         
         hungerBarFill.fillAmount = currentHungerFill;
         
-        // Color transition based on hunger level
         if (currentHungerFill <= hungerLowThreshold)
         {
-            hungerBarFill.color = Color.Lerp(hungerLowColor, hungerFullColor, currentHungerFill / hungerLowThreshold);
+            float colorLerpFactor = currentHungerFill / hungerLowThreshold;
+            hungerBarFill.color = Color.Lerp(hungerLowColor, hungerFullColor, colorLerpFactor);
         }
         else
         {
@@ -184,17 +178,46 @@ public class HealthHungerUI : MonoBehaviour
         }
     }
     
-    // Public methods for testing
-    [ContextMenu("Test Health Low")]
+    public void ResetToFullColors()
+    {
+        if (healthBarFill != null)
+        {
+            healthBarFill.color = healthColor;
+        }
+        
+        if (hungerBarFill != null)
+        {
+            hungerBarFill.color = hungerFullColor;
+        }
+    }
+    
+    public void ForceUpdateBars(float healthPercent, float hungerPercent)
+    {
+        targetHealthFill = healthPercent;
+        targetHungerFill = hungerPercent;
+        currentHealthFill = healthPercent;
+        currentHungerFill = hungerPercent;
+        
+        ApplyHealthVisuals();
+        ApplyHungerVisuals();
+    }
+    
+    [ContextMenu("Test Health Low (Red)")]
     public void TestHealthLow()
     {
         UpdateHealthBar(20f, 100f);
     }
     
-    [ContextMenu("Test Hunger Low")]
+    [ContextMenu("Test Hunger Low (Orange)")]
     public void TestHungerLow()
     {
         UpdateHungerBar(30f, 100f);
+    }
+    
+    [ContextMenu("Test Hunger 50% (Transition)")]
+    public void TestHunger50()
+    {
+        UpdateHungerBar(50f, 100f);
     }
     
     [ContextMenu("Test Full Stats")]
@@ -203,4 +226,12 @@ public class HealthHungerUI : MonoBehaviour
         UpdateHealthBar(100f, 100f);
         UpdateHungerBar(100f, 100f);
     }
+    
+    [ContextMenu("Reset Colors (Red/Yellow)")]
+    public void TestResetColors()
+    {
+        ResetToFullColors();
+    }
+    
+
 } 

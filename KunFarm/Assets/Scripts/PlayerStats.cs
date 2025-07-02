@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 /// <summary>
 /// Quản lý Health và Hunger của Player - Pattern giống Wallet
@@ -170,8 +171,12 @@ public class PlayerStats : MonoBehaviour
         currentHunger = maxHunger;
         SpeedModifier = 1f;
         
+        // Trigger events trước
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         OnHungerChanged?.Invoke(currentHunger, maxHunger);
+        
+        // Force reset UI màu sắc sau 1 frame để đảm bảo UI đã update
+        StartCoroutine(ForceResetUIColors());
         
         if (playerMovement != null)
         {
@@ -179,5 +184,23 @@ public class PlayerStats : MonoBehaviour
         }
         
         Debug.Log("[PlayerStats] Player revived!");
+    }
+    
+    private System.Collections.IEnumerator ForceResetUIColors()
+    {
+        yield return null; // Đợi 1 frame
+        
+        // Tìm và reset UI colors
+        HealthHungerUI healthUI = FindObjectOfType<HealthHungerUI>();
+        if (healthUI != null)
+        {
+            healthUI.ForceUpdateBars(1f, 1f); // Force update to 100%
+            healthUI.ResetToFullColors(); // Reset colors
+            
+            if (showDebugInfo)
+            {
+                Debug.Log("[PlayerStats] UI colors force reset after revive");
+            }
+        }
     }
 } 

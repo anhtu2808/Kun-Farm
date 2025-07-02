@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 5656207814825896208}
   - component: {fileID: 944264181672840308}
   - component: {fileID: 2083536048103807085}
+  - component: {fileID: 2944437466567668381}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -153,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d97ff64a2a154eaa92b6dc87a1ba2e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  money: 0
+  money: 10000
   userId: 0
 --- !u!114 &5656207814825896208
 MonoBehaviour:
@@ -188,6 +189,7 @@ MonoBehaviour:
   toolbarUI: {fileID: 0}
   tileManager: {fileID: 0}
   playerMovement: {fileID: 0}
+  inventoryUI: {fileID: 0}
 --- !u!114 &2083536048103807085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,6 +205,28 @@ MonoBehaviour:
   interactableMap: {fileID: 0}
   toolManager: {fileID: 944264181672840308}
   player: {fileID: 6099918374191354116}
+  inventoryUI: {fileID: 0}
+--- !u!114 &2944437466567668381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12345678901234567890123456789012, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  maxHunger: 100
+  hungerDecreaseRate: 1
+  healthDecreaseRate: 5
+  speedPenalty50Percent: 1
+  speedPenalty30Percent: 2
+  currentHealth: 100
+  currentHunger: 100
+  showDebugInfo: 1
 --- !u!1 &4358920708629238525
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,7 +300,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 10
   m_Sprite: {fileID: 607220629, guid: 26ef768d58e744e3580e607c92bc7394, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
