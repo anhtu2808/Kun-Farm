@@ -265,8 +265,12 @@ MonoBehaviour:
   player: {fileID: 1747502851}
   shopPanel: {fileID: 525305867}
   itemManager: {fileID: 822633254}
+  playerInventoryScrollUI: {fileID: 1954336609}
   sellSlotContainer: {fileID: 597268153}
+  playerId: 1
   shopSellSlotPrefab: {fileID: 6720336812612130337, guid: ae11c4161df5c45499d658dfe229c423, type: 3}
+  soldItemSlotPrefab: {fileID: 6720336812612130337, guid: ae11c4161df5c45499d658dfe229c423, type: 3}
+  minSlotCount: 27
 --- !u!1 &269776193 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3780189189055157834, guid: 2bfc1c172926585469814bfc1d5eea42, type: 3}
@@ -295,6 +299,7 @@ MonoBehaviour:
   shopSlotContainer: {fileID: 1588952750}
   shopSlotPrefab: {fileID: 6720336812612130337, guid: d093b854b94913144987559ad5806c47, type: 3}
   playerInventoryScrollUI: {fileID: 1954336609}
+  playerId: 1
 --- !u!1 &339978683 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4945531298151755936, guid: de0ede790a28226488e2a36ba547ff5a, type: 3}
@@ -1176,7 +1181,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7110774057344621660, guid: 2bfc1c172926585469814bfc1d5eea42, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 8.926515
+      value: 0.3030958
       objectReference: {fileID: 0}
     - target: {fileID: 7133877166987484249, guid: 2bfc1c172926585469814bfc1d5eea42, type: 3}
       propertyPath: m_Size
@@ -7813,6 +7818,16 @@ PrefabInstance:
     - {fileID: 2021820779479489926, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
     - {fileID: 8476065941596760533, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
     - {fileID: 8834904177829328835, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 7655459349377991876, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 6270760175323134123, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 7101224930847086651, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 7790358981607556932, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 1600551573456440309, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 4106337848580919941, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 9187770646670604118, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 1819037700316902011, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 7176263331970341402, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
+    - {fileID: 393967160106382079, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8688778290668940733, guid: fbc5d1b495dce3247bfb140d6d6328cc, type: 3}

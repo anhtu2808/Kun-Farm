@@ -21,18 +21,14 @@ namespace KunFarm.Presentation.Controllers
         public async Task<IActionResult> GetAll([FromRoute] int playerId)
         {
             var result = await _onlineShopService.GetRandomSoldItem(playerId);
-            if (result.Data is { } && result.Data.Count > 0)
-                return Ok(result);
-            return NotFound(result);
+            return Ok(result);
         }
 
         [HttpPost("sell/{playerId:int}")]
         public async Task<IActionResult> SellItems([FromRoute] int playerId, [FromBody] SellItemRequest request)
         {
             var result = await _onlineShopService.SellItem(playerId, request);
-            if (result.Code == 200)
-                return Ok(result);
-            return NotFound(result);
+            return Ok(result);
         }
 
 

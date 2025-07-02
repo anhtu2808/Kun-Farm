@@ -116,7 +116,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("API lỗi: " + request.error);
+                Debug.Log("API lỗi: " + request.error);
         }
         // Removed refresh call from here - now done in OpenShop()
     }

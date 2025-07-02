@@ -68,6 +68,9 @@ public class OnlBuyShopManager : MonoBehaviour
         isOpen = true;
         shopPanel.SetActive(true);
         
+        // Load fresh shop data từ API
+        LoadShopDataOnOpen();
+        
         // Refresh inventory UI để hiển thị items hiện tại
         if (playerInventoryScrollUI != null)
         {
@@ -91,22 +94,34 @@ public class OnlBuyShopManager : MonoBehaviour
     private IEnumerator LoadShopData(int customPlayerId = -1)
     {
         int targetPlayerId = customPlayerId > 0 ? customPlayerId : playerId;
-        string apiUrl = "http://localhost:5270/online-shop/2";
-        string url = apiUrl.Replace("{playerId}", targetPlayerId.ToString());
+        string apiUrl = $"http://localhost:5270/online-shop/2";
 
-        UnityWebRequest request = UnityWebRequest.Get(url);
+        UnityWebRequest request = UnityWebRequest.Get(apiUrl);
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
             string json = request.downloadHandler.text;
+            Debug.Log($"✅ [Online Buy] Shop data received: {json}");
+            
             BuyShopWrapper response = JsonUtility.FromJson<BuyShopWrapper>(json);
-            foreach (var item in response.data)
+            if (response?.data != null)
             {
-                Debug.Log($"[Get Online Shop Data] Loaded shop item: {item.collectableType} - {item.price} - {item.canBuy} - {item.quantity}");
-                GameObject slotGO = Instantiate(shopSlotPrefab, shopSlotContainer);
-                var slotUI = slotGO.GetComponent<ShopBuySlot_UI>();
-                slotUI.Setup(item, this);
+                Debug.Log($"📊 [Online Buy] Loading {response.data.Count()} shop items");
+                
+                foreach (var item in response.data)
+                {
+                    Debug.Log($"📦 [Online Buy] Shop item: {item.collectableType} - {item.price}G - CanBuy: {item.canBuy} - Qty: {item.quantity}");
+                    GameObject slotGO = Instantiate(shopSlotPrefab, shopSlotContainer);
+                    var slotUI = slotGO.GetComponent<ShopBuySlot_UI>();
+                    slotUI.Setup(item, this);
+                }
+                
+                Debug.Log($"✅ [Online Buy] Loaded {response.data.Count()} shop items successfully");
+            }
+            else
+            {
+                Debug.Log("📋 [Online Buy] No shop data available or empty response");
             }
         }
         else

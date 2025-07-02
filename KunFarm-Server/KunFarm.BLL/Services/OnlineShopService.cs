@@ -127,6 +127,15 @@ namespace KunFarm.BLL.Services
         public async Task<ApiResponse<SellItemResponse>> SellItem(int playerId, SellItemRequest request)
         {
             Item? item = await _itemRepository.GetItemByType(request.CollectableType);
+            if (item == null)
+            {
+                return new ApiResponse<SellItemResponse>
+                {
+                    Code = 400,
+                    Data = null,
+                    Message = $"Item type '{request.CollectableType}' not found in database."
+                };
+            }
 
             var slot = await _onlineShopRepository.AddAsync
                 (
@@ -167,6 +176,8 @@ namespace KunFarm.BLL.Services
         {
             List<SellItemResponse> responses = new List<SellItemResponse>();
             var soldItems = await _onlineShopRepository.GetBySellerId(playerId);
+            
+            Console.WriteLine($"[GetSoldItemsByPlayer] Found {soldItems.Count} items for player {playerId}");
             
             foreach (OnlineShopSlot slot in soldItems)
             {
@@ -267,10 +278,13 @@ namespace KunFarm.BLL.Services
                 };
             }
 
-            // Xóa items đã claim khỏi database
+            // Set deleteFlag = true cho items đã claim (soft delete)
             foreach (var slot in itemsToClaim)
             {
-                await _onlineShopRepository.DeleteAsync(slot.Id);
+                slot.IsDeleted = true;
+                slot.UpdatedAt = DateTime.UtcNow;
+                var updateResult = await _onlineShopRepository.UpdateAsync(slot);
+                Console.WriteLine($"[ClaimMoney] Set IsDeleted = true for slot {slot.Id}, UpdateResult: {updateResult != null}");
             }
 
             return new ApiResponse<bool>

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
+using TMPro;
 
 public class OnlSellShopManager : MonoBehaviour
 {
@@ -11,17 +13,22 @@ public class OnlSellShopManager : MonoBehaviour
     public GameObject shopPanel;
     public ItemManager itemManager;
     public PlayerInventoryScroll_UI playerInventoryScrollUI;
+    public Transform sellSlotContainer;
 
     [Header("Settings")]
     public int playerId = 1; // Default player ID, có thể set từ inspector hoặc script khác
 
     [Header("UI")]
-    public Transform sellSlotContainer;
     public GameObject shopSellSlotPrefab;
     public GameObject soldItemSlotPrefab; // Prefab cho items đã đăng bán
 
-    private List<SoldItemSlot_UI> soldSlots = new();
+    [Header("Slot Settings")]
+    [SerializeField] private int minSlotCount = 27; // Số slot tối thiểu
+
+    private List<SoldItemSlot_UI> soldSlots = new(); // Danh sách tất cả slot UI
     private bool isOpen = false;
+    private bool slotsInitialized = false;
+
     private void Awake()
     {
         if (player == null)
@@ -31,23 +38,64 @@ public class OnlSellShopManager : MonoBehaviour
         if (playerInventoryScrollUI == null)
             playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>();
         shopPanel.SetActive(false);
+
+        // Khởi tạo sẵn các slot rỗng
+        InitializeEmptySlots();
+    }
+
+    private void Start()
+    {
+        if (shopPanel != null)
+            shopPanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Khởi tạo sẵn 27 slot rỗng
+    /// </summary>
+    private void InitializeEmptySlots()
+    {
+        if (slotsInitialized || soldItemSlotPrefab == null || sellSlotContainer == null)
+            return;
+
+        Debug.Log($"🔧 [Sell Shop] Khởi tạo {minSlotCount} slot rỗng...");
+
+        for (int i = 0; i < minSlotCount; i++)
+        {
+            GameObject slotGO = Instantiate(soldItemSlotPrefab, sellSlotContainer);
+            var slotUI = slotGO.GetComponent<SoldItemSlot_UI>();
+            
+            if (slotUI != null)
+            {
+                slotUI.SetupEmptySlot(); // Setup slot rỗng
+                soldSlots.Add(slotUI);
+            }
+            else
+            {
+                Debug.LogError($"❌ [Sell Shop] SoldItemSlot_UI component not found on prefab!");
+                Destroy(slotGO);
+            }
+        }
+
+        slotsInitialized = true;
+        Debug.Log($"✅ [Sell Shop] Đã khởi tạo {soldSlots.Count} slot rỗng");
     }
 
     void Update()
     {
-        // Input handling moved to UIManager
-        // O key is now handled by UIManager
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            ToggleShop();
+        }
     }
 
     public void ToggleShop()
     {
-        isOpen = !isOpen;
-        shopPanel.SetActive(isOpen);
+        if (isOpen) CloseShop();
+        else OpenShop();
     }
 
     public void CloseShop()
     {
-
         isOpen = false;
         shopPanel.SetActive(false);
     }
@@ -56,6 +104,12 @@ public class OnlSellShopManager : MonoBehaviour
     {
         isOpen = true;
         shopPanel.SetActive(true);
+        
+        // Đảm bảo slots đã được khởi tạo
+        if (!slotsInitialized)
+        {
+            InitializeEmptySlots();
+        }
         
         // Refresh inventory UI để hiển thị items hiện tại
         if (playerInventoryScrollUI != null)
@@ -240,15 +294,19 @@ public class OnlSellShopManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Làm mới danh sách (ẩn tất cả slot)
+    /// Làm mới danh sách (reset về slot rỗng, không destroy)
     /// </summary>
     private void ClearAllSlots()
     {
+        Debug.Log($"🧹 [Sell Shop] Reset {soldSlots.Count} slot về trạng thái rỗng");
+        
         foreach (var slot in soldSlots)
         {
-            Destroy(slot.gameObject);
+            if (slot != null)
+            {
+                slot.SetupEmptySlot();
+            }
         }
-        soldSlots.Clear();
     }
 
     /// <summary>
@@ -280,38 +338,78 @@ public class OnlSellShopManager : MonoBehaviour
                 // Hiển thị tất cả items trên UI (cả đang bán và đã bán)
                 DisplaySoldItemsOnUI(response.data);
             }
+            else
+            {
+                Debug.Log($"📋 [Sell Shop] Không có items, hiển thị slot rỗng");
+                // Reset về trạng thái rỗng nếu không có data
+                ClearAllSlots();
+            }
         }
         else
         {
             Debug.LogError($"❌ [Sell Shop] Load sold items failed: {request.error}");
+            // Reset về trạng thái rỗng nếu API lỗi
+            ClearAllSlots();
         }
     }
 
     /// <summary>
-    /// Hiển thị danh sách sold items lên UI với button claim riêng biệt
+    /// Hiển thị danh sách sold items lên UI, sử dụng slot có sẵn
     /// </summary>
     private void DisplaySoldItemsOnUI(List<SellItemResponse> soldItems)
     {
-        // Clear existing UI slots first
+        // Reset tất cả slot về trạng thái rỗng trước
         ClearAllSlots();
         
-        foreach (var item in soldItems)
+        // Đảm bảo có đủ slot cho tất cả items
+        EnsureEnoughSlots(soldItems.Count);
+        
+        // Fill data vào các slot
+        for (int i = 0; i < soldItems.Count && i < soldSlots.Count; i++)
         {
-            // Sử dụng soldItemSlotPrefab thay vì shopSellSlotPrefab
-            GameObject slotGO = Instantiate(soldItemSlotPrefab, sellSlotContainer);
-            var slotUI = slotGO.GetComponent<SoldItemSlot_UI>();
+            var item = soldItems[i];
+            var slotUI = soldSlots[i];
             
             if (slotUI != null)
             {
                 // Setup UI với callback claim
                 slotUI.Setup(item, this, OnClaimSingleItem);
-                Debug.Log($"📦 [Sell Shop UI] Added item: {item.collectableType}, Price: {item.price}G, CanBuy: {item.canBuy}");
+                Debug.Log($"📦 [Sell Shop UI] Filled slot {i}: {item.collectableType}, ItemId: {item.id}, Price: {item.price}G, CanBuy: {item.canBuy}");
+            }
+        }
+        
+        Debug.Log($"✅ [Sell Shop] Hiển thị {soldItems.Count} items trên {soldSlots.Count} slot");
+    }
+
+    /// <summary>
+    /// Đảm bảo có đủ slot cho số lượng items
+    /// </summary>
+    private void EnsureEnoughSlots(int requiredSlots)
+    {
+        if (requiredSlots <= soldSlots.Count)
+            return; // Đã có đủ slot
+
+        int slotsToAdd = requiredSlots - soldSlots.Count;
+        Debug.Log($"🔧 [Sell Shop] Cần thêm {slotsToAdd} slot (từ {soldSlots.Count} lên {requiredSlots})");
+
+        for (int i = 0; i < slotsToAdd; i++)
+        {
+            GameObject slotGO = Instantiate(soldItemSlotPrefab, sellSlotContainer);
+            var slotUI = slotGO.GetComponent<SoldItemSlot_UI>();
+            
+            if (slotUI != null)
+            {
+                slotUI.SetupEmptySlot();
+                soldSlots.Add(slotUI);
             }
             else
             {
-                Debug.LogError($"❌ [Sell Shop UI] SoldItemSlot_UI component not found on prefab!");
+                Debug.LogError($"❌ [Sell Shop] SoldItemSlot_UI component not found on prefab!");
+                Destroy(slotGO);
             }
         }
+
+        Debug.Log($"✅ [Sell Shop] Đã tạo thêm {slotsToAdd} slot, tổng: {soldSlots.Count}");
     }
 
     /// <summary>
@@ -361,32 +459,65 @@ public class OnlSellShopManager : MonoBehaviour
                 Debug.Log($"💰 [Sell Shop] Đã cộng {expectedAmount}G vào wallet, tổng: {player.wallet.Money}G");
             }
             
-            // Refresh lại danh sách items sau khi claim
-            LoadSoldItemsForDisplay();
+            // Destroy specific slot sau khi claim thành công
+            DestroyClaimedSlot(itemIds[0]); // Single item claim
             
-            Debug.Log($"🎉 [Sell Shop] Claim thành công {expectedAmount}G!");
+            Debug.Log($"🎉 [Sell Shop] Claim thành công {expectedAmount}G và đã destroy slot!");
         }
         else
         {
             Debug.LogError($"❌ [Sell Shop] Claim money failed: {request.error}");
             
-            // Re-enable claim button for failed items
-            EnableClaimButtonsForItems(itemIds);
+            // Re-enable slot button for failed items
+            EnableSlotButtonsForItems(itemIds);
         }
     }
 
     /// <summary>
-    /// Re-enable claim buttons for specific items (khi claim thất bại)
+    /// Destroy specific slot sau khi claim thành công
     /// </summary>
-    private void EnableClaimButtonsForItems(List<int> itemIds)
+    private void DestroyClaimedSlot(int itemId)
+    {
+        Debug.Log($"🗑️ [Sell Shop] Tìm và destroy slot với itemId: {itemId}");
+        
+        // Tìm slot với itemId cụ thể
+        SoldItemSlot_UI slotToDestroy = null;
+        foreach (var slot in soldSlots)
+        {
+            if (slot != null && slot.GetItemId() == itemId)
+            {
+                slotToDestroy = slot;
+                break;
+            }
+        }
+        
+        if (slotToDestroy != null)
+        {
+            // Remove từ list trước khi destroy
+            soldSlots.Remove(slotToDestroy);
+            
+            // Destroy slot
+            slotToDestroy.DestroySlot();
+            
+            Debug.Log($"✅ [Sell Shop] Đã destroy slot itemId: {itemId}. Còn lại: {soldSlots.Count} slot");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ [Sell Shop] Không tìm thấy slot với itemId: {itemId}");
+        }
+    }
+
+    /// <summary>
+    /// Re-enable slot buttons for specific items (khi claim thất bại)
+    /// </summary>
+    private void EnableSlotButtonsForItems(List<int> itemIds)
     {
         // Tìm và re-enable buttons cho các items failed
-        foreach (Transform child in sellSlotContainer)
+        foreach (var slot in soldSlots)
         {
-            var slotUI = child.GetComponent<SoldItemSlot_UI>();
-            if (slotUI != null)
+            if (slot != null && itemIds.Contains(slot.GetItemId()))
             {
-                slotUI.EnableClaimButton();
+                slot.EnableSlotButton();
             }
         }
     }

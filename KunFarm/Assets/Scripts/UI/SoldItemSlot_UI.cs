@@ -5,7 +5,9 @@ using System;
 
 /// <summary>
 /// UI component cho items đã đăng bán online
-/// Hiển thị thông tin item + button claim nếu đã bán
+/// Hiển thị thông tin item + click để claim nếu đã bán
+/// Phân biệt trạng thái bằng màu background
+/// Có thể hiển thị slot rỗng
 /// </summary>
 public class SoldItemSlot_UI : MonoBehaviour
 {
@@ -15,28 +17,90 @@ public class SoldItemSlot_UI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI quantityText;
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private TextMeshProUGUI statusText;
-    [SerializeField] private Button claimButton;
+    [SerializeField] private Image backgroundImage; // Background để đổi màu
+
+    [Header("Color Settings")]
+    [SerializeField] private Color sellingColor = new Color(1f, 1f, 0.8f, 1f); // Màu vàng nhạt cho đang bán
+    [SerializeField] private Color soldColor = new Color(0.8f, 1f, 0.8f, 1f); // Màu xanh nhạt cho đã bán
+    [SerializeField] private Color emptyColor = new Color(0.9f, 0.9f, 0.9f, 1f); // Màu xám nhạt cho slot rỗng
 
     private SellItemResponse itemData;
     private OnlSellShopManager shopManager;
     private Action<SellItemResponse> onClaimCallback;
+    private Button slotButton; // Button cho toàn bộ slot
+    private bool isEmpty = true; // Trạng thái slot rỗng
+
+    private void Awake()
+    {
+        // Đảm bảo có Button component cho toàn bộ slot
+        slotButton = GetComponent<Button>();
+        if (slotButton == null)
+        {
+            slotButton = gameObject.AddComponent<Button>();
+        }
+
+        // Nếu chưa có background image, tạo mới
+        if (backgroundImage == null)
+        {
+            backgroundImage = GetComponent<Image>();
+            if (backgroundImage == null)
+            {
+                backgroundImage = gameObject.AddComponent<Image>();
+            }
+        }
+
+        // Khởi tạo slot rỗng
+        SetupEmptySlot();
+    }
+
+    /// <summary>
+    /// Setup slot rỗng (không có data)
+    /// </summary>
+    public void SetupEmptySlot()
+    {
+        isEmpty = true;
+        itemData = null;
+        
+        // Ẩn tất cả UI elements
+        if (itemIcon != null) itemIcon.gameObject.SetActive(false);
+        if (itemNameText != null) itemNameText.text = "";
+        if (quantityText != null) quantityText.text = "";
+        if (priceText != null) priceText.text = "";
+        if (statusText != null) statusText.text = "Slot trống";
+        
+        // Set background color cho slot rỗng
+        if (backgroundImage != null)
+            backgroundImage.color = emptyColor;
+        
+        // Disable button cho slot rỗng
+        if (slotButton != null)
+        {
+            slotButton.interactable = false;
+            slotButton.onClick.RemoveAllListeners();
+        }
+    }
 
     /// <summary>
     /// Setup UI slot với data từ server
     /// </summary>
     public void Setup(SellItemResponse data, OnlSellShopManager manager, Action<SellItemResponse> claimCallback)
     {
+        isEmpty = false;
         itemData = data;
         shopManager = manager;
         onClaimCallback = claimCallback;
 
         UpdateUI();
-        SetupClaimButton();
+        SetupSlotButton();
     }
 
     private void UpdateUI()
     {
-        if (itemData == null) return;
+        if (itemData == null) 
+        {
+            SetupEmptySlot();
+            return;
+        }
 
         // Set item name
         if (itemNameText != null)
@@ -56,8 +120,8 @@ public class SoldItemSlot_UI : MonoBehaviour
             LoadItemIcon();
         }
 
-        // Set status và button state
-        UpdateStatusAndButton();
+        // Set status và background color
+        UpdateStatusAndVisual();
     }
 
     /// <summary>
@@ -107,71 +171,106 @@ public class SoldItemSlot_UI : MonoBehaviour
         }
     }
 
-    private void UpdateStatusAndButton()
+    private void UpdateStatusAndVisual()
     {
         if (itemData.canBuy)
         {
-            // Item vẫn đang bán
+            // Item vẫn đang bán - màu vàng nhạt
             if (statusText != null)
                 statusText.text = "Đang bán";
 
-            if (claimButton != null)
-            {
-                claimButton.gameObject.SetActive(false);
-            }
+            if (backgroundImage != null)
+                backgroundImage.color = sellingColor;
+
+            // Button vẫn clickable nhưng sẽ không làm gì
+            if (slotButton != null)
+                slotButton.interactable = true;
         }
         else
         {
-            // Item đã được bán, có thể claim
+            // Item đã được bán - màu xanh nhạt, có thể claim
             if (statusText != null)
-                statusText.text = "Đã bán";
+                statusText.text = $"Đã bán - Click để claim {itemData.price}G";
 
-            if (claimButton != null)
-            {
-                claimButton.gameObject.SetActive(true);
-                var buttonText = claimButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (buttonText != null)
-                    buttonText.text = $"Claim {itemData.price}G";
-            }
+            if (backgroundImage != null)
+                backgroundImage.color = soldColor;
+
+            if (slotButton != null)
+                slotButton.interactable = true;
         }
     }
 
-    private void SetupClaimButton()
+    private void SetupSlotButton()
     {
-        if (claimButton != null)
+        if (slotButton != null)
         {
             // Clear existing listeners
-            claimButton.onClick.RemoveAllListeners();
+            slotButton.onClick.RemoveAllListeners();
             
             // Add click event
-            claimButton.onClick.AddListener(OnClaimButtonClick);
+            slotButton.onClick.AddListener(OnSlotClick);
         }
     }
 
-    private void OnClaimButtonClick()
+    private void OnSlotClick()
     {
-        if (itemData == null || itemData.canBuy)
+        if (isEmpty || itemData == null)
         {
-            Debug.LogWarning($"[SoldItemSlot_UI] Cannot claim item {itemData?.collectableType} - still for sale");
+            Debug.Log("[SoldItemSlot_UI] Slot rỗng - không làm gì");
             return;
         }
 
+        if (itemData.canBuy)
+        {
+            // Item đang bán - không làm gì, chỉ log
+            Debug.Log($"[SoldItemSlot_UI] Item {itemData.collectableType} is still for sale");
+            return;
+        }
+
+        // Item đã bán - proceed với claim
         Debug.Log($"[SoldItemSlot_UI] Claiming item: {itemData.collectableType} for {itemData.price}G");
         
         // Disable button để tránh double-click
-        if (claimButton != null)
-            claimButton.interactable = false;
+        if (slotButton != null)
+            slotButton.interactable = false;
 
         // Call callback
         onClaimCallback?.Invoke(itemData);
     }
 
     /// <summary>
-    /// Re-enable claim button (gọi khi claim thất bại)
+    /// Re-enable slot button (gọi khi claim thất bại)
     /// </summary>
-    public void EnableClaimButton()
+    public void EnableSlotButton()
     {
-        if (claimButton != null)
-            claimButton.interactable = true;
+        if (slotButton != null && !isEmpty)
+            slotButton.interactable = true;
     }
+
+    /// <summary>
+    /// Get item ID for tracking
+    /// </summary>
+    public int GetItemId()
+    {
+        return itemData?.id ?? -1;
+    }
+
+    /// <summary>
+    /// Destroy this slot with animation
+    /// </summary>
+    public void DestroySlot()
+    {
+        Debug.Log($"🗑️ [SoldItemSlot] Destroying slot for item ID: {GetItemId()}");
+        
+        // Optional: Thêm animation trước khi destroy
+        // StartCoroutine(DestroyWithAnimation());
+        
+        // Immediate destroy cho đơn giản
+        Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// Check if this slot is empty
+    /// </summary>
+    public bool IsEmpty => isEmpty;
 }
