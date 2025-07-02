@@ -180,4 +180,65 @@ public class HandTool : Tool
     {
         return false; // Hand tool vĩnh viễn
     }
+}
+
+/// <summary>
+/// Tool để ăn food và restore health/hunger
+/// </summary>
+[System.Serializable]
+public class FoodTool : Tool
+{
+    [Header("Food Properties")]
+    public float hungerRestore = 50f;
+    public float healthRestore = 30f;
+    
+    public FoodTool(int foodCount = 1)
+    {
+        toolName = "Food";
+        animatorToolIndex = 4; // Index cho eating animation
+        quantity = foodCount;
+    }
+
+    public override void Use(Vector3Int cellPosition, TileManager tileManager)
+    {
+        // Food tool không cần cellPosition hoặc tileManager
+        // Logic eating sẽ được handle trong ToolManager
+    }
+
+    public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
+    {
+        // Food luôn có thể dùng miễn là còn quantity
+        return quantity > 0;
+    }
+    
+    public override bool ConsumeOnUse()
+    {
+        quantity--;
+        return quantity > 0; // Return false nếu hết food
+    }
+    
+    public override bool IsConsumable()
+    {
+        return true; // Food có thể hết
+    }
+    
+    /// <summary>
+    /// Eat food và restore player stats
+    /// </summary>
+    public void EatFood()
+    {
+        PlayerStats playerStats = Object.FindObjectOfType<PlayerStats>();
+        if (playerStats != null)
+        {
+            playerStats.RestoreHunger(hungerRestore);
+            playerStats.RestoreHealth(healthRestore);
+            
+            SimpleNotificationPopup.Show($"Ate {toolName}! +{hungerRestore} Hunger, +{healthRestore} Health");
+            Debug.Log($"[FoodTool] Ate {toolName}: +{hungerRestore} hunger, +{healthRestore} health");
+        }
+        else
+        {
+            Debug.LogWarning("[FoodTool] PlayerStats not found!");
+        }
+    }
 } 
