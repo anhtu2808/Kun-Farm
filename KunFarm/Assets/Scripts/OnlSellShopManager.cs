@@ -68,7 +68,7 @@ public class OnlSellShopManager : MonoBehaviour
     private IEnumerator SendSellRequest(string collectableType, int quantity, int totalPrice)
     {
         Debug.Log($"📤 [Online Sell] Gửi yêu cầu bán: {collectableType}, Số lượng: {quantity}, Tổng giá: {totalPrice}");
-        string url = $"https://localhost:7067/online-shop/sell/{1}";
+        string url = $"http://localhost:5270/online-shop/sell/{1}";
 
         SellItemRequest requestData = new SellItemRequest
         {

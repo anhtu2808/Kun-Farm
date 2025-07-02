@@ -157,7 +157,7 @@ public class ShopManager : MonoBehaviour
 
     private IEnumerator SendBuyRequest(List<BuyItemRequest> requestList)
     {
-        string apiUrl = "https://localhost:7067/regular-shop/buy/1";
+        string apiUrl = "http://localhost:5270/regular-shop/buy/1";
 
         // ✅ Sử dụng class rõ ràng thay vì anonymous
         BuyItemRequestList wrapper = new BuyItemRequestList();

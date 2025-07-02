@@ -76,7 +76,7 @@ public class OnlBuyShopManager : MonoBehaviour
 
     private IEnumerator GetShopData(int playerId = 2)
     {
-        string apiUrl = "https://localhost:7067/online-shop/{playerId}";
+        string apiUrl = "http://localhost:5270/online-shop/{playerId}";
         string url = apiUrl.Replace("{playerId}", playerId.ToString());
 
         UnityWebRequest request = UnityWebRequest.Get(url);
@@ -133,7 +133,7 @@ public class OnlBuyShopManager : MonoBehaviour
 
     private IEnumerator SendBuyRequest(List<int> requestList)
     {
-        string apiUrl = "https://localhost:7067/online-shop/buy/1";
+        string apiUrl = "http://localhost:5270/online-shop/buy/1";
 
         string json = "[" + string.Join(",", requestList) + "]";
         Debug.Log("📤 Sending Buy Request: " + json); // kiểm tra JSON trước khi gửi
