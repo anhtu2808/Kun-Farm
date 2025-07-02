@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System;
 
 /// <summary>
 /// Quản lý logic mua/bán items trong shop
@@ -136,6 +137,20 @@ public class ShopManager : MonoBehaviour
         }
 
         hasBuyItem = true;
+
+        if (Enum.TryParse<CollectableType>(data.collectableType, ignoreCase: true, out var parsedType))
+        {
+            var collectable = itemManager.GetItemByType(parsedType);
+            if (collectable != null)
+            {
+                player.inventory.Add(collectable);
+                player.inventory.NotifyInventoryChanged();
+            }
+        }
+        else
+        {
+            Debug.LogError($"Không parse được CollectableType từ '{data.collectableType}'");
+        }
         // Gọi tới Wallet để trừ tiền + Inventory để thêm item (nếu đủ)
         Debug.Log($"Mua: {data.itemName} với giá {data.buyPrice}");
     }
