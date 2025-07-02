@@ -10,6 +10,9 @@ public class Movement : MonoBehaviour
     [Header("References")]
     public Animator animator;
     
+    // Speed modifier for PlayerStats system
+    private float speedModifier = 1f;
+    
     private Vector3 direction; // Direction of movement
     private Vector3 lastMovementDirection = Vector3.down; // Default facing down
     private Vector3 lastFacingDirection = Vector3.down; // Keep track of facing for idle animation
@@ -71,7 +74,8 @@ public class Movement : MonoBehaviour
     private void HandleMovement()
     {
         // Move the player (only in FixedUpdate to avoid double movement)
-        transform.position += direction.normalized * speed * Time.fixedDeltaTime;
+        float currentSpeed = speed * speedModifier;
+        transform.position += direction.normalized * currentSpeed * Time.fixedDeltaTime;
     }
     
     void AnimateMovement(Vector3 direction)
@@ -126,5 +130,29 @@ public class Movement : MonoBehaviour
     public Animator GetAnimator()
     {
         return animator;
+    }
+    
+    /// <summary>
+    /// Set speed modifier for PlayerStats system
+    /// </summary>
+    public void SetSpeedModifier(float modifier)
+    {
+        speedModifier = Mathf.Clamp(modifier, 0f, 2f); // Clamp để tránh giá trị quá cao/thấp
+    }
+    
+    /// <summary>
+    /// Get current effective speed (including modifier)
+    /// </summary>
+    public float GetCurrentSpeed()
+    {
+        return speed * speedModifier;
+    }
+    
+    /// <summary>
+    /// Get current speed modifier
+    /// </summary>
+    public float GetSpeedModifier()
+    {
+        return speedModifier;
     }
 }
