@@ -96,6 +96,7 @@
     <Compile Include="Assets\Scripts\UI\HealthHungerUI.cs" />
     <Compile Include="Assets\Scripts\PlayerInteraction.cs" />
     <Compile Include="Assets\Scripts\DoorController.cs" />
+    <Compile Include="Assets\Scripts\Data\GameLoader.cs" />
     <Compile Include="Assets\Scripts\Wallet.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerSellScroll_UI.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerSellItemSlot_UI.cs" />

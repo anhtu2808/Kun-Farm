@@ -13,5 +13,7 @@ namespace KunFarm.BLL.Interfaces
         Task<ApiResponse<List<ShopItemResponse>>> GetShopItem(int playerId);
 
         Task<ApiResponse<bool>> BuyItem(int playerId, List<BuyItemRequest> request);
+
+        Task CreatePlayerSlot(int playerId);
     }
 }

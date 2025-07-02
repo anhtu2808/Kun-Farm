@@ -1,7 +1,9 @@
 ﻿using KunFarm.BLL.DTOs.Request;
 using KunFarm.BLL.DTOs.Response;
 using KunFarm.BLL.Interfaces;
+using KunFarm.DAL.Entities;
 using KunFarm.DAL.Interfaces;
+using KunFarm.DAL.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,5 +110,21 @@ namespace KunFarm.BLL.Services
                };
            });
         }
+        public async Task CreatePlayerSlot(int playerId)
+        {
+           
+            var regularShopSlots = await _regularShopSlotRepository.GetAllSlot();
+            foreach (var slot in regularShopSlots)
+            {
+                var playerSlot = new PlayerRegularShopSlot
+                {
+                    PlayerStateId = playerId,
+                    RegularShopSlotId = slot.Id,
+                    CurrentStock = 0,
+                };
+                await _playerRegularShopSlotRepository.CreateAsync(playerSlot);
+            }
+        }
+
     }
 }
