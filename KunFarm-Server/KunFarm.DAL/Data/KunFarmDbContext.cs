@@ -17,6 +17,7 @@ namespace KunFarm.DAL.Data
         public DbSet<InventorySlot> InventorySlots { get; set; }
         public DbSet<PlayerRegularShopSlot> PlayerRegularShopSlots { get; set; }
         public DbSet<OnlineShopSlot> OnlineShopSlots { get; set; }
+        public DbSet<PlayerToolbar> PlayerToolbars { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +58,21 @@ namespace KunFarm.DAL.Data
                     .WithOne(s => s.PlayerState)
                     .HasForeignKey(s => s.PlayerStateId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // One-to-one relationship with PlayerToolbar
+                entity.HasOne(p => p.PlayerToolbar)
+                      .WithOne(t => t.PlayerState)
+                      .HasForeignKey<PlayerToolbar>(t => t.PlayerStateId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PlayerToolbar entity configuration
+            modelBuilder.Entity<PlayerToolbar>(entity =>
+            {
+                entity.HasKey(e => e.PlayerStateId);
+                
+                entity.Property(e => e.LastSaved)
+                      .HasDefaultValue(DateTime.Now);
             });
 
             // FarmState entity configuration

@@ -9,5 +9,7 @@ namespace KunFarm.BLL.Interfaces
         Task<bool> SaveGameAsync(int userId, SaveGameRequest request);
         Task<FarmStateResponse?> LoadFarmStateAsync(int userId);
         Task<bool> SaveFarmStateAsync(int userId, SaveFarmStateRequest request);
+        Task<ToolbarResponse?> LoadToolbarAsync(int userId);
+        Task<bool> SaveToolbarAsync(int userId, SaveToolbarRequest request);
     }
 } 

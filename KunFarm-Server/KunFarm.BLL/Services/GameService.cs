@@ -13,17 +13,20 @@ namespace KunFarm.BLL.Services
         private readonly IPlayerStateRepository _playerStateRepository;
         private readonly IUserRepository _userRepository;
         private readonly IFarmStateRepository _farmStateRepository;
+        private readonly IPlayerToolbarRepository _playerToolbarRepository;
         private readonly ILogger<GameService> _logger;
 
         public GameService(
             IPlayerStateRepository playerStateRepository,
             IUserRepository userRepository,
             IFarmStateRepository farmStateRepository,
+            IPlayerToolbarRepository playerToolbarRepository,
             ILogger<GameService> logger)
         {
             _playerStateRepository = playerStateRepository;
             _userRepository = userRepository;
             _farmStateRepository = farmStateRepository;
+            _playerToolbarRepository = playerToolbarRepository;
             _logger = logger;
         }
 
@@ -267,6 +270,120 @@ namespace KunFarm.BLL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving farm state for user: {UserId}", userId);
+                return false;
+            }
+        }
+
+        public async Task<ToolbarResponse?> LoadToolbarAsync(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Loading toolbar for user: {UserId}", userId);
+
+                // Check if user exists
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found: {UserId}", userId);
+                    return null;
+                }
+
+                // Get player state to find PlayerStateId
+                var playerState = await _playerStateRepository.GetByUserIdAsync(userId);
+                if (playerState == null)
+                {
+                    _logger.LogWarning("Player state not found for user: {UserId}", userId);
+                    return null;
+                }
+
+                // Get player toolbar
+                var playerToolbar = await _playerToolbarRepository.GetByPlayerStateIdAsync(playerState.UserId);
+                
+                if (playerToolbar == null)
+                {
+                    _logger.LogInformation("No toolbar data found for user: {UserId}, returning empty toolbar", userId);
+                    
+                    // Return empty toolbar
+                    return new ToolbarResponse
+                    {
+                        PlayerStateId = playerState.UserId,
+                        Tools = new List<ToolSlotResponse>(),
+                        LastSaved = DateTime.UtcNow
+                    };
+                }
+
+                // Parse JSON data
+                var toolsData = JsonSerializer.Deserialize<List<ToolSlotResponse>>(playerToolbar.ToolsJson, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                _logger.LogInformation("Toolbar loaded successfully for user: {UserId}", userId);
+                return new ToolbarResponse
+                {
+                    PlayerStateId = playerToolbar.PlayerStateId,
+                    Tools = toolsData ?? new List<ToolSlotResponse>(),
+                    LastSaved = playerToolbar.LastSaved
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading toolbar for user: {UserId}", userId);
+                return null;
+            }
+        }
+
+        public async Task<bool> SaveToolbarAsync(int userId, SaveToolbarRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Saving toolbar for user: {UserId}", userId);
+
+                // Check if user exists
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found: {UserId}", userId);
+                    return false;
+                }
+
+                // Get player state to find PlayerStateId
+                var playerState = await _playerStateRepository.GetByUserIdAsync(userId);
+                if (playerState == null)
+                {
+                    _logger.LogWarning("Player state not found for user: {UserId}", userId);
+                    return false;
+                }
+
+                // Convert request data to JSON with camelCase naming policy
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+                
+                var toolsJson = JsonSerializer.Serialize(request.tools, jsonOptions);
+                
+                _logger.LogInformation("Serializing {ToolCount} tools to JSON", request.tools?.Count ?? 0);
+
+                // Save toolbar
+                var success = await _playerToolbarRepository.SavePlayerToolbarAsync(
+                    playerState.UserId, 
+                    toolsJson);
+
+                if (success)
+                {
+                    _logger.LogInformation("Toolbar saved successfully for user: {UserId}", userId);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogError("Failed to save toolbar for user: {UserId}", userId);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving toolbar for user: {UserId}", userId);
                 return false;
             }
         }

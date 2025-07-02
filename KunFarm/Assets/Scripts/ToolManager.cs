@@ -25,6 +25,16 @@ public class ToolManager : MonoBehaviour
     private int selectedToolIndex = 0;
     private bool isUsingTool = false;
     
+    [Header("Auto-Save Settings")]
+    [SerializeField] private bool autoSaveEnabled = true;
+    [SerializeField] private float autoSaveInterval = 30f; // 30 seconds
+    [SerializeField] private bool showDebugInfo = false;
+    
+    // Auto-save tracking
+    private bool hasToolbarChanges = false;
+    private float lastAutoSaveTime = 0f;
+    private int currentUserId = 0;
+    
     public Tool SelectedTool => tools != null && selectedToolIndex < tools.Length ? tools[selectedToolIndex] : null;
 
     void Awake()
@@ -41,6 +51,15 @@ public class ToolManager : MonoBehaviour
             playerMovement = FindObjectOfType<Movement>();
         if (inventoryUI == null)
             inventoryUI = FindObjectOfType<Inventory>();
+        
+        // Get user ID from PlayerPrefs
+        currentUserId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        
+        // Đảm bảo Hand Tool luôn có ở slot đầu tiên
+        EnsureHandTool();
+        
+        if (showDebugInfo)
+            Debug.Log($"[ToolManager] Initialized with userId: {currentUserId}");
     }
 
     void Update()
@@ -50,20 +69,33 @@ public class ToolManager : MonoBehaviour
         
         // Listen for food eating (Space key)
         CheckFoodEating();
+        
+        // Auto-save toolbar if changes detected
+        CheckAutoSave();
     }
 
     private void InitializeTools()
     {
         tools = new Tool[9]; // 9 slots như trong Toolbar_UI
         
-        // Initialize tools từ ToolData array
-        for (int i = 0; i < toolDataArray.Length && i < tools.Length; i++)
+        // Luôn đặt Hand Tool ở slot đầu tiên (index 0) với icon từ ToolData
+        tools[0] = CreateHandToolWithIcon();
+        
+        // Initialize tools từ ToolData array (bắt đầu từ slot 1)
+        for (int i = 0; i < toolDataArray.Length && i + 1 < tools.Length; i++)
         {
             if (toolDataArray[i] != null)
             {
-                tools[i] = toolDataArray[i].CreateTool();
+                // Skip HandTool ToolData vì đã được set ở slot 0
+                if (toolDataArray[i].toolType != ToolType.Hand)
+                {
+                    tools[i + 1] = toolDataArray[i].CreateTool();
+                }
             }
         }
+        
+        if (showDebugInfo)
+            Debug.Log("[ToolManager] Hand Tool với icon đã được đặt ở slot đầu tiên");
     }
 
     private void CheckToolSelection()
@@ -295,8 +327,14 @@ public class ToolManager : MonoBehaviour
                 }
                 }
                 
+                // Mark toolbar as changed for auto-save
+                hasToolbarChanges = true;
+                
                 // Update display để show quantity mới hoặc xóa tool
                 UpdateToolbarDisplay();
+                
+                // Đảm bảo Hand Tool luôn có ở slot đầu tiên (nếu bị xóa do lỗi)
+                EnsureHandTool();
         }
     }
 
@@ -355,7 +393,21 @@ public class ToolManager : MonoBehaviour
     {
         if (index >= 0 && index < tools.Length)
         {
+            // Đặc biệt bảo vệ slot 0 - chỉ cho phép HandTool
+            if (index == 0 && tool != null && !(tool is HandTool))
+            {
+                if (showDebugInfo)
+                    Debug.LogWarning($"[ToolManager] Cannot place {tool.GetType().Name} at slot 0. Slot 0 is reserved for HandTool.");
+                return;
+            }
+            
             tools[index] = tool;
+            
+            // Mark toolbar as changed for auto-save
+            hasToolbarChanges = true;
+            
+            if (showDebugInfo)
+                Debug.Log($"[ToolManager] Tool changed at index {index}: {tool?.toolName ?? "null"}");
         }
     }
 
@@ -404,5 +456,172 @@ public class ToolManager : MonoBehaviour
         float distance = Vector3.Distance(playerPos, targetPos);
         
         return distance <= maxInteractionDistance;
+    }
+
+    private void CheckAutoSave()
+    {
+        if (!autoSaveEnabled || !hasToolbarChanges || currentUserId <= 0)
+            return;
+
+        if (Time.time - lastAutoSaveTime >= autoSaveInterval)
+        {
+            SaveToolbar();
+            lastAutoSaveTime = Time.time;
+            hasToolbarChanges = false;
+        }
+    }
+
+    public void SaveToolbar()
+    {
+        if (currentUserId <= 0)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[ToolManager] Cannot save toolbar: invalid userId");
+            return;
+        }
+
+        if (ApiClient.Instance == null)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[ToolManager] Cannot save toolbar: ApiClient not found");
+            return;
+        }
+
+        var toolbarData = ToolbarSaveData.FromToolManager(this, currentUserId);
+        string json = JsonUtility.ToJson(toolbarData);
+
+        if (showDebugInfo)
+            Debug.Log($"[ToolManager] Saving toolbar for user {currentUserId}");
+
+        StartCoroutine(ApiClient.Instance.PostJson(
+            "/game/toolbar/save",
+            json,
+            onSuccess: HandleSaveSuccess,
+            onError: HandleSaveError
+        ));
+    }
+
+    private void HandleSaveSuccess(string responseJson)
+    {
+        if (showDebugInfo)
+            Debug.Log("[ToolManager] ✅ Toolbar saved successfully");
+    }
+
+    private void HandleSaveError(string error)
+    {
+        if (showDebugInfo)
+            Debug.LogError($"[ToolManager] ❌ Failed to save toolbar: {error}");
+    }
+
+    public void LoadFromServer(ToolbarSaveData toolbarData)
+    {
+        if (toolbarData != null)
+        {
+            toolbarData.ApplyToToolManager(this);
+            
+            if (showDebugInfo)
+                Debug.Log($"[ToolManager] ✅ Toolbar loaded from server with {toolbarData.tools.Count} tools");
+        }
+        else
+        {
+            if (showDebugInfo)
+                Debug.Log("[ToolManager] No toolbar data received from server");
+        }
+    }
+
+    /// <summary>
+    /// Tạo Hand Tool với icon từ ToolData
+    /// </summary>
+    private Tool CreateHandToolWithIcon()
+    {
+        // Tìm HandTool ToolData trong toolDataArray
+        ToolData handToolData = null;
+        for (int i = 0; i < toolDataArray.Length; i++)
+        {
+            if (toolDataArray[i] != null && toolDataArray[i].toolType == ToolType.Hand)
+            {
+                handToolData = toolDataArray[i];
+                break;
+            }
+        }
+
+        // Nếu tìm thấy ToolData, sử dụng nó để tạo tool với icon
+        if (handToolData != null)
+        {
+            Tool handTool = handToolData.CreateTool();
+            if (showDebugInfo)
+                Debug.Log($"[ToolManager] Created HandTool with icon: {handTool.toolIcon?.name ?? "null"}");
+            return handTool;
+        }
+        
+        // Fallback: tạo HandTool mới và thử load icon từ Resources
+        var fallbackHand = new HandTool();
+        
+        // Thử load icon từ các path có thể
+        Sprite handIcon = Resources.Load<Sprite>("Sprites/hand_icon") ?? 
+                         Resources.Load<Sprite>("Tools/hand_icon") ??
+                         Resources.Load<Sprite>("hand_icon");
+        
+        if (handIcon != null)
+        {
+            fallbackHand.toolIcon = handIcon;
+            if (showDebugInfo)
+                Debug.Log($"[ToolManager] Created HandTool with fallback icon: {handIcon.name}");
+        }
+        else
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[ToolManager] No icon found for HandTool!");
+        }
+        
+        return fallbackHand;
+    }
+
+    /// <summary>
+    /// Đảm bảo Hand Tool luôn có ở slot đầu tiên (index 0)
+    /// </summary>
+    public void EnsureHandTool()
+    {
+        if (tools == null || tools.Length == 0) return;
+
+        // Kiểm tra nếu slot 0 không có tool hoặc không phải HandTool
+        if (tools[0] == null || !(tools[0] is HandTool))
+        {
+            // Tìm HandTool ở slot khác (nếu có)
+            HandTool existingHand = null;
+            int existingHandIndex = -1;
+            
+            for (int i = 1; i < tools.Length; i++)
+            {
+                if (tools[i] is HandTool handTool)
+                {
+                    existingHand = handTool;
+                    existingHandIndex = i;
+                    break;
+                }
+            }
+
+            // Nếu có HandTool ở slot khác, move về slot 0
+            if (existingHand != null)
+            {
+                tools[existingHandIndex] = tools[0]; // Move tool ở slot 0 sang slot cũ của hand
+                tools[0] = existingHand;
+                
+                if (showDebugInfo)
+                    Debug.Log($"[ToolManager] Moved HandTool from slot {existingHandIndex} to slot 0");
+            }
+            else
+            {
+                // Nếu không có HandTool nào, tạo mới ở slot 0 với icon
+                tools[0] = CreateHandToolWithIcon();
+                
+                if (showDebugInfo)
+                    Debug.Log("[ToolManager] Created new HandTool with icon at slot 0");
+            }
+
+            // Update display
+            UpdateToolbarDisplay();
+            hasToolbarChanges = true; // Mark for save
+        }
     }
 } 

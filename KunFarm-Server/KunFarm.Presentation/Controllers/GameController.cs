@@ -158,5 +158,74 @@ namespace KunFarm.Presentation.Controllers
                 return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
             }
         }
+
+        [HttpPost("toolbar/save")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<bool>>> SaveToolbar([FromBody] SaveToolbarRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid request data", 400));
+                }
+
+                var userId = request.userId;
+                
+                if (userId <= 0)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid user ID", 400));
+                }
+
+                var success = await _gameService.SaveToolbarAsync(userId, request);
+                
+                if (success)
+                {
+                    return Ok(ApiResponse<bool>.Success(true, "Toolbar saved successfully"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<bool>.Error("Failed to save toolbar", 400));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SaveToolbar endpoint");
+                return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
+            }
+        }
+
+        [HttpGet("toolbar/load/{userId}")]
+        [ProducesResponseType(typeof(ApiResponse<ToolbarResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
+        public async Task<ActionResult<ApiResponse<ToolbarResponse>>> LoadToolbar(int userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    return BadRequest(ApiResponse<object>.Error("Invalid user ID", 400));
+                }
+
+                var toolbar = await _gameService.LoadToolbarAsync(userId);
+                
+                if (toolbar != null)
+                {
+                    return Ok(ApiResponse<ToolbarResponse>.Success(toolbar, "Toolbar loaded successfully"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<ToolbarResponse>.Error("Failed to load toolbar", 400));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LoadToolbar endpoint");
+                return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
+            }
+        }
     }
 } 

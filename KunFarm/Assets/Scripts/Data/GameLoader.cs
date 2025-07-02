@@ -30,6 +30,33 @@ public class GameLoader : MonoBehaviour
         public float hunger;
     }
 
+    [Serializable]
+    private class ToolbarServerResponse
+    {
+        public int code;
+        public string message;
+        public ToolbarData data;
+    }
+
+    [Serializable]
+    private class ToolbarData
+    {
+        public int playerStateId;
+        public ToolSlotData[] tools;
+        public string lastSaved;
+    }
+
+    [Serializable]
+    private class ToolSlotData
+    {
+        public int slotIndex;
+        public string toolType;
+        public string toolName;
+        public int quantity;
+        public int animatorToolIndex;
+        public string iconPath;
+    }
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -153,6 +180,9 @@ public class GameLoader : MonoBehaviour
                     Debug.Log($"[GameLoader] Loaded player stats - Health: {response.data.health}, Hunger: {response.data.hunger}");
             }
 
+            // Load toolbar after player state
+            LoadToolbar(response.data.userId);
+
             if (showDebugInfo)
                 Debug.Log($"[GameLoader] Successfully loaded game state for user {response.data.userId}");
 
@@ -168,5 +198,101 @@ public class GameLoader : MonoBehaviour
     {
         if (showDebugInfo)
             Debug.LogWarning($"[GameLoader] Failed to load game state: {error}");
+    }
+
+    private void LoadToolbar(int userId)
+    {
+        if (userId <= 0)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[GameLoader] Invalid userId for toolbar loading");
+            return;
+        }
+
+        if (ApiClient.Instance == null)
+        {
+            if (showDebugInfo)
+                Debug.LogError("[GameLoader] ApiClient not found for toolbar loading!");
+            return;
+        }
+
+        string toolbarPath = $"/game/toolbar/load/{userId}";
+        if (showDebugInfo)
+            Debug.Log($"[GameLoader] Loading toolbar for user {userId}");
+
+        StartCoroutine(ApiClient.Instance.Get(
+            toolbarPath,
+            onSuccess: HandleToolbarLoadSuccess,
+            onError: HandleToolbarLoadError
+        ));
+    }
+
+    private void HandleToolbarLoadSuccess(string responseJson)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(responseJson))
+            {
+                if (showDebugInfo)
+                    Debug.LogWarning("[GameLoader] Empty toolbar response from server");
+                return;
+            }
+
+            var response = JsonUtility.FromJson<ToolbarServerResponse>(responseJson);
+            
+            if (response == null || response.data == null)
+            {
+                if (showDebugInfo)
+                    Debug.LogWarning("[GameLoader] Invalid toolbar response format");
+                return;
+            }
+
+            // Convert server response to Unity format
+            var toolbarData = new ToolbarSaveData();
+            toolbarData.userId = response.data.playerStateId;
+            
+            if (response.data.tools != null)
+            {
+                foreach (var serverTool in response.data.tools)
+                {
+                    var toolSlot = new ToolSlotSaveData
+                    {
+                        slotIndex = serverTool.slotIndex,
+                        toolType = serverTool.toolType,
+                        toolName = serverTool.toolName,
+                        quantity = serverTool.quantity,
+                        animatorToolIndex = serverTool.animatorToolIndex,
+                        iconPath = serverTool.iconPath
+                    };
+                    toolbarData.tools.Add(toolSlot);
+                }
+            }
+
+            // Apply to ToolManager
+            var toolManager = FindObjectOfType<ToolManager>();
+            if (toolManager != null)
+            {
+                toolManager.LoadFromServer(toolbarData);
+                
+                if (showDebugInfo)
+                    Debug.Log($"[GameLoader] ✅ Toolbar loaded successfully with {toolbarData.tools.Count} tools");
+            }
+            else
+            {
+                if (showDebugInfo)
+                    Debug.LogWarning("[GameLoader] ToolManager not found, toolbar not applied");
+            }
+        }
+        catch (Exception e)
+        {
+            if (showDebugInfo)
+                Debug.LogError($"[GameLoader] Error parsing toolbar response: {e.Message}");
+        }
+    }
+
+    private void HandleToolbarLoadError(string error)
+    {
+        if (showDebugInfo)
+            Debug.LogWarning($"[GameLoader] Failed to load toolbar: {error}");
     }
 } 

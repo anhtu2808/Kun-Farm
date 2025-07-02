@@ -34,5 +34,7 @@ namespace KunFarm.DAL.Entities
 
         public ICollection<OnlineShopSlot> BuyingOnlineShopSlots { get; set; }
             = new List<OnlineShopSlot>();
+
+        public PlayerToolbar? PlayerToolbar { get; set; }
     }
 } 

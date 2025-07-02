@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/TileStateNum.cs" />
+    <Compile Include="Assets/Scripts/Data/ToolbarSaveData.cs" />
     <Compile Include="Assets/Scripts/OnlSellShopManager.cs" />
     <Compile Include="Assets/Scripts/UI/SoldItemSlot_UI.cs" />
     <Compile Include="Assets/Scripts/UI/Toolbar_UI.cs" />

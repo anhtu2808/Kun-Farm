@@ -27,6 +27,7 @@ builder.Services.AddDbContext<KunFarmDbContext>(options =>
 // Repository pattern registration
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPlayerStateRepository, PlayerStateRepository>();
+builder.Services.AddScoped<IPlayerToolbarRepository, PlayerToolbarRepository>();
 builder.Services.AddScoped<IFarmStateRepository, FarmStateRepository>();
 builder.Services.AddScoped<IRegularShopSlotRepository, RegularShopSlotRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();

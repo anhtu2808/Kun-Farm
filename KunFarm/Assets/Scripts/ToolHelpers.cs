@@ -20,6 +20,15 @@ public static class ToolHelpers
                 
             case CollectableType.HAND_TOOL:
                 tool = new HandTool(); // Infinite use
+                // Try to load default icon if no icon provided
+                if (icon == null)
+                {
+                    icon = Resources.Load<Sprite>("Sprites/hand_icon") ?? 
+                           Resources.Load<Sprite>("Tools/hand_icon") ??
+                           Resources.Load<Sprite>("hand_icon") ??
+                           Resources.Load<Sprite>("Sprites/hand") ??
+                           Resources.Load<Sprite>("hand");
+                }
                 break;
                 
             case CollectableType.WHEATSEED:
