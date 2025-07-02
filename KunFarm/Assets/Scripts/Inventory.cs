@@ -80,7 +80,15 @@ public class Inventory : MonoBehaviour
     {
         inventoryPanel.SetActive(false);
         InitializeEmptySlots();
-        StartCoroutine(GetInventoryData(1));
+        int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId > 0)
+        {
+            StartCoroutine(GetInventoryData(playerId));
+        }
+        else
+        {
+            Debug.LogWarning("[Inventory] No valid player ID found, skipping inventory load");
+        }
     }
 
     void Update()
@@ -174,7 +182,7 @@ public class Inventory : MonoBehaviour
         Debug.Log("✅ [Inventory] Đã khởi tạo 27 slot trống");
     }
 
-    private IEnumerator GetInventoryData(int playerId = 1)
+    private IEnumerator GetInventoryData(int playerId = 0)
     {
         Debug.Log("📡 [Inventory] Đang gọi API để load data...");
         string apiUrl = "http://localhost:5270/inventory/{playerId}";
@@ -384,7 +392,13 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private IEnumerator SendBatchUpdateRequest(BatchUpdateInventoryRequest request)
     {
-        string apiUrl = "http://localhost:5270/inventory/batch-update/1";
+        int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId <= 0)
+        {
+            Debug.LogError("[Inventory] No valid player ID for batch update");
+            yield break;
+        }
+        string apiUrl = $"http://localhost:5270/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
         
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -460,7 +474,13 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private IEnumerator SendBatchUpdateRequestSync(BatchUpdateInventoryRequest request)
     {
-        string apiUrl = "http://localhost:5270/inventory/batch-update/1";
+        int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId <= 0)
+        {
+            Debug.LogError("[Inventory] No valid player ID for quit save");
+            yield break;
+        }
+        string apiUrl = $"http://localhost:5270/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
         
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);

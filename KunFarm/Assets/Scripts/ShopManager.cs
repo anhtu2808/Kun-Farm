@@ -38,7 +38,15 @@ public class ShopManager : MonoBehaviour
         if (playerInventoryScrollUI == null)
             playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>(); // Nếu bạn chưa gán thủ công
         shopPanel.SetActive(false);
-        StartCoroutine(GetShopData(1));
+        int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId > 0)
+        {
+            StartCoroutine(GetShopData(playerId));
+        }
+        else
+        {
+            Debug.LogWarning("[ShopManager] No valid player ID found, skipping shop data load");
+        }
     }
 
     void Update()
@@ -127,12 +135,39 @@ public class ShopManager : MonoBehaviour
     public void BuyItem(ShopSlotData data)
     {
         Debug.Log($"Mua item: {data.itemName} - Giá: {data.buyPrice} - Số lượng hiện tại: {data.currentStock}/{data.stockLimit}");
+        
+        // Kiểm tra hết hàng
         if (data.currentStock > data.stockLimit)
         {
             Debug.LogWarning("Đã hết hàng!");
             return;
         }
 
+        // Kiểm tra đủ tiền
+        if (player?.wallet == null)
+        {
+            Debug.LogError("❌ [Regular Shop] Player wallet không tìm thấy!");
+            return;
+        }
+
+        if (player.wallet.Money < data.buyPrice)
+        {
+            Debug.LogWarning($"❌ [Regular Shop] Không đủ tiền! Cần: {data.buyPrice}G, Có: {player.wallet.Money}G");
+            SimpleNotificationPopup.Show($"Không đủ tiền! Cần: {data.buyPrice}G, bạn có: {player.wallet.Money}G");
+            return;
+        }
+
+        // Trừ tiền ngay lập tức
+        bool moneySpent = player.wallet.Spend(data.buyPrice);
+        if (!moneySpent)
+        {
+            Debug.LogError($"❌ [Regular Shop] Không thể trừ tiền! Cần: {data.buyPrice}G, Có: {player.wallet.Money}G");
+            return;
+        }
+
+        Debug.Log($"💰 [Regular Shop] Đã trừ {data.buyPrice}G, còn lại: {player.wallet.Money}G");
+
+        // Thêm vào batch request list để gửi API khi đóng shop
         if (list == null)
             list = new List<BuyItemRequest>();
 
@@ -154,6 +189,7 @@ public class ShopManager : MonoBehaviour
 
         hasBuyItem = true;
 
+        // Thêm item vào inventory sau khi đã trừ tiền thành công
         if (Enum.TryParse<CollectableType>(data.collectableType, ignoreCase: true, out var parsedType))
         {
             var collectable = itemManager.GetItemByType(parsedType);
@@ -161,19 +197,35 @@ public class ShopManager : MonoBehaviour
             {
                 player.inventory.Add(collectable, 1);
                 player.inventory.NotifyInventoryChanged();
+                Debug.Log($"✅ [Regular Shop] Đã thêm {data.itemName} vào inventory");
+                SimpleNotificationPopup.Show($"Mua thành công {data.itemName} với giá {data.buyPrice}G! Còn lại: {player.wallet.Money}G");
+            }
+            else
+            {
+                Debug.LogError($"❌ [Regular Shop] Không tìm thấy collectable cho {parsedType}");
+                // Hoàn tiền nếu không tìm thấy item
+                player.wallet.Add(data.buyPrice);
+                Debug.Log($"💰 [Regular Shop] Đã hoàn tiền {data.buyPrice}G do không tìm thấy item");
             }
         }
         else
         {
-            Debug.LogError($"Không parse được CollectableType từ '{data.collectableType}'");
+            Debug.LogError($"❌ [Regular Shop] Không parse được CollectableType từ '{data.collectableType}'");
+            // Hoàn tiền nếu parse thất bại
+            player.wallet.Add(data.buyPrice);
+            Debug.Log($"💰 [Regular Shop] Đã hoàn tiền {data.buyPrice}G do lỗi parse");
         }
-        // Gọi tới Wallet để trừ tiền + Inventory để thêm item (nếu đủ)
-        Debug.Log($"Mua: {data.itemName} với giá {data.buyPrice}");
     }
 
     private IEnumerator SendBuyRequest(List<BuyItemRequest> requestList)
     {
-        string apiUrl = "http://localhost:5270/regular-shop/buy/1";
+        int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId <= 0)
+        {
+            Debug.LogError("[ShopManager] No valid player ID for buy request");
+            yield break;
+        }
+        string apiUrl = $"http://localhost:5270/regular-shop/buy/{playerId}";
 
         // ✅ Sử dụng class rõ ràng thay vì anonymous
         BuyItemRequestList wrapper = new BuyItemRequestList();

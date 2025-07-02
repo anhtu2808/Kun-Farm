@@ -17,7 +17,7 @@ public class OnlBuyShopManager : MonoBehaviour
     public PlayerInventoryScroll_UI playerInventoryScrollUI;
     
     [Header("Settings")]
-    public int playerId = 1; // Default player ID, có thể set từ inspector hoặc script khác
+    public int playerId = 0; // Will be loaded from PlayerPrefs
     
     // Events
     public System.Action OnShopUpdated;
@@ -38,8 +38,23 @@ public class OnlBuyShopManager : MonoBehaviour
 
         if (playerInventoryScrollUI == null)
             playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>(); // Nếu bạn chưa gán thủ công
+        
+        // Load player ID từ PlayerPrefs
+        playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId > 0)
+        {
+            Debug.Log($"[OnlBuyShopManager] Loaded player ID from PlayerPrefs: {playerId}");
+        }
+        else
+        {
+            Debug.LogWarning("[OnlBuyShopManager] No valid player ID found in PlayerPrefs");
+        }
+        
         shopPanel.SetActive(false);
-        StartCoroutine(LoadShopData());
+        if (playerId > 0)
+        {
+            StartCoroutine(LoadShopData());
+        }
     }
 
     void Update()
@@ -169,6 +184,11 @@ public class OnlBuyShopManager : MonoBehaviour
     /// </summary>
     private IEnumerator SendBuyRequestImmediate(SellItemResponse data)
     {
+        if (playerId <= 0)
+        {
+            Debug.LogError("[OnlBuyShopManager] No valid player ID for buy request");
+            yield break;
+        }
         string apiUrl = $"http://localhost:5270/online-shop/buy/{playerId}";
         List<int> itemIds = new List<int> { data.id };
 

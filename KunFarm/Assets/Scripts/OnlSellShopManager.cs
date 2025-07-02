@@ -16,7 +16,7 @@ public class OnlSellShopManager : MonoBehaviour
     public Transform sellSlotContainer;
 
     [Header("Settings")]
-    public int playerId = 1; // Default player ID, có thể set từ inspector hoặc script khác
+    public int playerId = 0; // Will be loaded from PlayerPrefs
 
     [Header("UI")]
     public GameObject shopSellSlotPrefab;
@@ -37,6 +37,18 @@ public class OnlSellShopManager : MonoBehaviour
             itemManager = FindObjectOfType<ItemManager>();
         if (playerInventoryScrollUI == null)
             playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>();
+        
+        // Load player ID từ PlayerPrefs
+        playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        if (playerId > 0)
+        {
+            Debug.Log($"[OnlSellShopManager] Loaded player ID from PlayerPrefs: {playerId}");
+        }
+        else
+        {
+            Debug.LogWarning("[OnlSellShopManager] No valid player ID found in PlayerPrefs");
+        }
+        
         shopPanel.SetActive(false);
 
         // Khởi tạo sẵn các slot rỗng
@@ -170,8 +182,14 @@ public class OnlSellShopManager : MonoBehaviour
 
     private IEnumerator SendSellRequest(string collectableType, int quantity, int totalPrice, CollectableType itemType)
     {
+        if (playerId <= 0)
+        {
+            Debug.LogError("[OnlSellShopManager] No valid player ID for sell request");
+            yield break;
+        }
+        
         Debug.Log($"📤 [Online Sell] Gửi yêu cầu bán: {collectableType}, Số lượng: {quantity}, Tổng giá: {totalPrice}");
-        string url = $"http://localhost:5270/online-shop/sell/{1}";
+        string url = $"http://localhost:5270/online-shop/sell/{playerId}";
 
         SellItemRequest requestData = new SellItemRequest
         {

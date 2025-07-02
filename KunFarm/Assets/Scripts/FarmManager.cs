@@ -20,7 +20,7 @@ public class FarmManager : MonoBehaviour
     [SerializeField] private float autoSaveInterval = 30f; // 30 seconds
 
     private float lastAutoSaveTime;
-    private int currentUserId = 1; // Default user ID, should be set from login
+    private int currentUserId = 0; // Will be loaded from PlayerPrefs
     private bool hasTriedLogin = false;
     private bool isLoading = false; // Flag to prevent save during load
     private float loadCompleteTime = 0f; // Time when load completed
@@ -122,7 +122,15 @@ public class FarmManager : MonoBehaviour
         if (!hasTriedLogin)
         {
             hasTriedLogin = true;
-            Debug.Log($"[FarmManager] Using default user ID: {currentUserId}");
+            currentUserId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+            if (currentUserId > 0)
+            {
+                Debug.Log($"[FarmManager] Loaded user ID from PlayerPrefs: {currentUserId}");
+            }
+            else
+            {
+                Debug.LogWarning("[FarmManager] No valid user ID found in PlayerPrefs");
+            }
         }
     }
 
