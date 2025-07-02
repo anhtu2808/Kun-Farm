@@ -11,5 +11,6 @@ namespace KunFarm.DAL.Interfaces
     {
         Task<PlayerRegularShopSlot?> PlayerRegularShopSlot(int palyerId, int shopSlotId);
         Task UpdateAsync(PlayerRegularShopSlot playerRegularShopSlot);
+        Task CreateAsync(PlayerRegularShopSlot playerRegularShopSlot);
     }
 }

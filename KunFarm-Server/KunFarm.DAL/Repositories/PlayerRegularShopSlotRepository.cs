@@ -34,5 +34,11 @@ namespace KunFarm.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task CreateAsync(PlayerRegularShopSlot playerRegularShopSlot)
+        {
+            _context.Add(playerRegularShopSlot);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
