@@ -41,38 +41,38 @@ MonoBehaviour:
     canSell: 1
     sellPrice: 25
     showInShop: 1
-    stockLimit: 10
+    stockLimit: -1
     currentStock: 0
   - collectableType: 2
     itemName: Wheat
     itemIcon: {fileID: 1605751755, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
-    canBuy: 0
-    buyPrice: 0
+    canBuy: 1
+    buyPrice: 30
     canSell: 1
     sellPrice: 15
-    showInShop: 0
+    showInShop: 1
     stockLimit: -1
-    currentStock: -1
+    currentStock: 0
   - collectableType: 3
     itemName: Grape
     itemIcon: {fileID: -2007504898, guid: 3bd6ae9c3972ac8469f6e9c1212c1a27, type: 3}
-    canBuy: 0
-    buyPrice: 0
+    canBuy: 1
+    buyPrice: 50
     canSell: 1
     sellPrice: 25
-    showInShop: 0
+    showInShop: 1
     stockLimit: -1
-    currentStock: -1
+    currentStock: 0
   - collectableType: 10
     itemName: Apple
     itemIcon: {fileID: 1212611662, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
-    canBuy: 0
-    buyPrice: 0
+    canBuy: 1
+    buyPrice: 120
     canSell: 1
     sellPrice: 60
-    showInShop: 0
+    showInShop: 1
     stockLimit: -1
-    currentStock: -1
+    currentStock: 0
   - collectableType: 8
     itemName: Shovel
     itemIcon: {fileID: -1290445048, guid: 62e41a9e38c064b77a30abd1105dd0a5, type: 3}
@@ -81,15 +81,15 @@ MonoBehaviour:
     canSell: 1
     sellPrice: 50
     showInShop: 1
-    stockLimit: 5
-    currentStock: 5
+    stockLimit: -1
+    currentStock: 0
   - collectableType: 1
     itemName: Egg
     itemIcon: {fileID: 1272668285, guid: c69c4caf20c9bdb4b9234455af70233a, type: 3}
-    canBuy: 0
-    buyPrice: 0
+    canBuy: 1
+    buyPrice: 60
     canSell: 1
     sellPrice: 30
-    showInShop: 0
+    showInShop: 1
     stockLimit: -1
-    currentStock: -1
+    currentStock: 0

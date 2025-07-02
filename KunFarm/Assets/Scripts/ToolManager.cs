@@ -19,7 +19,7 @@ public class ToolManager : MonoBehaviour
     [SerializeField] private Toolbar_UI toolbarUI;
     [SerializeField] private TileManager tileManager;
     [SerializeField] private Movement playerMovement; // Changed from playerAnimator to playerMovement
-    [SerializeField] private InventoryUI inventoryUI;
+    [SerializeField] private Inventory inventoryUI;
 
     private Tool[] tools; // Mảng tools trong toolbar (9 slots)
     private int selectedToolIndex = 0;
@@ -40,7 +40,7 @@ public class ToolManager : MonoBehaviour
         if (playerMovement == null)
             playerMovement = FindObjectOfType<Movement>();
         if (inventoryUI == null)
-            inventoryUI = FindObjectOfType<InventoryUI>();
+            inventoryUI = FindObjectOfType<Inventory>();
     }
 
     void Update()

@@ -21,5 +21,14 @@ namespace KunFarm.DAL.Entities
         
         // Navigation property
         public User User { get; set; } = null!;
+
+        public ICollection<InventorySlot> InventorySlots { get; set; } = new List<InventorySlot>();
+        public ICollection<PlayerRegularShopSlot> PlayerRegularShopSlots { get; set; } = new List<PlayerRegularShopSlot>();
+
+        public ICollection<OnlineShopSlot> SellingOnlineShopSlots { get; set; }
+    = new List<OnlineShopSlot>();
+
+        public ICollection<OnlineShopSlot> BuyingOnlineShopSlots { get; set; }
+            = new List<OnlineShopSlot>();
     }
 } 

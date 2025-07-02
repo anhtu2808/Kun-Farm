@@ -10,7 +10,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private Tilemap interactableMap;
     [SerializeField] private ToolManager toolManager;
     [SerializeField] private Player player;
-    [SerializeField] private InventoryUI inventoryUI;
+    [SerializeField] private Inventory inventoryUI;
 
     void Start()
     {
@@ -20,7 +20,7 @@ public class PlayerInteraction : MonoBehaviour
         if (toolManager == null)
             toolManager = FindObjectOfType<ToolManager>();
         if (inventoryUI == null)
-            inventoryUI = FindObjectOfType<InventoryUI>();
+            inventoryUI = FindObjectOfType<Inventory>();
     }
 
     void Update()

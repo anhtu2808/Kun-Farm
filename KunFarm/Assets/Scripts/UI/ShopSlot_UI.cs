@@ -9,242 +9,173 @@ public class ShopSlot_UI : MonoBehaviour
 {
     [Header("UI References")]
     public Image itemIcon;
-    public TextMeshProUGUI itemNameText;
-    public TextMeshProUGUI buyPriceText;
+    public TextMeshProUGUI nameText;
+    public TextMeshProUGUI priceText;
     public TextMeshProUGUI stockText;
-    public GameObject buyButtonObject;
-
-    // ✅ SHOP CHỈ DÀNH CHO MUA - XÓA SELL FUNCTIONALITY
-    [Header("Disabled Sell Features")]
-    [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell")]
-    public TextMeshProUGUI sellPriceText;
-    [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell")]
-    public Button sellButton;
-    [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell")]
-    public Button sellAllButton;
-
-    [Header("Visual States")]
-    public GameObject outOfStockOverlay;
-    public Color normalColor = Color.white;
-    public Color outOfStockColor = Color.gray;
-
-    // Data
-    private ShopItem currentShopItem;
+    private ShopSlotData slotData;
     private ShopManager shopManager;
     private Player player;
 
-    // Events
-    public System.Action<ShopSlot_UI> OnBuyClicked;
-
-    // ✅ SHOP CHỈ DÀNH CHO MUA - XÓA SELL EVENTS
-    [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell events")]
-    public System.Action<ShopSlot_UI> OnSellClicked;
-    [System.Obsolete("Shop slots chỉ dành cho mua - không cần sell events")]
-    public System.Action<ShopSlot_UI> OnSellAllClicked;
-
-    private void Awake()
+    public void Setup(ShopSlotData data, ShopManager manager)
     {
-        if (buyButtonObject != null)
-        {
-            var button = buyButtonObject.GetComponent<Button>();
-            if (button == null)
-                button = buyButtonObject.AddComponent<Button>();
+        Debug.Log($"Setting up shop slot for: {data.collectableType} - price: {data.buyPrice} - {data.currentStock}/{data.stockLimit}");
 
-            button.onClick.AddListener(() => OnBuyClicked?.Invoke(this));
-        }
+        slotData = data;
+        shopManager = manager;
+        Debug.Log($"slotData: {slotData.itemName}, shopManager: {shopManager == null}");
+        priceText.text = $"{data.buyPrice}G";
+        // stockText.text = $"{data.currentStock}/{data.stockLimit}";
 
-        // Ẩn các nút bán như trước
-        if (sellButton != null)
-            sellButton.gameObject.SetActive(false);
-        if (sellAllButton != null)
-            sellAllButton.gameObject.SetActive(false);
+        Sprite icon = Resources.Load<Sprite>($"Sprites/{data.icon}");
+        itemIcon.sprite = icon;
     }
 
+    public void OnBuyClicked()
+    {
+        if (slotData != null && shopManager != null)
+        {
+            if (slotData.currentStock >= slotData.stockLimit || !slotData.canBuy)
+            {
+                Debug.LogWarning("Item hết hàng!");
+                return;
+            }
+            slotData.currentStock += 1; // Giả sử mỗi lần mua sẽ tăng stock lên 1
+            Debug.Log($"Đã click mua: {slotData.itemName} - Số lượng hiện tại: {slotData.currentStock}/{slotData.stockLimit}");
+            shopManager.BuyItem(slotData);
+        }
+    }
+}
     /// <summary>
     /// Initialize shop slot với data
     /// </summary>
-    public void Initialize(ShopItem shopItem, ShopManager manager, Player playerRef)
-    {
-        currentShopItem = shopItem;
-        shopManager = manager;
-        player = playerRef;
+    // public void Initialize(ShopItem shopItem, ShopManager manager, Player playerRef)
+    // {
+    //     currentShopItem = shopItem;
+    //     shopManager = manager;
+    //     player = playerRef;
 
-        UpdateDisplay();
-    }
+    //     UpdateDisplay();
+    // }
 
     /// <summary>
     /// Cập nhật hiển thị của slot
     /// </summary>
-    public void UpdateDisplay()
-    {
-        if (currentShopItem == null) return;
+    // public void UpdateDisplay()
+    // {
+    //     if (currentShopItem == null) return;
 
-        // Cập nhật icon và tên
-        if (itemIcon != null)
-        {
-            itemIcon.sprite = currentShopItem.itemIcon;
-            itemIcon.color = currentShopItem.HasStock() ? normalColor : outOfStockColor;
-        }
+    //     // Cập nhật icon và tên
+    //     if (itemIcon != null)
+    //     {
+    //         itemIcon.sprite = currentShopItem.itemIcon;
+    //         itemIcon.color = currentShopItem.HasStock() ? normalColor : outOfStockColor;
+    //     }
 
-        if (itemNameText != null)
-            itemNameText.text = currentShopItem.itemName;
+    //     if (itemNameText != null)
+    //         itemNameText.text = currentShopItem.itemName;
 
-        // ✅ CHỈ HIỂN THỊ GIÁ MUA - SHOP CHỈ DÀNH CHO MUA
-        if (buyPriceText != null)
-        {
-            if (currentShopItem.canBuy && currentShopItem.showInShop)
-            {
-                buyPriceText.text = $"Mua: {currentShopItem.buyPrice}G";
-                buyPriceText.gameObject.SetActive(true);
-            }
-            else
-            {
-                buyPriceText.gameObject.SetActive(false);
-            }
-        }
+    //     // ✅ CHỈ HIỂN THỊ GIÁ MUA - SHOP CHỈ DÀNH CHO MUA
+    //     if (buyPriceText != null)
+    //     {
+    //         if (currentShopItem.canBuy && currentShopItem.showInShop)
+    //         {
+    //             buyPriceText.text = $"Mua: {currentShopItem.buyPrice}G";
+    //             buyPriceText.gameObject.SetActive(true);
+    //         }
+    //         else
+    //         {
+    //             buyPriceText.gameObject.SetActive(false);
+    //         }
+    //     }
 
-        // ✅ ẨN SELL PRICE VÌ SHOP CHỈ DÀNH CHO MUA
-        if (sellPriceText != null)
-        {
-            sellPriceText.gameObject.SetActive(false);
-        }
+    //     // Cập nhật stock
+    //     if (stockText != null)
+    //     {
+    //         if (currentShopItem.stockLimit >= 0)
+    //         {
+    //             stockText.text = $"Stock: {currentShopItem.currentStock}";
+    //             stockText.gameObject.SetActive(true);
+    //         }
+    //         else
+    //         {
+    //             stockText.gameObject.SetActive(false);
+    //         }
+    //     }
 
-        // Cập nhật stock
-        if (stockText != null)
-        {
-            if (currentShopItem.stockLimit >= 0)
-            {
-                stockText.text = $"Stock: {currentShopItem.currentStock}";
-                stockText.gameObject.SetActive(true);
-            }
-            else
-            {
-                stockText.gameObject.SetActive(false);
-            }
-        }
+    //     // Cập nhật overlay hết hàng
+    //     if (outOfStockOverlay != null)
+    //         outOfStockOverlay.SetActive(!currentShopItem.HasStock());
 
-        // Cập nhật overlay hết hàng
-        if (outOfStockOverlay != null)
-            outOfStockOverlay.SetActive(!currentShopItem.HasStock());
-
-        // Cập nhật buttons
-        UpdateButtons();
-    }
+    //     // Cập nhật buttons
+    //     UpdateButtons();
+    // }
 
     /// <summary>
     /// Cập nhật trạng thái buttons - CHỈ CHO MUA
     /// </summary>
-    private void UpdateButtons()
-    {
-        if (player == null || currentShopItem == null) return;
+    // private void UpdateButtons()
+    // {
+    //     if (player == null || currentShopItem == null) return;
 
-        // ✅ CHỈ CẬP NHẬT BUY BUTTON
-        if (buyButtonObject != null)
-        {
-            var button = buyButtonObject.GetComponent<Button>();
-            if (button != null)
-            {
-                bool canBuy = currentShopItem.canBuy &&
-                              currentShopItem.showInShop &&
-                              currentShopItem.HasStock() &&
-                              player.wallet.Money >= currentShopItem.buyPrice;
+    //     // ✅ CHỈ CẬP NHẬT BUY BUTTON
+    //     if (buyButtonObject != null)
+    //     {
+    //         var button = buyButtonObject.GetComponent<Button>();
+    //         if (button != null)
+    //         {
+    //             bool canBuy = currentShopItem.canBuy &&
+    //                           currentShopItem.showInShop &&
+    //                           currentShopItem.HasStock() &&
+    //                           player.wallet.Money >= currentShopItem.buyPrice;
 
-                button.interactable = canBuy;
-                button.gameObject.SetActive(currentShopItem.canBuy && currentShopItem.showInShop);
-            }
-        }
-
-        // ✅ ĐẢM BẢO SELL BUTTONS LUÔN DISABLED
-        if (sellButton != null)
-        {
-            sellButton.gameObject.SetActive(false);
-        }
-
-        if (sellAllButton != null)
-        {
-            sellAllButton.gameObject.SetActive(false);
-        }
-    }
+    //             button.interactable = canBuy;
+    //             button.gameObject.SetActive(currentShopItem.canBuy && currentShopItem.showInShop);
+    //         }
+    //     }
+    // }
 
     /// <summary>
     /// Lấy số lượng item trong inventory của player
     /// </summary>
-    private int GetPlayerItemCount()
-    {
-        if (player == null || player.inventory == null || currentShopItem == null)
-            return 0;
+    // private int GetPlayerItemCount()
+    // {
+    //     if (player == null || player.inventory == null || currentShopItem == null)
+    //         return 0;
 
-        int count = 0;
-        foreach (var slot in player.inventory.slots)
-        {
-            if (slot.type == currentShopItem.collectableType)
-                count += slot.count;
-        }
-        return count;
-    }
+    //     int count = 0;
+    //     foreach (var slot in player.inventory.slots)
+    //     {
+    //         if (slot.type == currentShopItem.collectableType)
+    //             count += slot.count;
+    //     }
+    //     return count;
+    // }
 
     /// <summary>
     /// Thực hiện mua item
     /// </summary>
-    public void BuyItem(int quantity = 1)
-    {
-        if (shopManager == null || currentShopItem == null) return;
+    // public void BuyItem(int quantity = 1)
+    // {
+    //     if (shopManager == null || currentShopItem == null) return;
 
-        if (shopManager.BuyItem(currentShopItem.collectableType, quantity))
-        {
-            UpdateDisplay();
-        }
-    }
-
-    /// <summary>
-    /// Thực hiện bán item (bán 1 item đầu tiên tìm thấy)
-    /// </summary>
-    public void SellItem(int quantity = 1)
-    {
-        if (shopManager == null || currentShopItem == null || player == null) return;
-
-        // Tìm slot đầu tiên có item này
-        for (int i = 0; i < player.inventory.slots.Count; i++)
-        {
-            var slot = player.inventory.slots[i];
-            if (slot.type == currentShopItem.collectableType && slot.count > 0)
-            {
-                int sellQuantity = Mathf.Min(quantity, slot.count);
-                if (shopManager.SellItem(i, sellQuantity))
-                {
-                    UpdateDisplay();
-                    return;
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Bán tất cả items cùng loại
-    /// </summary>
-    public void SellAllItems()
-    {
-        if (shopManager == null || currentShopItem == null) return;
-
-        if (shopManager.SellAllItems(currentShopItem.collectableType))
-        {
-            UpdateDisplay();
-        }
-    }
+    //     if (shopManager.BuyItem(currentShopItem.collectableType, quantity))
+    //     {
+    //         UpdateDisplay();
+    //     }
+    // }
 
     /// <summary>
     /// Getter cho ShopItem hiện tại
     /// </summary>
-    public ShopItem GetShopItem()
-    {
-        return currentShopItem;
-    }
+    // public ShopItem GetShopItem()
+    // {
+    //     return currentShopItem;
+    // }
 
     /// <summary>
     /// Refresh display khi có thay đổi
     /// </summary>
-    public void Refresh()
-    {
-        UpdateDisplay();
-    }
-}
+    // public void Refresh()
+    // {
+    //     UpdateDisplay();
+    // }

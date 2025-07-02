@@ -33,7 +33,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 6, 29, 17, 21, 3, 860, DateTimeKind.Utc).AddTicks(5540));
+                        .HasDefaultValue(new DateTime(2025, 7, 1, 14, 56, 4, 758, DateTimeKind.Utc).AddTicks(6818));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -53,6 +53,142 @@ namespace KunFarm.DAL.Migrations
                     b.ToTable("FarmStates");
                 });
 
+            modelBuilder.Entity("KunFarm.DAL.Entities.InventorySlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerStateId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SlotIndex")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("PlayerStateId");
+
+                    b.ToTable("InventorySlots");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.Item", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CollectableType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.OnlineShopSlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BuyPrice")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BuyerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanBuy")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("OnlineShopSlots");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.PlayerRegularShopSlot", b =>
+                {
+                    b.Property<int>("PlayerStateId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RegularShopSlotId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CurrentStock")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerStateId", "RegularShopSlotId");
+
+                    b.HasIndex("RegularShopSlotId");
+
+                    b.ToTable("PlayerRegularShopSlots");
+                });
+
             modelBuilder.Entity("KunFarm.DAL.Entities.PlayerState", b =>
                 {
                     b.Property<int>("UserId")
@@ -61,7 +197,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 6, 30, 0, 21, 3, 860, DateTimeKind.Local).AddTicks(4680));
+                        .HasDefaultValue(new DateTime(2025, 7, 1, 21, 56, 4, 758, DateTimeKind.Local).AddTicks(4226));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()
@@ -80,6 +216,43 @@ namespace KunFarm.DAL.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("PlayerStates");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.RegularShopSlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BuyPrice")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanBuy")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StockLimit")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId")
+                        .IsUnique();
+
+                    b.ToTable("RegularShopSlots");
                 });
 
             modelBuilder.Entity("KunFarm.DAL.Entities.User", b =>
@@ -150,6 +323,70 @@ namespace KunFarm.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("KunFarm.DAL.Entities.InventorySlot", b =>
+                {
+                    b.HasOne("KunFarm.DAL.Entities.Item", "Item")
+                        .WithMany("InventorySlots")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("KunFarm.DAL.Entities.PlayerState", "PlayerState")
+                        .WithMany("InventorySlots")
+                        .HasForeignKey("PlayerStateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("PlayerState");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.OnlineShopSlot", b =>
+                {
+                    b.HasOne("KunFarm.DAL.Entities.PlayerState", "Buyer")
+                        .WithMany("BuyingOnlineShopSlots")
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KunFarm.DAL.Entities.Item", "Item")
+                        .WithMany("OnlineShopSlots")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KunFarm.DAL.Entities.PlayerState", "Seller")
+                        .WithMany("SellingOnlineShopSlots")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.PlayerRegularShopSlot", b =>
+                {
+                    b.HasOne("KunFarm.DAL.Entities.PlayerState", "PlayerState")
+                        .WithMany("PlayerRegularShopSlots")
+                        .HasForeignKey("PlayerStateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KunFarm.DAL.Entities.RegularShopSlot", "RegularShopSlot")
+                        .WithMany("PlayerRegularShopSlots")
+                        .HasForeignKey("RegularShopSlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlayerState");
+
+                    b.Navigation("RegularShopSlot");
+                });
+
             modelBuilder.Entity("KunFarm.DAL.Entities.PlayerState", b =>
                 {
                     b.HasOne("KunFarm.DAL.Entities.User", "User")
@@ -159,6 +396,43 @@ namespace KunFarm.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.RegularShopSlot", b =>
+                {
+                    b.HasOne("KunFarm.DAL.Entities.Item", "Item")
+                        .WithOne("RegularShop")
+                        .HasForeignKey("KunFarm.DAL.Entities.RegularShopSlot", "ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.Item", b =>
+                {
+                    b.Navigation("InventorySlots");
+
+                    b.Navigation("OnlineShopSlots");
+
+                    b.Navigation("RegularShop")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.PlayerState", b =>
+                {
+                    b.Navigation("BuyingOnlineShopSlots");
+
+                    b.Navigation("InventorySlots");
+
+                    b.Navigation("PlayerRegularShopSlots");
+
+                    b.Navigation("SellingOnlineShopSlots");
+                });
+
+            modelBuilder.Entity("KunFarm.DAL.Entities.RegularShopSlot", b =>
+                {
+                    b.Navigation("PlayerRegularShopSlots");
                 });
 
             modelBuilder.Entity("KunFarm.DAL.Entities.User", b =>
