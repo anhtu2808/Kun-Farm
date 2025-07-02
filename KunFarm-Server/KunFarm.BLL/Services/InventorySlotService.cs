@@ -1,9 +1,11 @@
-﻿using KunFarm.BLL.DTOs.Response;
+﻿using KunFarm.BLL.DTOs.Request;
+using KunFarm.BLL.DTOs.Response;
 using KunFarm.BLL.Interfaces;
 using KunFarm.DAL.Entities;
 using KunFarm.DAL.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +27,47 @@ namespace KunFarm.BLL.Services
         public async Task<ApiResponse<List<InventorySlotResponse>>> GetInventorySlots(int playerId)
         {
             var inventorySlots = await _inventorySlotRepository.GetAllByPlayer(playerId);
+            var responses = await BuildInventorySlotResponse(inventorySlots);
+            return new()
+            {
+                Code = 200,
+                Message = "Inventory slots retrieved successfully.",
+                Data = responses,
+            };
+        }
+
+        public async Task<ApiResponse<List<InventorySlotResponse>>> SaveInventory(int playerId, InventorySaveList requests)
+        {
+            await _inventorySlotRepository.DeleteAllByPlayerId(playerId);
+            Console.WriteLine($"----------------------------------Saving inventory for player {playerId} with {requests.Data.Count} slots.");
+            foreach (SaveInventoryRequest slot in requests.Data)
+            {
+                Item? item = await _itemRepository.GetItemByType(slot.CollectableType);
+                await _inventorySlotRepository.AddAsync(
+                        new()
+                        {
+                            SlotIndex = slot.SlotIndex,
+                            ItemId = item == null ? null : item.Id,
+                            PlayerStateId = playerId,
+                            Quantity = slot.Quantity,
+                            IsDeleted = false,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        });
+            }
+            var inventorySlots = await _inventorySlotRepository.GetAllByPlayer(playerId);
+            var responses = await BuildInventorySlotResponse(inventorySlots);
+            Console.WriteLine($"----------------------------------Inventory for player {playerId} saved successfully with {responses.Count} slots.");
+            return new()
+            {
+                Code = 200,
+                Message = "Inventory slots retrieved successfully.",
+                Data = responses,
+            };
+        }
+
+        private async Task<List<InventorySlotResponse>> BuildInventorySlotResponse(List<InventorySlot> inventorySlots)
+        {
             var inventorySlotResponses = new List<InventorySlotResponse>();
             foreach (var slot in inventorySlots)
             {
@@ -44,13 +87,7 @@ namespace KunFarm.BLL.Services
                 };
                 inventorySlotResponses.Add(response);
             }
-            return new()
-            {
-                Code = 200,
-                Message = "Inventory slots retrieved successfully.",
-                Data = inventorySlotResponses,
-            };
+            return inventorySlotResponses;
         }
-
     }
 }

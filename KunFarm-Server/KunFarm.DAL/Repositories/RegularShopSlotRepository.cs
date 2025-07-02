@@ -13,10 +13,10 @@ namespace KunFarm.DAL.Repositories
     public class RegularShopSlotRepository : IRegularShopSlotRepository
     {
         private readonly KunFarmDbContext _context;
-
         public RegularShopSlotRepository(KunFarmDbContext context)
         {
             _context = context;
+
         }
 
         public async Task<List<RegularShopSlot>> GetAllSlot()
@@ -30,6 +30,12 @@ namespace KunFarm.DAL.Repositories
         {
             return await _context.RegularShopSlots
                 .FirstOrDefaultAsync(s => s.Id == slotId);
+        }
+
+        public async Task UpdateAsync(RegularShopSlot shopSlot)
+        {
+            _context.Update(shopSlot);
+            await _context.SaveChangesAsync();
         }
     }
 }

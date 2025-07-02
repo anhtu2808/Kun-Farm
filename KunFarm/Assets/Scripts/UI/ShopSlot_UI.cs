@@ -22,7 +22,7 @@ public class ShopSlot_UI : MonoBehaviour
 
         slotData = data;
         shopManager = manager;
-
+        Debug.Log($"slotData: {slotData.itemName}, shopManager: {shopManager == null}");
         priceText.text = $"{data.buyPrice}G";
         // stockText.text = $"{data.currentStock}/{data.stockLimit}";
 
@@ -34,17 +34,17 @@ public class ShopSlot_UI : MonoBehaviour
     {
         if (slotData != null && shopManager != null)
         {
-            if (slotData.currentStock >= slotData.stockLimit)
+            if (slotData.currentStock >= slotData.stockLimit || !slotData.canBuy)
             {
                 Debug.LogWarning("Item hết hàng!");
                 return;
             }
-
-            Debug.Log($"Đã click mua: {slotData.itemName}");
+            slotData.currentStock += 1; // Giả sử mỗi lần mua sẽ tăng stock lên 1
+            Debug.Log($"Đã click mua: {slotData.itemName} - Số lượng hiện tại: {slotData.currentStock}/{slotData.stockLimit}");
             shopManager.BuyItem(slotData);
         }
     }
-
+}
     /// <summary>
     /// Initialize shop slot với data
     /// </summary>
@@ -179,4 +179,3 @@ public class ShopSlot_UI : MonoBehaviour
     // {
     //     UpdateDisplay();
     // }
-}

@@ -1,5 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -262,4 +266,87 @@ public class Inventory : MonoBehaviour
     {
         onInventoryChanged?.Invoke();
     }
+    private bool saveCompleted = false;
+
+    private void OnApplicationQuit()
+    {
+        Debug.Log("▶️ [Quit] App đang thoát... Lưu dữ liệu!");
+
+        List<SaveInventoryRequest> saveRequests = new List<SaveInventoryRequest>();
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            if (slots[i].type != CollectableType.NONE)
+            {
+                SaveInventoryRequest request = new SaveInventoryRequest
+                {
+                    SlotIndex = i,
+                    CollectableType = slots[i].type.ToString(),
+                    quantity = slots[i].count
+                };
+                saveRequests.Add(request);
+            }
+            else
+            {
+                SaveInventoryRequest request = new SaveInventoryRequest
+                {
+                    SlotIndex = i,
+                    CollectableType = CollectableType.NONE.ToString(),
+                    quantity = 0
+                };
+                saveRequests.Add(request);
+            }
+        }
+
+        Debug.Log($"📦 [Quit] Tổng số request chuẩn bị gửi: {saveRequests.Count}");
+
+        SaveGameData(saveRequests);
+
+        float timeout = 5f;
+        float startTime = Time.realtimeSinceStartup;
+        Debug.Log("⏳ [Quit] Đang chờ gửi inventory...");
+        while (!saveCompleted && Time.realtimeSinceStartup - startTime < timeout)
+        {
+            System.Threading.Thread.Sleep(100);
+        }
+
+        if (saveCompleted)
+            Debug.Log("✔️ [Quit] Gửi thành công trước khi thoát ứng dụng.");
+        else
+            Debug.LogWarning("⚠️ [Quit] Hết thời gian chờ, có thể dữ liệu chưa được gửi xong.");
+    }
+
+    private void SaveGameData(List<SaveInventoryRequest> saveRequests)
+    {
+        try
+        {
+            string apiUrl = "https://localhost:7067/inventory/save/1";
+            InventorySaveList requestBody = new InventorySaveList(saveRequests);
+            string json = JsonUtility.ToJson(requestBody);
+            Debug.Log("📤 [Blocking Send] JSON gửi: " + json);
+
+            using (HttpClient client = new HttpClient())
+            {
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // Gửi đồng bộ, chặn cho tới khi xong
+                HttpResponseMessage response = client.PostAsync(apiUrl, content).GetAwaiter().GetResult();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    Debug.Log("✅ [Blocking Send] Lưu thành công! Response: " + result);
+                }
+                else
+                {
+                    Debug.LogError("❌ [Blocking Send] Lỗi khi gửi: " + response.StatusCode);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("❌ [Blocking Send] Exception: " + ex.Message);
+        }
+    }
+
 }

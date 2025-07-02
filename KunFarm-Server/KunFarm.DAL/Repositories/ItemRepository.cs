@@ -25,5 +25,12 @@ namespace KunFarm.DAL.Repositories
                 .Where(i => i.Id == id)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<Item?> GetItemByType(string type)
+        {
+            return await _context.Items
+               .Where(i => i.CollectableType == type)
+               .FirstOrDefaultAsync();
+        }
     }
 }

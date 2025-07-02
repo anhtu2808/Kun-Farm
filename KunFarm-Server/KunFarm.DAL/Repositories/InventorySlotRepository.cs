@@ -16,10 +16,22 @@ namespace KunFarm.DAL.Repositories
         {
         }
 
+        public async Task DeleteAllByPlayerId(int playerId)
+        {
+            var inventorySlots = await _context.InventorySlots
+                .Where(s => s.PlayerStateId == playerId)
+                .ToListAsync();
+
+            _context.InventorySlots.RemoveRange(inventorySlots);
+            await _context.SaveChangesAsync();
+
+        }
+
         public async Task<List<InventorySlot>> GetAllByPlayer(int playerId)
         {
             return await _context.InventorySlots
                 .Where(slot => slot.PlayerStateId == playerId)
+                .OrderBy(slot => slot.SlotIndex)
                 .ToListAsync();
         }
 

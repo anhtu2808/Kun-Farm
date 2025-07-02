@@ -11,5 +11,11 @@ namespace KunFarm.BLL.DTOs.Request
         public int SlotId { get; set; }
 
         public int Quantity { get; set; }
+        public int TotalPrice { get; set; }
+    }
+
+    public class BuyItemRequestList
+    {
+        public List<BuyItemRequest> Items { get; set; } = new();
     }
 }

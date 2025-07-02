@@ -50,9 +50,11 @@ namespace KunFarm.BLL.Services
                 }
 
                 playerSlot.CurrentStock += request.Quantity;
+                slot.CanBuy = request.CanBuy;
                 
                 // Update the player's shop slot
                 await _playerRegularShopSlotRepository.UpdateAsync(playerSlot);
+                await _regularShopSlotRepository.UpdateAsync(slot);
 
                 return new ApiResponse<bool>
                 {

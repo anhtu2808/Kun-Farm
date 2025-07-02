@@ -12,6 +12,7 @@ namespace KunFarm.DAL.Interfaces
     {
 
         Task<List<InventorySlot>> GetAllByPlayer(int playerId);
+        Task DeleteAllByPlayerId(int playerId);
 
     }
 }

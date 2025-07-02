@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 /// <summary>
 /// Quản lý logic mua/bán items trong shop
@@ -14,11 +17,14 @@ public class ShopManager : MonoBehaviour
     public ItemManager itemManager;
     public Transform shopSlotContainer;
     public GameObject shopSlotPrefab;
+    public PlayerInventoryScroll_UI playerInventoryScrollUI;
     // Events
     public System.Action OnShopUpdated;
     private bool isOpen = false;
     private string apiUrl = "https://localhost:7067/regular-shop/{playerId}";
     private bool hasBuyItem = false;
+    private List<BuyItemRequest> list;
+
     private void Awake()
     {
         // Tự động tìm references nếu chưa assign
@@ -27,6 +33,9 @@ public class ShopManager : MonoBehaviour
 
         if (itemManager == null)
             itemManager = FindObjectOfType<ItemManager>();
+
+        if (playerInventoryScrollUI == null)
+            playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>(); // Nếu bạn chưa gán thủ công
         shopPanel.SetActive(false);
         StartCoroutine(GetShopData(1));
     }
@@ -50,13 +59,13 @@ public class ShopManager : MonoBehaviour
     {
         if (hasBuyItem)
         {
-            
+            StartCoroutine(SendBuyRequest(list));
         }
 
         hasBuyItem = false;
         isOpen = false;
         shopPanel.SetActive(false);
-        
+
     }
 
     public void OpenShop()
@@ -89,6 +98,7 @@ public class ShopManager : MonoBehaviour
         {
             Debug.LogError("API lỗi: " + request.error);
         }
+        playerInventoryScrollUI.RefreshInventoryUI();
     }
 
     /// <summary>
@@ -96,14 +106,61 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void BuyItem(ShopSlotData data)
     {
+        Debug.Log($"Mua item: {data.itemName} - Giá: {data.buyPrice} - Số lượng hiện tại: {data.currentStock}/{data.stockLimit}");
         if (data.currentStock >= data.stockLimit)
         {
             Debug.LogWarning("Đã hết hàng!");
             return;
         }
+
+        if (list == null)
+            list = new List<BuyItemRequest>();
+
+        var existingItem = list.FirstOrDefault(x => x.SlotId == data.slotId);
+        if (existingItem != null)
+        {
+            existingItem.Quantity += 1;
+            existingItem.TotalPrice += data.buyPrice;
+        }
+        else
+        {
+            list.Add(new BuyItemRequest
+            {
+                SlotId = data.slotId,
+                Quantity = 1,
+                TotalPrice = data.buyPrice
+            });
+        }
+
         hasBuyItem = true;
         // Gọi tới Wallet để trừ tiền + Inventory để thêm item (nếu đủ)
         Debug.Log($"Mua: {data.itemName} với giá {data.buyPrice}");
+    }
+
+    private IEnumerator SendBuyRequest(List<BuyItemRequest> requestList)
+    {
+        string apiUrl = "https://localhost:7067/regular-shop/buy/1"; // ví dụ: /shop/buy/{playerId}
+
+        var wrapper = new { items = requestList };
+        string json = JsonUtility.ToJson(wrapper); // HOẶC dùng Newtonsoft.Json nếu cần
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+        UnityWebRequest request = new UnityWebRequest(apiUrl, "POST");
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        Debug.Log("📤 Sending Buy Request: " + json);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("✅ Mua thành công! Response: " + request.downloadHandler.text);
+        }
+        else
+        {
+            Debug.LogError("❌ Mua thất bại: " + request.error);
+        }
     }
 
     /// <summary>

@@ -11,5 +11,7 @@ namespace KunFarm.DAL.Interfaces
     {
         Task<List<RegularShopSlot>> GetAllSlot();
         Task<RegularShopSlot?> GetById(int slotId);
+
+        Task UpdateAsync(RegularShopSlot shopSlot);
     }
 }

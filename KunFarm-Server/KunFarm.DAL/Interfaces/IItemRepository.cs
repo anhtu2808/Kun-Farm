@@ -10,6 +10,6 @@ namespace KunFarm.DAL.Interfaces
     public interface IItemRepository
     {
         Task<Item?> GetItemById(int id);
-
+        Task<Item?> GetItemByType(string type);
     }
 }

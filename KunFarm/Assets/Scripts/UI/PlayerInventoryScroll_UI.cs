@@ -1,57 +1,100 @@
-// using UnityEngine;
-// using UnityEngine.UI;
-// using TMPro;
-// using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
 
-// /// <summary>
-// /// UI Manager cho Player_Scroll - hiển thị inventory items với sell functionality
-// /// </summary>
-// public class PlayerInventoryScroll_UI : MonoBehaviour
-// {
-//     [Header("References")]
-//     public ShopManager shopManager;
-//     public Player player;
-//     public Transform playerItemsContainer; // Player_Items container
+/// <summary>
+/// UI Manager cho Player_Scroll - hiển thị inventory items với sell functionality
+/// </summary>
+public class PlayerInventoryScroll_UI : MonoBehaviour
+{
+    [Header("References")]
+    //     public ShopManager shopManager;
+    public Player player;
+    public Transform playerItemsContainer; // Player_Items container
+    public GameObject itemPrefab;
+    //     [Header("Item Slot Structure")]
+    //     [Tooltip("Prefab structure: Item/icon(Image), Item/buybutton(Button), Item/price(TextMeshProUGUI), Item/quantity(TextMeshProUGUI)")]
+    //     public List<PlayerScrollItem> itemSlots = new List<PlayerScrollItem>();
 
-//     [Header("Item Slot Structure")]
-//     [Tooltip("Prefab structure: Item/icon(Image), Item/buybutton(Button), Item/price(TextMeshProUGUI), Item/quantity(TextMeshProUGUI)")]
-//     public List<PlayerScrollItem> itemSlots = new List<PlayerScrollItem>();
+    [System.Serializable]
+    public class PlayerScrollItem
+    {
+        public GameObject itemObject;
+        public Image iconImage;
+        public TextMeshProUGUI priceText;
 
-//     [System.Serializable]
-//     public class PlayerScrollItem
-//     {
-//         public GameObject itemObject;
-//         public Image iconImage;
-//         public Button sellButton; // buybutton thực chất là sell button
-//         public TextMeshProUGUI priceText;
+        public TextMeshProUGUI quantityText;
+        public CollectableType currentItemType = CollectableType.NONE;
+    }
+    private List<PlayerScrollItem> itemSlots = new List<PlayerScrollItem>();
 
-//         public TextMeshProUGUI quantityText;
-//         public CollectableType currentItemType = CollectableType.NONE;
-//         public int currentItemCount = 0;
-//     }
+    private void Awake()
+    {
+        // Auto-find references nếu chưa gán
+        // if (shopManager == null)
+        //     shopManager = FindObjectOfType<ShopManager>();
 
-//     private void Awake()
-//     {
-//         // Auto-find references nếu chưa gán
-//         if (shopManager == null)
-//             shopManager = FindObjectOfType<ShopManager>();
+        if (player == null)
+            player = FindObjectOfType<Player>();
 
-//         if (player == null)
-//             player = FindObjectOfType<Player>();
+        // Tìm Player_Items container nếu chưa gán
+        if (playerItemsContainer == null)
+        {
+            playerItemsContainer = transform.Find("Player_Items");
+            if (playerItemsContainer == null)
+            {
+                Debug.LogError("PlayerInventoryScroll_UI: Không tìm thấy Player_Items container!");
+                return;
+            }
+        }
 
-//         // Tìm Player_Items container nếu chưa gán
-//         if (playerItemsContainer == null)
-//         {
-//             playerItemsContainer = transform.Find("Player_Items");
-//             if (playerItemsContainer == null)
-//             {
-//                 Debug.LogError("PlayerInventoryScroll_UI: Không tìm thấy Player_Items container!");
-//                 return;
-//             }
-//         }
+        // InitializeItemSlots();
+    }
 
-//         InitializeItemSlots();
-//     }
+    private void Start()
+    {
+        if (player != null && player.inventory != null)
+        {
+            player.inventory.onInventoryChanged += RefreshInventoryUI;
+        }
+    }
+
+    public void RefreshInventoryUI()
+    {
+        foreach (Transform child in playerItemsContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        itemSlots.Clear();
+        if (player == null || player.inventory == null)
+        {
+            Debug.LogWarning("PlayerInventoryScroll_UI: Player or inventory is not set!");
+            return;
+        }
+        foreach (var slot in player.inventory.slots)
+        {
+            if (slot.type == CollectableType.NONE || slot.count <= 0)
+                continue;
+
+            GameObject go = Instantiate(itemPrefab, playerItemsContainer);
+            PlayerScrollItem scrollItem = new PlayerScrollItem
+            {
+                itemObject = go,
+                iconImage = go.transform.Find("icon").GetComponent<Image>(),
+                quantityText = go.transform.Find("quantity").GetComponent<TextMeshProUGUI>(),
+                currentItemType = slot.type
+            };
+
+            scrollItem.iconImage.sprite = slot.icon;
+            scrollItem.quantityText.text = slot.count.ToString();
+
+            itemSlots.Add(scrollItem);
+        }
+    }
+
+}
 
 //     private void Start()
 //     {
@@ -134,108 +177,93 @@
 //         Debug.Log($"PlayerInventoryScroll_UI: Initialized {itemSlots.Count} item slots");
 //     }
 
-//     /// <summary>
-//     /// Refresh hiển thị tất cả items
-//     /// </summary>
-//     public void RefreshDisplay()
+/// <summary>
+/// Refresh hiển thị tất cả items
+/// </summary>
+// public void RefreshDisplay()
+// {
+//     if (player == null || player.inventory == null)
 //     {
-//         if (player == null || player.inventory == null || shopManager == null || shopManager.shopData == null)
-//         {
-//             Debug.LogWarning("PlayerInventoryScroll_UI: Missing references for refresh");
-//             return;
-//         }
-
-//         // Lấy danh sách items từ inventory
-//         List<Inventory.Slot> inventoryItems = new List<Inventory.Slot>();
-//         foreach (var slot in player.inventory.slots)
-//         {
-//             if (slot.type != CollectableType.NONE && slot.count > 0)
-//             {
-//                 inventoryItems.Add(slot);
-//             }
-//         }
-
-//         // Cập nhật từng slot
-//         for (int i = 0; i < itemSlots.Count; i++)
-//         {
-//             if (i < inventoryItems.Count)
-//             {
-//                 // Có item để hiển thị
-//                 UpdateSlot(i, inventoryItems[i]);
-//             }
-//             else
-//             {
-//                 // Slot trống
-//                 ClearSlot(i);
-//             }
-//         }
-
-//         Debug.Log($"PlayerInventoryScroll_UI: Refreshed display with {inventoryItems.Count} items");
+//         Debug.LogWarning("PlayerInventoryScroll_UI: Missing references for refresh");
+//         return;
 //     }
+
+//     // Lấy danh sách items từ inventory
+//     List<Inventory.Slot> inventoryItems = new List<Inventory.Slot>();
+//     foreach (var slot in player.inventory.slots)
+//     {
+//         if (slot.type != CollectableType.NONE && slot.count > 0)
+//         {
+//             inventoryItems.Add(slot);
+//         }
+//     }
+
+// // Cập nhật từng slot
+// for (int i = 0; i < itemSlots.Count; i++)
+// {
+//     if (i < inventoryItems.Count)
+//     {
+//         // Có item để hiển thị
+//         UpdateSlot(i, inventoryItems[i]);
+//     }
+//     else
+//     {
+//         // Slot trống
+//         ClearSlot(i);
+//     }
+// }
+
+//     Debug.Log($"PlayerInventoryScroll_UI: Refreshed display with {inventoryItems.Count} items");
+// }
 
 //     /// <summary>
 //     /// Cập nhật một slot với item data
 //     /// </summary>
-//     private void UpdateSlot(int slotIndex, Inventory.Slot inventorySlot)
+// private void UpdateSlot(int slotIndex, Inventory.Slot inventorySlot)
+// {
+//     if (slotIndex >= itemSlots.Count) return;
+
+//     PlayerScrollItem scrollItem = itemSlots[slotIndex];
+//     scrollItem.currentItemType = inventorySlot.type;
+//     scrollItem.currentItemCount = inventorySlot.count;
+
+//     // Lấy shop item data
+//     ShopItem shopItem = shopManager.shopData.GetShopItem(inventorySlot.type);
+
+//     // Cập nhật icon
+//     if (scrollItem.iconImage != null && shopItem != null)
 //     {
-//         if (slotIndex >= itemSlots.Count) return;
-
-//         PlayerScrollItem scrollItem = itemSlots[slotIndex];
-//         scrollItem.currentItemType = inventorySlot.type;
-//         scrollItem.currentItemCount = inventorySlot.count;
-
-//         // Lấy shop item data
-//         ShopItem shopItem = shopManager.shopData.GetShopItem(inventorySlot.type);
-
-//         // Cập nhật icon
-//         if (scrollItem.iconImage != null && shopItem != null)
-//         {
-//             scrollItem.iconImage.sprite = shopItem.itemIcon;
-//             scrollItem.iconImage.color = Color.white;
-//             scrollItem.iconImage.gameObject.SetActive(true);
-//         }
-
-//         // Cập nhật price text
-//         if (scrollItem.priceText != null)
-//         {
-//             if (shopItem != null && shopItem.canSell)
-//             {
-//                 int totalValue = shopItem.sellPrice * inventorySlot.count;
-//                 scrollItem.priceText.text = $"{totalValue}G";
-//                 scrollItem.priceText.color = Color.yellow;
-//             }
-//             else
-//             {
-//                 scrollItem.priceText.text = "Không bán được";
-//                 scrollItem.priceText.color = Color.red;
-//             }
-//             scrollItem.priceText.gameObject.SetActive(true);
-//         }
-
-//         // Cập nhật sell button
-//         if (scrollItem.sellButton != null)
-//         {
-//             bool canSell = shopItem != null && shopItem.canSell;
-//             scrollItem.sellButton.interactable = canSell;
-//             scrollItem.sellButton.gameObject.SetActive(true);
-
-//             // Cập nhật text của button nếu có
-//             TextMeshProUGUI buttonText = scrollItem.sellButton.GetComponentInChildren<TextMeshProUGUI>();
-//             if (buttonText != null)
-//             {
-//                 buttonText.text = canSell ? "Bán" : "Không thể bán";
-//             }
-//         }
-
-//         if (scrollItem.quantityText != null)
-//         {
-//             scrollItem.quantityText.text = $"x{inventorySlot.count}";
-//             scrollItem.quantityText.gameObject.SetActive(true);
-//         }
-
-//         // Show item object
-//         scrollItem.itemObject.SetActive(true);
+//         scrollItem.iconImage.sprite = shopItem.itemIcon;
+//         scrollItem.iconImage.color = Color.white;
+//         scrollItem.iconImage.gameObject.SetActive(true);
 //     }
+
+//     // Cập nhật price text
+//     if (scrollItem.priceText != null)
+//     {
+//         if (shopItem != null && shopItem.canSell)
+//         {
+//             int totalValue = shopItem.sellPrice * inventorySlot.count;
+//             scrollItem.priceText.text = $"{totalValue}G";
+//             scrollItem.priceText.color = Color.yellow;
+//         }
+//         else
+//         {
+//             scrollItem.priceText.text = "Không bán được";
+//             scrollItem.priceText.color = Color.red;
+//         }
+//         scrollItem.priceText.gameObject.SetActive(true);
+//     }
+
+//     if (scrollItem.quantityText != null)
+//     {
+//         scrollItem.quantityText.text = $"x{inventorySlot.count}";
+//         scrollItem.quantityText.gameObject.SetActive(true);
+//     }
+
+//     // Show item object
+//     scrollItem.itemObject.SetActive(true);
+// }
 
 //     /// <summary>
 //     /// Xóa hiển thị của một slot
@@ -394,4 +422,3 @@
 //         }
 //         return -1;
 //     }
-// }
