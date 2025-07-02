@@ -1,0 +1,89 @@
+name: CI/CD KunFarm Backend
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/shop
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore KunFarm-Server/KunFarm.Presentation/KunFarm.Presentation.csproj
+
+    - name: Build with dotnet
+      run: dotnet build KunFarm-Server/KunFarm.Presentation/KunFarm.Presentation.csproj --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test KunFarm-Server/ --no-build --configuration Release --verbosity normal
+
+    - name: Docker login
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        cd KunFarm-Server
+        # Build the main API service
+        docker build -f dockerfile -t ${{ vars.DOCKER_USERNAME }}/kunfarm-api:latest .
+        docker push ${{ vars.DOCKER_USERNAME }}/kunfarm-api:latest
+        
+        # Tag with git commit hash for versioning
+        docker tag ${{ vars.DOCKER_USERNAME }}/kunfarm-api:latest ${{ vars.DOCKER_USERNAME }}/kunfarm-api:${{ github.sha }}
+        docker push ${{ vars.DOCKER_USERNAME }}/kunfarm-api:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: TEST
+    steps:
+    - name: SSH to server and deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ vars.HOST_IP }}
+        username: root
+        key: ${{ secrets.SECRET_KEY }}
+        script: |
+          cd /var/docker/kunfarm-app
+          echo "🚀 Deploying KunFarm..."
+          
+          # Set environment variables
+          export DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }}
+          export MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          
+          # Pull latest image
+          echo "📦 Pulling latest image..."
+          docker-compose pull kunfarm-api
+          
+          # Restart service
+          echo "🔄 Restarting services..."
+          docker-compose up -d --force-recreate kunfarm-api
+          
+          # Simple health check
+          sleep 20
+          if curl -f http://localhost:5270 &>/dev/null; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+          fi
+          
+          # Show status
+          docker-compose ps 

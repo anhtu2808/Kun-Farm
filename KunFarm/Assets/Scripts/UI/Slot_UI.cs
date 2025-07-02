@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class Slot_UI : MonoBehaviour
+public class Slot_UI : MonoBehaviour, IPointerClickHandler
 {
     [Header("Basic UI")]
     public Image itemIcon;
@@ -137,11 +137,88 @@ public class Slot_UI : MonoBehaviour
         onSlotClicked = callback;
     }
 
-    // / <summary>
-    // / Get current slot data
-    // / </summary>
+    /// <summary>
+    /// Get current slot data
+    /// </summary>
     public Inventory.Slot GetCurrentSlot()
     {
         return currentSlot;
+    }
+
+    /// <summary>
+    /// Handle mouse clicks on the slot
+    /// </summary>
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // Right-click to drop item
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            DropItem();
+        }
+        // Left-click for selection (existing behavior) 
+        else if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            onSlotClicked?.Invoke(slotIndex);
+        }
+    }
+
+    /// <summary>
+    /// Drop item from this slot to the ground
+    /// </summary>
+    private void DropItem()
+    {
+        Inventory inventory = FindObjectOfType<Inventory>();
+        Player player = FindObjectOfType<Player>();
+        ItemManager itemManager = FindObjectOfType<ItemManager>();
+        
+        if (inventory == null || player == null || itemManager == null) return;
+        
+        // Check if this is an inventory slot and has items
+        if (currentSlot != null && currentSlot.type != CollectableType.NONE && currentSlot.count > 0)
+        {
+            // Get the collectable prefab for this item type
+            Collectable collectablePrefab = itemManager.GetItemByType(currentSlot.type);
+            
+            if (collectablePrefab != null)
+            {
+                // Drop the item
+                player.DropItem(collectablePrefab);
+                
+                // Remove 1 item from inventory slot
+                currentSlot.RemoveItem();
+                
+                // Show notification
+                string itemName = currentSlot.type.ToString();
+                SimpleNotificationPopup.Show($"Dropped {itemName}! Right-click to drop items.");
+                
+                // If slot is empty, clear the slot data
+                if (currentSlot.count <= 0)
+                {
+                    currentSlot.type = CollectableType.NONE;
+                    currentSlot.icon = null;
+                    SetEmpty();
+                }
+                else
+                {
+                    // Update display with new quantity
+                    quantityText.text = currentSlot.count.ToString();
+                }
+                
+                // Notify inventory of changes
+                inventory.MarkInventoryChanged();
+                inventory.NotifyInventoryChanged();
+                
+                Debug.Log($"[Slot_UI] Dropped {collectablePrefab.type} from slot {slotIndex}, remaining: {currentSlot.count}");
+            }
+            else
+            {
+                Debug.LogWarning($"[Slot_UI] No collectable prefab found for {currentSlot.type}");
+                SimpleNotificationPopup.Show($"Cannot drop {currentSlot.type} - no prefab found!");
+            }
+        }
+        else
+        {
+            SimpleNotificationPopup.Show("No item to drop! Right-click on items to drop them.");
+        }
     }
 }

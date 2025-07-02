@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  kunfarm-api:
+    image: anhtu2808/kunfarm-api:latest
+    container_name: kunfarm-api
+    ports:
+      - "5270:8080"
+    depends_on:
+      - kunfarm-mysql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=server=kunfarm-mysql;port=3306;user=root;password=${MYSQL_ROOT_PASSWORD};database=Kun_Farm;
+    restart: unless-stopped
+    networks:
+      - kunfarm-network
+
+  kunfarm-mysql:
+    image: mysql:8.0
+    container_name: kunfarm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: Kun_Farm
+    ports:
+      - "3306:3306"
+    volumes:
+      - kunfarm_mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - kunfarm-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+      interval: 10s
+
+volumes:
+  kunfarm_mysql_data:
+
+networks:
+  kunfarm-network:
+    driver: bridge 

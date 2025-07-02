@@ -40,20 +40,33 @@ public class Player : MonoBehaviour
     {
         Debug.Log("DropItem called for: " + item.name);
 
+        // Drop item ngay tại vị trí player
         Vector2 spawnLocation = transform.position;
-        Vector2 spawnOffset = UnityEngine.Random.insideUnitCircle * 3f;
+        Collectable droppedItem = Instantiate(item, spawnLocation, Quaternion.identity);
 
-        Collectable droppedItem = Instantiate(item, spawnLocation + spawnOffset, Quaternion.identity);
-
+        // Ensure Rigidbody2D is properly initialized (for pickup physics if needed)
         if (droppedItem.rb2d == null)
         {
-            Debug.LogError("rb2d is null! Did not assign or init properly.");
+            // Try to get existing Rigidbody2D component
+            droppedItem.rb2d = droppedItem.GetComponent<Rigidbody2D>();
+            
+            // If still null, add one
+            if (droppedItem.rb2d == null)
+            {
+                droppedItem.rb2d = droppedItem.gameObject.AddComponent<Rigidbody2D>();
+                droppedItem.rb2d.gravityScale = 0f; // No gravity for farming items
+                droppedItem.rb2d.drag = 2f; // Add some drag
+                droppedItem.rb2d.bodyType = RigidbodyType2D.Static; // Keep item stationary after drop
+            }
         }
         else
         {
-            droppedItem.rb2d.AddForce(spawnOffset * 2f, ForceMode2D.Impulse);
-            Debug.Log("Force applied to dropped item");
+            // Make existing rigidbody static so item doesn't move
+            droppedItem.rb2d.bodyType = RigidbodyType2D.Static;
+            droppedItem.rb2d.velocity = Vector2.zero;
         }
+
+        Debug.Log($"Dropped {item.type} at player position");
     }
     public bool TryBuy(int price) => wallet.Spend(price);
     public void Earn(int amount) => wallet.Add(amount);

@@ -22,7 +22,11 @@ builder.Services.AddControllers()
 // Database configuration - MySQL
 builder.Services.AddDbContext<KunFarmDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("Default"), 
-        new MySqlServerVersion(new Version(8, 0, 21))));
+        new MySqlServerVersion(new Version(8, 0, 21)),
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 // Repository pattern registration
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -140,15 +144,53 @@ else
     app.UseHsts();
 }
 
-// Ensure database is created and seed admin account
+// Ensure database is created and seed admin account with retry logic
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<KunFarmDbContext>();
-    dbContext.Database.EnsureCreated();
+    
+    // Retry logic for database connection
+    int retryCount = 0;
+    const int maxRetries = 10;
+    const int delaySeconds = 5;
+    
+    while (retryCount < maxRetries)
+    {
+        try
+        {
+            Console.WriteLine($"Attempting to connect to database... (Attempt {retryCount + 1}/{maxRetries})");
+            dbContext.Database.EnsureCreated();
+            Console.WriteLine("✅ Database connected and created successfully!");
+            break;
+        }
+        catch (Exception ex)
+        {
+            retryCount++;
+            Console.WriteLine($"❌ Database connection failed (Attempt {retryCount}/{maxRetries}): {ex.Message}");
+            
+            if (retryCount >= maxRetries)
+            {
+                Console.WriteLine("💥 Max retries reached. Unable to connect to database.");
+                throw;
+            }
+            
+            Console.WriteLine($"⏳ Waiting {delaySeconds} seconds before retry...");
+            await Task.Delay(delaySeconds * 1000);
+        }
+    }
     
     // Seed admin account from configuration
-    var seeder = scope.ServiceProvider.GetRequiredService<KunFarm.BLL.Services.DatabaseSeederService>();
-    await seeder.SeedAsync();
+    try
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<KunFarm.BLL.Services.DatabaseSeederService>();
+        await seeder.SeedAsync();
+        Console.WriteLine("✅ Database seeding completed successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Database seeding failed: {ex.Message}");
+        // Don't throw here, app can still run without seeding
+    }
 }
 
 app.UseHttpsRedirection();
