@@ -89,5 +89,120 @@ namespace KunFarm.BLL.Services
             }
             return inventorySlotResponses;
         }
+
+        public async Task<ApiResponse<InventorySlotResponse>> UpdateInventorySlot(int playerId, UpdateInventorySlotRequest request)
+        {
+            // Tìm slot hiện tại
+            var existingSlot = await _inventorySlotRepository.GetByPlayerAndSlotIndex(playerId, request.SlotIndex);
+            
+            // Tìm item theo type
+            Item? item = await _itemRepository.GetItemByType(request.CollectableType);
+            
+            if (existingSlot != null)
+            {
+                // Update slot hiện tại
+                existingSlot.ItemId = item?.Id;
+                existingSlot.Quantity = request.Quantity;
+                existingSlot.UpdatedAt = DateTime.UtcNow;
+                
+                await _inventorySlotRepository.UpdateAsync(existingSlot);
+                Console.WriteLine($"Updated slot {request.SlotIndex} for player {playerId}: {request.CollectableType} x{request.Quantity}");
+            }
+            else
+            {
+                // Tạo slot mới
+                var newSlot = new InventorySlot
+                {
+                    SlotIndex = request.SlotIndex,
+                    ItemId = item?.Id,
+                    PlayerStateId = playerId,
+                    Quantity = request.Quantity,
+                    IsDeleted = false,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                
+                existingSlot = await _inventorySlotRepository.AddAsync(newSlot);
+                Console.WriteLine($"Created new slot {request.SlotIndex} for player {playerId}: {request.CollectableType} x{request.Quantity}");
+            }
+            
+            // Tạo response
+            var response = new InventorySlotResponse
+            {
+                Id = existingSlot.Id,
+                ItemId = existingSlot.ItemId ?? 0,
+                Quantity = existingSlot.Quantity,
+                CollectableType = item?.CollectableType ?? "NONE",
+                Icon = item?.Icon ?? "NONE",
+                SlotIndex = existingSlot.SlotIndex
+            };
+            
+            return new ApiResponse<InventorySlotResponse>
+            {
+                Code = 200,
+                Message = "Inventory slot updated successfully.",
+                Data = response
+            };
+        }
+
+        public async Task<ApiResponse<List<InventorySlotResponse>>> BatchUpdateInventory(int playerId, BatchUpdateInventoryRequest request)
+        {
+            Console.WriteLine($"Batch updating inventory for player {playerId} with {request.Slots.Count} slots");
+            
+            var updatedSlots = new List<InventorySlot>();
+            
+            foreach (var slotRequest in request.Slots)
+            {
+                // Tìm slot hiện tại
+                var existingSlot = await _inventorySlotRepository.GetByPlayerAndSlotIndex(playerId, slotRequest.SlotIndex);
+                
+                // Tìm item theo type (chấp nhận null cho NONE)
+                Item? item = null;
+                if (slotRequest.CollectableType != "NONE")
+                {
+                    item = await _itemRepository.GetItemByType(slotRequest.CollectableType);
+                }
+                
+                if (existingSlot != null)
+                {
+                    // Update slot hiện tại
+                    existingSlot.ItemId = item?.Id; // null cho NONE slots
+                    existingSlot.Quantity = slotRequest.Quantity;
+                    existingSlot.UpdatedAt = DateTime.UtcNow;
+                    
+                    await _inventorySlotRepository.UpdateAsync(existingSlot);
+                    updatedSlots.Add(existingSlot);
+                    Console.WriteLine($"Updated slot {slotRequest.SlotIndex}: {slotRequest.CollectableType} x{slotRequest.Quantity}");
+                }
+                else
+                {
+                    // Tạo slot mới
+                    var newSlot = new InventorySlot
+                    {
+                        SlotIndex = slotRequest.SlotIndex,
+                        ItemId = item?.Id, // null cho NONE slots
+                        PlayerStateId = playerId,
+                        Quantity = slotRequest.Quantity,
+                        IsDeleted = false,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    
+                    var createdSlot = await _inventorySlotRepository.AddAsync(newSlot);
+                    updatedSlots.Add(createdSlot);
+                    Console.WriteLine($"Created slot {slotRequest.SlotIndex}: {slotRequest.CollectableType} x{slotRequest.Quantity}");
+                }
+            }
+            
+            // Build response
+            var responses = await BuildInventorySlotResponse(updatedSlots);
+            
+            return new ApiResponse<List<InventorySlotResponse>>
+            {
+                Code = 200,
+                Message = $"Batch updated {request.Slots.Count} inventory slots successfully.",
+                Data = responses
+            };
+        }
     }
 }

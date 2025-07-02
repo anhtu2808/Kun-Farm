@@ -115,6 +115,8 @@
     <Compile Include="Assets/Scripts/RegisterManager.cs" />
     <Compile Include="Assets/Scripts/ShopData.cs" />
     <Compile Include="Assets/Scripts/UI/SellShopScroll_UI.cs" />
+    <Compile Include="Assets/Scripts/Data/BatchUpdateInventoryRequest.cs" />
+    <Compile Include="Assets/Scripts/Data/UpdateInventorySlotRequest.cs" />
     <Compile Include="Assets/Scripts/UI/InputQuantityUI.cs" />
     <Compile Include="Assets/Scripts/ItemManager.cs" />
     <Compile Include="Assets/Scripts/Helper/IconProvider.cs" />

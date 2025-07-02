@@ -13,5 +13,9 @@ namespace KunFarm.BLL.Interfaces
         Task<ApiResponse<List<InventorySlotResponse>>> GetInventorySlots(int playerId);
 
         Task<ApiResponse<List<InventorySlotResponse>>> SaveInventory(int playerId, InventorySaveList requests);
+        
+        Task<ApiResponse<InventorySlotResponse>> UpdateInventorySlot(int playerId, UpdateInventorySlotRequest request);
+        
+        Task<ApiResponse<List<InventorySlotResponse>>> BatchUpdateInventory(int playerId, BatchUpdateInventoryRequest request);
     }
 }

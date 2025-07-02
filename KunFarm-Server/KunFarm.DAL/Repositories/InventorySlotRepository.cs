@@ -35,5 +35,11 @@ namespace KunFarm.DAL.Repositories
                 .ToListAsync();
         }
 
+        public async Task<InventorySlot?> GetByPlayerAndSlotIndex(int playerId, int slotIndex)
+        {
+            return await _context.InventorySlots
+                .FirstOrDefaultAsync(slot => slot.PlayerStateId == playerId && slot.SlotIndex == slotIndex);
+        }
+
     }
 }

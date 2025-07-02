@@ -35,5 +35,23 @@ namespace KunFarm.Presentation.Controllers
             return NotFound(result);
         }
 
+        [HttpPut("update-slot/{playerId:int}")]
+        public async Task<IActionResult> UpdateInventorySlot([FromRoute] int playerId, [FromBody] UpdateInventorySlotRequest request)
+        {
+            var result = await _inventoryService.UpdateInventorySlot(playerId, request);
+            if (result.Data is { })
+                return Ok(result);
+            return BadRequest(result);
+        }
+
+        [HttpPut("batch-update/{playerId:int}")]
+        public async Task<IActionResult> BatchUpdateInventory([FromRoute] int playerId, [FromBody] BatchUpdateInventoryRequest request)
+        {
+            var result = await _inventoryService.BatchUpdateInventory(playerId, request);
+            if (result.Data is { } && result.Data.Count > 0)
+                return Ok(result);
+            return BadRequest(result);
+        }
+
     }
 }

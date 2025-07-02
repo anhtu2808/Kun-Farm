@@ -16,6 +16,12 @@ public class Inventory : MonoBehaviour
     public bool IsOpen => inventoryPanel.activeSelf;
     private int totalSlots = 27;
     private List<GameObject> slotInstances = new();
+    
+    // Track changes for auto-save
+    private bool hasChanges = false;
+    private float autoSaveTimer = 0f;
+    private const float AUTO_SAVE_INTERVAL = 30f; // 30 seconds
+    private bool isAutoSaveEnabled = true;
 
     [System.Serializable]
     public class Slot
@@ -81,6 +87,21 @@ public class Inventory : MonoBehaviour
     {
         // Input handling moved to UIManager
         // Tab key is now handled by UIManager
+        
+        // Auto save every 30 seconds
+        if (isAutoSaveEnabled)
+        {
+            autoSaveTimer += Time.deltaTime;
+            if (autoSaveTimer >= AUTO_SAVE_INTERVAL)
+            {
+                autoSaveTimer = 0f;
+                if (hasChanges)
+                {
+                    Debug.Log($"🕐 [Auto Save] Timer triggered, saving all 27 slots");
+                    StartCoroutine(SaveAllSlots());
+                }
+            }
+        }
     }
 
     public void ToggleInventory()
@@ -207,21 +228,23 @@ public class Inventory : MonoBehaviour
     public List<Slot> slots = new List<Slot>();
     public void Add(Collectable item, int quantity)
     {
-        foreach (Slot slot in slots)
+        for (int i = 0; i < slots.Count; i++)
         {
-            if (slot.type == item.type && slot.CanAddItem())
+            if (slots[i].type == item.type && slots[i].CanAddItem())
             {
-                slot.AddItem(item, quantity);
+                slots[i].AddItem(item, quantity);
+                MarkInventoryChanged();
                 onInventoryChanged?.Invoke();
                 return;
             }
         }
 
-        foreach (Slot slot in slots)
+        for (int i = 0; i < slots.Count; i++)
         {
-            if (slot.type == CollectableType.NONE)
+            if (slots[i].type == CollectableType.NONE)
             {
-                slot.AddItem(item, quantity);
+                slots[i].AddItem(item, quantity);
+                MarkInventoryChanged();
                 onInventoryChanged?.Invoke();
                 return;
             }
@@ -231,6 +254,7 @@ public class Inventory : MonoBehaviour
     public void Remove(int index)
     {
         slots[index].RemoveItem();
+        MarkInventoryChanged();
         var type = player.inventory.slots[index].type;
         var itemToDrop = GameManager.instance.itemManager.GetItemByType(type);
 
@@ -248,26 +272,28 @@ public class Inventory : MonoBehaviour
     public void AddItemByType(CollectableType type, Sprite icon, int count = 1)
     {
         // Find existing slot with same type
-        foreach (Slot slot in slots)
+        for (int i = 0; i < slots.Count; i++)
         {
-            if (slot.type == type && slot.CanAddItem())
+            if (slots[i].type == type && slots[i].CanAddItem())
             {
-                slot.type = type;
-                slot.icon = icon;
-                slot.count += count;
+                slots[i].type = type;
+                slots[i].icon = icon;
+                slots[i].count += count;
+                MarkInventoryChanged();
                 onInventoryChanged?.Invoke();
                 return;
             }
         }
 
         // Find empty slot
-        foreach (Slot slot in slots)
+        for (int i = 0; i < slots.Count; i++)
         {
-            if (slot.type == CollectableType.NONE)
+            if (slots[i].type == CollectableType.NONE)
             {
-                slot.type = type;
-                slot.icon = icon;
-                slot.count = count;
+                slots[i].type = type;
+                slots[i].icon = icon;
+                slots[i].count = count;
+                MarkInventoryChanged();
                 onInventoryChanged?.Invoke();
                 return;
             }
@@ -283,6 +309,7 @@ public class Inventory : MonoBehaviour
             slots[index].count = 0;
             slots[index].type = CollectableType.NONE;
             slots[index].icon = null;
+            MarkInventoryChanged();
             onInventoryChanged?.Invoke();
         }
     }
@@ -292,87 +319,171 @@ public class Inventory : MonoBehaviour
     {
         onInventoryChanged?.Invoke();
     }
-    private bool saveCompleted = false;
+    
+    /// <summary>
+    /// Mark inventory as changed for auto-save
+    /// </summary>
+    public void MarkInventoryChanged()
+    {
+        hasChanges = true;
+        Debug.Log($"📝 [Change Tracking] Inventory marked as changed");
+    }
+    
+    /// <summary>
+    /// Force save all slots immediately (public method)
+    /// </summary>
+    public void ForceSaveChanges()
+    {
+        if (hasChanges)
+        {
+            Debug.Log($"🚨 [Force Save] Manually triggered, saving all 27 slots");
+            StartCoroutine(SaveAllSlots());
+        }
+        else
+        {
+            Debug.Log("💡 [Force Save] No changes to save");
+        }
+    }
+    
+        /// <summary>
+    /// Save all 27 slots to server
+    /// </summary>
+    private IEnumerator SaveAllSlots()
+    {
+        if (!hasChanges) yield break;
+        
+        Debug.Log($"💾 [Save All] Saving all 27 slots...");
+        
+        // Prepare all 27 slots data
+        UpdateInventorySlotRequest[] allSlots = new UpdateInventorySlotRequest[totalSlots];
+
+        for (int i = 0; i < totalSlots; i++)
+        {
+            allSlots[i] = new UpdateInventorySlotRequest
+            {
+                slotIndex = i,
+                collectableType = slots[i].type.ToString(),
+                quantity = slots[i].count
+            };
+            Debug.Log($"Slot {i}: Type={allSlots[i].collectableType}, Quantity={allSlots[i].quantity}");
+        }
+        
+        BatchUpdateInventoryRequest batchRequest = new BatchUpdateInventoryRequest
+        {
+            slots = allSlots
+        };
+        
+        yield return StartCoroutine(SendBatchUpdateRequest(batchRequest));
+
+        
+        Debug.Log($"✅ [Save All] Completed saving all 27 slots");
+    }
+    
+    /// <summary>
+    /// Send batch update request to server
+    /// </summary>
+    private IEnumerator SendBatchUpdateRequest(BatchUpdateInventoryRequest request)
+    {
+        string apiUrl = "http://localhost:5270/inventory/batch-update/1";
+        string json = JsonUtility.ToJson(request);
+        
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+        UnityWebRequest webRequest = new UnityWebRequest(apiUrl, "PUT");
+        webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        
+        Debug.Log($"📤 [Batch Update] Sending all 27 slots...");
+        
+        yield return webRequest.SendWebRequest();
+        
+        if (webRequest.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"✅ [Batch Update] All slots updated successfully");
+            hasChanges = false; // Clear changes flag
+        }
+        else
+        {
+            Debug.LogError($"❌ [Batch Update] Failed to update slots: {webRequest.error}");
+            // Keep hasChanges = true for retry
+        }
+    }
 
     private void OnApplicationQuit()
     {
         Debug.Log("▶️ [Quit] App đang thoát... Lưu dữ liệu!");
 
-        List<SaveInventoryRequest> saveRequests = new List<SaveInventoryRequest>();
-
-        for (int i = 0; i < slots.Count; i++)
+        // Force save all slots if there are changes
+        if (hasChanges)
         {
-            if (slots[i].type != CollectableType.NONE)
-            {
-                SaveInventoryRequest request = new SaveInventoryRequest
-                {
-                    SlotIndex = i,
-                    CollectableType = slots[i].type.ToString(),
-                    quantity = slots[i].count
-                };
-                saveRequests.Add(request);
-            }
-            else
-            {
-                SaveInventoryRequest request = new SaveInventoryRequest
-                {
-                    SlotIndex = i,
-                    CollectableType = CollectableType.NONE.ToString(),
-                    quantity = 0
-                };
-                saveRequests.Add(request);
-            }
+            Debug.Log($"🚨 [Quit] Force saving all 27 slots...");
+            StartCoroutine(SaveAllSlotsSync());
         }
-
-        Debug.Log($"📦 [Quit] Tổng số request chuẩn bị gửi: {saveRequests.Count}");
-
-        SaveGameData(saveRequests);
-
-        float timeout = 5f;
-        float startTime = Time.realtimeSinceStartup;
-        Debug.Log("⏳ [Quit] Đang chờ gửi inventory...");
-        while (!saveCompleted && Time.realtimeSinceStartup - startTime < timeout)
-        {
-            System.Threading.Thread.Sleep(100);
-        }
-
-        if (saveCompleted)
-            Debug.Log("✔️ [Quit] Gửi thành công trước khi thoát ứng dụng.");
         else
-            Debug.LogWarning("⚠️ [Quit] Hết thời gian chờ, có thể dữ liệu chưa được gửi xong.");
+        {
+            Debug.Log("💡 [Quit] No changes to save");
+        }
     }
-
-    private void SaveGameData(List<SaveInventoryRequest> saveRequests)
+    
+    /// <summary>
+    /// Synchronous save for application quit
+    /// </summary>
+    private IEnumerator SaveAllSlotsSync()
     {
-        try
+        isAutoSaveEnabled = false; // Disable auto save during quit
+        
+        // Prepare all 27 slots data
+        UpdateInventorySlotRequest[] allSlots = new UpdateInventorySlotRequest[totalSlots];
+        
+        for (int i = 0; i < totalSlots; i++)
         {
-            string apiUrl = "http://localhost:5270/inventory/save/1";
-            InventorySaveList requestBody = new InventorySaveList(saveRequests);
-            string json = JsonUtility.ToJson(requestBody);
-            Debug.Log("📤 [Blocking Send] JSON gửi: " + json);
-
-            using (HttpClient client = new HttpClient())
+            allSlots[i] = new UpdateInventorySlotRequest
             {
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                // Gửi đồng bộ, chặn cho tới khi xong
-                HttpResponseMessage response = client.PostAsync(apiUrl, content).GetAwaiter().GetResult();
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    Debug.Log("✅ [Blocking Send] Lưu thành công! Response: " + result);
-                }
-                else
-                {
-                    Debug.LogError("❌ [Blocking Send] Lỗi khi gửi: " + response.StatusCode);
-                }
-            }
+                slotIndex = i,
+                collectableType = slots[i].type.ToString(),
+                quantity = slots[i].count
+            };
         }
-        catch (Exception ex)
+        
+        BatchUpdateInventoryRequest batchRequest = new BatchUpdateInventoryRequest
         {
-            Debug.LogError("❌ [Blocking Send] Exception: " + ex.Message);
+            slots = allSlots
+        };
+        
+        yield return StartCoroutine(SendBatchUpdateRequestSync(batchRequest));
+        
+        Debug.Log($"✅ [Quit] Completed saving all 27 slots before quit");
+    }
+    
+    /// <summary>
+    /// Synchronous version for quit save
+    /// </summary>
+    private IEnumerator SendBatchUpdateRequestSync(BatchUpdateInventoryRequest request)
+    {
+        string apiUrl = "http://localhost:5270/inventory/batch-update/1";
+        string json = JsonUtility.ToJson(request);
+        
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+        UnityWebRequest webRequest = new UnityWebRequest(apiUrl, "PUT");
+        webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        
+        Debug.Log($"📤 [Quit Save] Sending all 27 slots...");
+        
+        yield return webRequest.SendWebRequest();
+        
+        if (webRequest.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"✅ [Quit Save] All slots saved successfully");
+            hasChanges = false;
+        }
+        else
+        {
+            Debug.LogError($"❌ [Quit Save] Failed to save slots: {webRequest.error}");
         }
     }
+
+
 
 }
