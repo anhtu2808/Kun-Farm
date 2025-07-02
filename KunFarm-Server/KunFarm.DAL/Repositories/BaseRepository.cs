@@ -47,7 +47,8 @@ namespace KunFarm.DAL.Repositories
         public virtual async Task<T> UpdateAsync(T entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;
-            _dbSet.Update(entity);
+            _context.Update(entity);
+            await _context.SaveChangesAsync();
             return entity;
         }
 

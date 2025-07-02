@@ -15,10 +15,12 @@ namespace KunFarm.DAL.Entities
         [Required]
         public int BuyPrice { get; set; }
 
-        public int SellerId { get; set; }
+        public int Quantiy { get; set; }
+
+        public int? SellerId { get; set; }
         public PlayerState Seller { get; set; } = null!;
 
-        public int BuyerId { get; set; }
+        public int? BuyerId { get; set; }
         public PlayerState Buyer { get; set; } = null!;
 
         public int ItemId { get; set; }

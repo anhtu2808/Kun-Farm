@@ -51,7 +51,7 @@ public class Collectable : MonoBehaviour
         Player player = collision.GetComponent<Player>();
         if (player)
         {
-            player.inventory.Add(this);
+            player.inventory.Add(this, 1);
             Destroy(this.gameObject);
         }
     }

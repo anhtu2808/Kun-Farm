@@ -1,17 +1,13 @@
-using UnityEngine;
+using System;
 using System.Collections;
-using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System;
+using UnityEngine;
+using UnityEngine.Networking;
 
-/// <summary>
-/// Quản lý logic mua/bán items trong shop
-/// </summary>
-public class ShopManager : MonoBehaviour
+public class OnlBuyShopManager : MonoBehaviour
 {
-
     [Header("References")]
     public Player player;
     public GameObject shopPanel;
@@ -22,9 +18,9 @@ public class ShopManager : MonoBehaviour
     // Events
     public System.Action OnShopUpdated;
     private bool isOpen = false;
-    private string apiUrl = "https://localhost:7067/regular-shop/{playerId}";
+
     private bool hasBuyItem = false;
-    private List<BuyItemRequest> list;
+    private List<int> list;
 
     private void Awake()
     {
@@ -38,13 +34,13 @@ public class ShopManager : MonoBehaviour
         if (playerInventoryScrollUI == null)
             playerInventoryScrollUI = FindObjectOfType<PlayerInventoryScroll_UI>(); // Nếu bạn chưa gán thủ công
         shopPanel.SetActive(false);
-        StartCoroutine(GetShopData(1));
+        StartCoroutine(GetShopData());
     }
 
     void Update()
     {
-        // Toggle shop bằng phím B chẳng hạn
-        if (Input.GetKeyDown(KeyCode.B))
+
+        if (Input.GetKeyDown(KeyCode.P))
         {
             ToggleShop();
         }
@@ -78,8 +74,9 @@ public class ShopManager : MonoBehaviour
         shopPanel.SetActive(true);
     }
 
-    private IEnumerator GetShopData(int playerId)
+    private IEnumerator GetShopData(int playerId = 2)
     {
+        string apiUrl = "https://localhost:7067/online-shop/{playerId}";
         string url = apiUrl.Replace("{playerId}", playerId.ToString());
 
         UnityWebRequest request = UnityWebRequest.Get(url);
@@ -88,13 +85,13 @@ public class ShopManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             string json = request.downloadHandler.text;
-            ShopResponseWrapper response = JsonUtility.FromJson<ShopResponseWrapper>(json);
-
+            BuyShopWrapper response = JsonUtility.FromJson<BuyShopWrapper>(json);
             foreach (var item in response.data)
             {
-                Debug.Log($"Loaded shop item: {item.collectableType} - {item.currentStock}/{item.stockLimit}");
+
+                Debug.Log($"[Get Online Shop Data]] Loaded shop item: {item.collectableType} - {item.price} - {item.canBuy} - {item.quantity}");
                 GameObject slotGO = Instantiate(shopSlotPrefab, shopSlotContainer);
-                var slotUI = slotGO.GetComponent<ShopSlot_UI>();
+                var slotUI = slotGO.GetComponent<ShopBuySlot_UI>();
                 slotUI.Setup(item, this);
             }
         }
@@ -108,33 +105,13 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// Mua item từ shop
     /// </summary>
-    public void BuyItem(ShopSlotData data)
+    public void BuyItem(SellItemResponse data)
     {
-        Debug.Log($"Mua item: {data.itemName} - Giá: {data.buyPrice} - Số lượng hiện tại: {data.currentStock}/{data.stockLimit}");
-        if (data.currentStock > data.stockLimit)
-        {
-            Debug.LogWarning("Đã hết hàng!");
-            return;
-        }
 
         if (list == null)
-            list = new List<BuyItemRequest>();
+            list = new List<int>();
 
-        var existingItem = list.FirstOrDefault(x => x.SlotId == data.slotId);
-        if (existingItem != null)
-        {
-            existingItem.Quantity += 1;
-            existingItem.TotalPrice += data.buyPrice;
-        }
-        else
-        {
-            list.Add(new BuyItemRequest
-            {
-                SlotId = data.slotId,
-                Quantity = 1,
-                TotalPrice = data.buyPrice
-            });
-        }
+        list.Add(data.id);
 
         hasBuyItem = true;
 
@@ -143,7 +120,7 @@ public class ShopManager : MonoBehaviour
             var collectable = itemManager.GetItemByType(parsedType);
             if (collectable != null)
             {
-                player.inventory.Add(collectable, 1);
+                player.inventory.Add(collectable, data.quantity);
                 player.inventory.NotifyInventoryChanged();
             }
         }
@@ -152,18 +129,13 @@ public class ShopManager : MonoBehaviour
             Debug.LogError($"Không parse được CollectableType từ '{data.collectableType}'");
         }
         // Gọi tới Wallet để trừ tiền + Inventory để thêm item (nếu đủ)
-        Debug.Log($"Mua: {data.itemName} với giá {data.buyPrice}");
     }
 
-    private IEnumerator SendBuyRequest(List<BuyItemRequest> requestList)
+    private IEnumerator SendBuyRequest(List<int> requestList)
     {
-        string apiUrl = "https://localhost:7067/regular-shop/buy/1";
+        string apiUrl = "https://localhost:7067/online-shop/buy/1";
 
-        // ✅ Sử dụng class rõ ràng thay vì anonymous
-        BuyItemRequestList wrapper = new BuyItemRequestList();
-        wrapper.Items = requestList;
-
-        string json = JsonUtility.ToJson(wrapper);
+        string json = "[" + string.Join(",", requestList) + "]";
         Debug.Log("📤 Sending Buy Request: " + json); // kiểm tra JSON trước khi gửi
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -202,4 +174,10 @@ public class ShopManager : MonoBehaviour
         }
         return count;
     }
+}
+
+[Serializable]
+public class IntListWrapper
+{
+    public List<int> items;
 }

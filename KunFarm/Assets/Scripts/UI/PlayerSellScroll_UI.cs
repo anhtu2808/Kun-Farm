@@ -1,27 +1,91 @@
-// using UnityEngine;
-// using UnityEngine.UI;
-// using TMPro;
-// using System.Collections.Generic;
-// using System;
-// using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
 
-// /// <summary>
-// /// UI Manager cho PlayerSell_Scroll - hiển thị inventory items của player với sell functionality
-// /// </summary>
-// public class PlayerSellScroll_UI : MonoBehaviour
-// {
-//     [Header("References")]
-//     public ShopManager shopManager;
-//     public Player player;
-//     public Transform playerItemsContainer; // Player_Items container
-    
-//     [Header("Item Slot Structure")]
-//     [Tooltip("Prefab structure: Item/icon(Image), Item/sellbutton(Button), Item/price(TextMeshProUGUI), Item/quantity(TextMeshProUGUI)")]
-//     public List<PlayerSellItem> itemSlots = new List<PlayerSellItem>();
-    
-//     [Header("Sell All Button")]
-//     public Button sellAllButton;
-//     public TextMeshProUGUI sellAllText;
+public class PlayerSellScroll_UI : MonoBehaviour
+{
+    [Header("UI References")]
+    [Tooltip("Container để chứa các SellSlot prefab")]
+    public Transform itemSlotContainer;
+    [Tooltip("Prefab cho mỗi ô sell item (cần có icon, quantity, nút Sell)")]
+    public GameObject sellItemSlotPrefab;
+
+    [Header("Dependencies")]
+    public Player player;
+    public ItemManager itemManager;
+    public OnlSellShopManager sellShopManager;
+
+    // Giữ các instance hiện tại để dễ xoá
+    private List<GameObject> spawnedSlots = new List<GameObject>();
+
+    private void Awake()
+    {
+        if (player == null)           player = FindObjectOfType<Player>();
+        if (itemManager == null)      itemManager = FindObjectOfType<ItemManager>();
+        if (sellShopManager == null)  sellShopManager = FindObjectOfType<OnlSellShopManager>();
+    }
+
+    private void OnEnable()
+    {
+        // Đăng ký lắng nghe event inventory thay đổi
+        if (player != null && player.inventory != null)
+            player.inventory.onInventoryChanged += RefreshSellUI;
+
+        // Khởi tạo lần đầu
+        RefreshSellUI();
+    }
+
+    private void OnDisable()
+    {
+        if (player != null && player.inventory != null)
+            player.inventory.onInventoryChanged -= RefreshSellUI;
+    }
+
+    /// <summary>
+    /// Xoá toàn bộ các ô cũ rồi tạo mới từ inventory.slots
+    /// </summary>
+    public void RefreshSellUI()
+    {
+        // 1) Clear cũ
+        foreach (var go in spawnedSlots)
+            Destroy(go);
+        spawnedSlots.Clear();
+
+        if (player?.inventory == null)
+        {
+            Debug.LogWarning("PlayerSellScroll_UI: player hoặc inventory null!");
+            return;
+        }
+
+        // 2) Với mỗi slot > 0
+        foreach (var slot in player.inventory.slots)
+        {
+            if (slot.count <= 0 || slot.type == CollectableType.NONE)
+                continue;
+
+            // Tạo ô mới
+            var go = Instantiate(sellItemSlotPrefab, itemSlotContainer);
+            spawnedSlots.Add(go);
+
+            // Gán dữ liệu
+            var ui = go.GetComponent<PlayerSellItemSlot_UI>();
+            if (ui != null)
+            {
+                // Lấy sprite từ ItemManager
+                var itemData = itemManager.GetItemByType(slot.type);
+                var icon = itemData != null ? itemData.icon : null;
+
+                // Setup(CollectableType type, int count, Sprite icon, OnlSellShopManager mgr)
+                ui.Setup(slot.type, slot.count, icon, sellShopManager);
+            }
+            else
+            {
+                Debug.LogError("PlayerSellScroll_UI: prefab không có PlayerSellItemSlot_UI component!");
+            }
+        }
+    }
+}
     
 //     [System.Serializable]
 //     public class PlayerSellItem

@@ -4,6 +4,7 @@ using KunFarm.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KunFarm.DAL.Migrations
 {
     [DbContext(typeof(KunFarmDbContext))]
-    partial class KunFarmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250702094239_UpdateOnlineShop")]
+    partial class UpdateOnlineShop
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +36,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 2, 9, 45, 17, 816, DateTimeKind.Utc).AddTicks(5861));
+                        .HasDefaultValue(new DateTime(2025, 7, 2, 9, 42, 37, 693, DateTimeKind.Utc).AddTicks(8243));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -139,7 +142,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("BuyPrice")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BuyerId")
+                    b.Property<int>("BuyerId")
                         .HasColumnType("int");
 
                     b.Property<bool>("CanBuy")
@@ -200,7 +203,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 2, 16, 45, 17, 816, DateTimeKind.Local).AddTicks(1361));
+                        .HasDefaultValue(new DateTime(2025, 7, 2, 16, 42, 37, 693, DateTimeKind.Local).AddTicks(4951));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()
@@ -349,7 +352,8 @@ namespace KunFarm.DAL.Migrations
                     b.HasOne("KunFarm.DAL.Entities.PlayerState", "Buyer")
                         .WithMany("BuyingOnlineShopSlots")
                         .HasForeignKey("BuyerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("KunFarm.DAL.Entities.Item", "Item")
                         .WithMany("OnlineShopSlots")

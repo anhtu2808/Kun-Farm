@@ -39,11 +39,11 @@ public class Inventory : MonoBehaviour
             return false;
         }
 
-        public void AddItem(Collectable item)
+        public void AddItem(Collectable item, int quantity)
         {
             this.type = item.type;
             this.icon = item.icon;
-            count++;
+            count += quantity;
         }
 
         public void RemoveItem()
@@ -179,13 +179,13 @@ public class Inventory : MonoBehaviour
     public event OnInventoryChanged onInventoryChanged;
 
     public List<Slot> slots = new List<Slot>();
-    public void Add(Collectable item)
+    public void Add(Collectable item, int quantity)
     {
         foreach (Slot slot in slots)
         {
             if (slot.type == item.type && slot.CanAddItem())
             {
-                slot.AddItem(item);
+                slot.AddItem(item, quantity);
                 onInventoryChanged?.Invoke();
                 return;
             }
@@ -195,7 +195,7 @@ public class Inventory : MonoBehaviour
         {
             if (slot.type == CollectableType.NONE)
             {
-                slot.AddItem(item);
+                slot.AddItem(item, quantity);
                 onInventoryChanged?.Invoke();
                 return;
             }
