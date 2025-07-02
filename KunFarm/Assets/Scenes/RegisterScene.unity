@@ -321,6 +321,10 @@ PrefabInstance:
       value: -8.285099
       objectReference: {fileID: 0}
     - target: {fileID: 5168772153010167681, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e4ad3d49c222ad549940ca5508a9ec91, type: 3}
+    - target: {fileID: 5168772153010167681, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
       propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
@@ -613,7 +617,9 @@ PrefabInstance:
       value: -0.50001144
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4866639071137515872, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
+    - {fileID: 2201048587871141701, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}

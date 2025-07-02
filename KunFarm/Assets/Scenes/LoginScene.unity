@@ -637,6 +637,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -17
       objectReference: {fileID: 0}
+    - target: {fileID: 6752234003059614137, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e4ad3d49c222ad549940ca5508a9ec91, type: 3}
     - target: {fileID: 7049264663542718886, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -4
@@ -649,6 +653,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -0.20000076
       objectReference: {fileID: 0}
+    - target: {fileID: 7924245170312136277, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c8a68ef0b567ff5479a2d9fac7b433a7, type: 3}
     - target: {fileID: 8011235598532984891, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
       propertyPath: m_text
       value: Username or Email
@@ -710,7 +718,9 @@ PrefabInstance:
       value: -43
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 3806415852780847667, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
+    - {fileID: 3498375076946602699, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 027e403fe9d437843af888a03e86afcf, type: 3}
