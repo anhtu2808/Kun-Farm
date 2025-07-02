@@ -11,8 +11,9 @@ public class PlayerStats : MonoBehaviour
     [Header("Stats Settings")]
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float maxHunger = 100f;
-    [SerializeField] private float hungerDecreaseRate = 1f; // Hunger giảm mỗi giây
-    [SerializeField] private float healthDecreaseRate = 5f; // Health giảm khi đói
+    [SerializeField] private float baseHungerDecreaseRate = 0.33f; // Base rate (chậm 3 lần)
+    [SerializeField] private float baseHealthDecreaseRate = 1.67f; // Base rate (chậm 3 lần)
+    [SerializeField] private float movementMultiplier = 2f; // Nhân 2 khi di chuyển
     
     [Header("Speed Penalty")]
     [SerializeField] private float speedPenalty50Percent = 1f; // Giảm 1 đơn vị speed khi hunger <= 50%
@@ -76,7 +77,9 @@ public class PlayerStats : MonoBehaviour
         
         if (showDebugInfo && Time.frameCount % 60 == 0) // Log mỗi giây
         {
-            Debug.Log($"[PlayerStats] H: {currentHealth:F1}/{maxHealth} ({HealthPercent:P1}) | F: {currentHunger:F1}/{maxHunger} ({HungerPercent:P1}) | Speed: {SpeedModifier:F2}x");
+            bool isMoving = playerMovement != null && playerMovement.IsMoving();
+            string movingText = isMoving ? "Moving (2x)" : "Idle (1x)";
+            Debug.Log($"[PlayerStats] H: {currentHealth:F1}/{maxHealth} ({HealthPercent:P1}) | F: {currentHunger:F1}/{maxHunger} ({HungerPercent:P1}) | Speed: {SpeedModifier:F2}x | {movingText}");
         }
     }
     
@@ -84,7 +87,11 @@ public class PlayerStats : MonoBehaviour
     {
         if (currentHunger > 0)
         {
-            currentHunger -= hungerDecreaseRate * Time.deltaTime;
+            // Tính tốc độ giảm hunger dựa trên di chuyển
+            bool isMoving = playerMovement != null && playerMovement.IsMoving();
+            float actualRate = isMoving ? baseHungerDecreaseRate * movementMultiplier : baseHungerDecreaseRate;
+            
+            currentHunger -= actualRate * Time.deltaTime;
             currentHunger = Mathf.Max(0, currentHunger);
             OnHungerChanged?.Invoke(currentHunger, maxHunger);
         }
@@ -95,7 +102,11 @@ public class PlayerStats : MonoBehaviour
         // Health chỉ giảm khi hunger = 0
         if (currentHunger <= 0 && currentHealth > 0)
         {
-            currentHealth -= healthDecreaseRate * Time.deltaTime;
+            // Tính tốc độ giảm health dựa trên di chuyển
+            bool isMoving = playerMovement != null && playerMovement.IsMoving();
+            float actualRate = isMoving ? baseHealthDecreaseRate * movementMultiplier : baseHealthDecreaseRate;
+            
+            currentHealth -= actualRate * Time.deltaTime;
             currentHealth = Mathf.Max(0, currentHealth);
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             

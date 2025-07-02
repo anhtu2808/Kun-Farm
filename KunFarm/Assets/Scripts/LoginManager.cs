@@ -13,6 +13,7 @@ public class LoginManager : MonoBehaviour
     public TMP_InputField usernameInput;
     public TMP_InputField passwordInput;
     public Button         loginButton;
+    public Button         registerButton;
     // public TMP_Text       errorText; // Không sử dụng nữa, thay bằng notification
 
     /* ---------- Settings ---------- */
@@ -60,6 +61,10 @@ public class LoginManager : MonoBehaviour
         // Setup login button
         if (loginButton != null) 
         loginButton.onClick.AddListener(OnLogin);
+        
+        // Setup register button
+        if (registerButton != null)
+            registerButton.onClick.AddListener(GoToRegister);
             
         // Ensure ApiClient exists
         if (ApiClient.Instance == null)
@@ -206,5 +211,11 @@ public class LoginManager : MonoBehaviour
             // Re-enable login button
             if (loginButton != null) loginButton.interactable = true;
         }
+    }
+
+    void GoToRegister()
+    {
+        if (showDebug) Debug.Log("[Login] Navigating to RegisterScene");
+        SceneManager.LoadScene("RegisterScene");
     }
 }

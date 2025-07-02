@@ -82,6 +82,7 @@
     <Compile Include="Assets/Scripts/UI/Inventory_UI.cs" />
     <Compile Include="Assets/Scripts/UI/DragDropHandler.cs" />
     <Compile Include="Assets/Scripts/Inventory.cs" />
+    <Compile Include="Assets/Scripts/ShopNPC.cs" />
     <Compile Include="Assets/Scripts/Data/ApiClient.cs" />
     <Compile Include="Assets/Scripts/GameOverManager.cs" />
     <Compile Include="Assets/Scripts/UI/ConfirmationPopup.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Assets/Scripts/UI/PlayerSellItemSlot_UI.cs" />
     <Compile Include="Assets/Scripts/Player.cs" />
     <Compile Include="Assets/Scripts/GameManager.cs" />
+    <Compile Include="Assets/Scripts/UI/NPCPrompt.cs" />
     <Compile Include="Assets/Scripts/CameraFollow.cs" />
     <Compile Include="Assets/Scripts/CropGrower.cs" />
     <Compile Include="Assets/Scripts/Helper/JsonHelper.cs" />
