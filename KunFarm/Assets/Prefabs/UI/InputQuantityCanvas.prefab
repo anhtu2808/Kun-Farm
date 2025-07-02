@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8967250925293684551}
   - component: {fileID: 2364360982303095198}
   - component: {fileID: 4215206278239536561}
-  - component: {fileID: 4199771010954391397}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -41,7 +40,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -615, y: -712}
+  m_AnchoredPosition: {x: 55, y: 45}
   m_SizeDelta: {x: -194.24078, y: -209.78009}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2364360982303095198
@@ -65,7 +64,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -82,24 +81,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4199771010954391397
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 532352437546856775}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a3ac3c3c70e62443818eacfa84ce216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  quantityInputField: {fileID: 3615381094505516220}
-  priceInputField: {fileID: 9011673647273247924}
-  confirmButton: {fileID: 7375508574915856197}
-  cancelButton: {fileID: 465174523148058933}
-  defaultQuantity: 1
-  maxQuantity: 999
 --- !u!1 &1518529096019374734
 GameObject:
   m_ObjectHideFlags: 0
@@ -1863,6 +1844,7 @@ GameObject:
   - component: {fileID: 715398819028330686}
   - component: {fileID: 5304444632805389033}
   - component: {fileID: 8089702738842934377}
+  - component: {fileID: 3005730538636897057}
   m_Layer: 5
   m_Name: InputQuantityCanvas
   m_TagString: Untagged
@@ -1899,7 +1881,7 @@ Canvas:
   m_GameObject: {fileID: 8384848507658206224}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -1911,7 +1893,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 15
   m_TargetDisplay: 0
 --- !u!114 &5304444632805389033
 MonoBehaviour:
@@ -1953,3 +1935,23 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &3005730538636897057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8384848507658206224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a3ac3c3c70e62443818eacfa84ce216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popupPanel: {fileID: 532352437546856775}
+  quantityInputField: {fileID: 3615381094505516220}
+  priceInputField: {fileID: 9011673647273247924}
+  confirmButton: {fileID: 7375508574915856197}
+  cancelButton: {fileID: 465174523148058933}
+  defaultQuantity: 1
+  maxQuantity: 999
+  useAnimation: 0

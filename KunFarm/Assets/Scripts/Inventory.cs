@@ -73,15 +73,14 @@ public class Inventory : MonoBehaviour
     private void Awake()
     {
         inventoryPanel.SetActive(false);
+        InitializeEmptySlots();
         StartCoroutine(GetInventoryData(1));
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            ToggleInventory();
-        }
+        // Input handling moved to UIManager
+        // Tab key is now handled by UIManager
     }
 
     public void ToggleInventory()
@@ -113,59 +112,86 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Khởi tạo 27 slot trống ban đầu
+    /// </summary>
+    private void InitializeEmptySlots()
+    {
+        Debug.Log("🔄 [Inventory] Khởi tạo 27 slot trống...");
+        
+        // Tạo 27 slot GameObject
+        for (int i = 0; i < totalSlots; i++)
+        {
+            GameObject slotGO = Instantiate(inventorySlotPrefab, inventorySlotContainer);
+            slotInstances.Add(slotGO);
+            
+            // Setup UI slot trống
+            Slot_UI slotUI = slotGO.GetComponent<Slot_UI>();
+            InventorySlotData emptyData = new InventorySlotData
+            {
+                id = -1,
+                slotIndex = i,
+                itemId = 0,
+                collectableType = "NONE",
+                icon = "NONE",
+                quantity = 0
+            };
+            slotUI.Setup(emptyData);
+            StartCoroutine(DelayedInitDragDrop(slotUI, i));
+            
+            // Tạo slot data trống
+            var emptySlot = new Slot
+            {
+                type = CollectableType.NONE,
+                icon = null,
+                count = 0,
+                maxAllowed = 99
+            };
+            slots.Add(emptySlot);
+        }
+        
+        Debug.Log("✅ [Inventory] Đã khởi tạo 27 slot trống");
+    }
+
     private IEnumerator GetInventoryData(int playerId = 1)
     {
+        Debug.Log("📡 [Inventory] Đang gọi API để load data...");
         string apiUrl = "http://localhost:5270/inventory/{playerId}";
         UnityWebRequest request = UnityWebRequest.Get(apiUrl.Replace("{playerId}", playerId.ToString()));
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
+            Debug.Log("✅ [Inventory] API thành công, đang update slots...");
             string json = request.downloadHandler.text;
             InventoryResponse response = JsonUtility.FromJson<InventoryResponse>(json);
 
-            // Nếu chưa có đủ slot -> tạo
-            while (slotInstances.Count < totalSlots)
+            // Update slots với data từ API
+            foreach (var apiSlot in response.data)
             {
-                GameObject slotGO = Instantiate(inventorySlotPrefab, inventorySlotContainer);
-                slotInstances.Add(slotGO);
-            }
-
-            // Lặp 27 lần để setup từng slot
-            for (int i = 0; i < totalSlots; i++)
-            {
-                InventorySlotData data;
-                if (i < response.data.Count)
-                    data = response.data[i];
-                else
+                if (apiSlot.slotIndex >= 0 && apiSlot.slotIndex < totalSlots)
                 {
-                    data = new InventorySlotData
-                    {
-                        id = -1,
-                        slotIndex = i,
-                        itemId = 0,
-                        collectableType = "NONE",
-                        icon = "NONE",
-                        quantity = 0
-                    };
+                    // Update slot data
+                    var slot = slots[apiSlot.slotIndex];
+                    slot.type = System.Enum.TryParse<CollectableType>(apiSlot.collectableType, out var parsedType) ? parsedType : CollectableType.NONE;
+                    slot.icon = Resources.Load<Sprite>($"Sprites/{apiSlot.icon}");
+                    slot.count = apiSlot.quantity;
+                    
+                    // Update UI slot
+                    Slot_UI slotUI = slotInstances[apiSlot.slotIndex].GetComponent<Slot_UI>();
+                    slotUI.Setup(apiSlot);
+                    
+                    Debug.Log($"📦 [Inventory] Updated slot {apiSlot.slotIndex}: {apiSlot.collectableType} x{apiSlot.quantity}");
                 }
-
-                Slot_UI slotUI = slotInstances[i].GetComponent<Slot_UI>();
-                slotUI.Setup(data);
-                StartCoroutine(DelayedInitDragDrop(slotUI, i));
-                var slot = new Slot
-                {
-                    type = System.Enum.TryParse<CollectableType>(data.collectableType, out var parsedType) ? parsedType : CollectableType.NONE,
-                    icon = Resources.Load<Sprite>($"Sprites/{data.icon}"),
-                    count = data.quantity,
-                    maxAllowed = 99
-                };
-                slots.Add(slot);
             }
+            
+            Debug.Log($"✅ [Inventory] Đã load {response.data.Count} items từ API");
         }
         else
         {
-            Debug.LogError("Lỗi khi gọi inventory API: " + request.error);
+            Debug.LogWarning($"⚠️ [Inventory] API lỗi: {request.error}");
+            Debug.Log("💡 [Inventory] Sử dụng 27 slot trống như đã init");
+            // Không làm gì cả, giữ nguyên 27 slot trống đã init
         }
     }
 

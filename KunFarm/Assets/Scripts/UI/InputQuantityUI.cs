@@ -7,12 +7,18 @@ using TMPro;
 public class InputQuantityUI : MonoBehaviour
 {
     [Header("UI References")]
+    [SerializeField] private GameObject popupPanel; // Panel chính để bật/tắt
     [SerializeField] private TMP_InputField quantityInputField;
     [SerializeField] private TMP_InputField priceInputField;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button cancelButton;
     [SerializeField] private int defaultQuantity = 1;
     [SerializeField] private int maxQuantity = 999;
+    
+    [Header("Animation")]
+    [SerializeField] private bool useAnimation = false;
+    
+    private bool isShowing = false;
 
     // Delegate for callback events
     public delegate void OnQuantityConfirmedDelegate(int quantity, int price);
@@ -24,6 +30,19 @@ public class InputQuantityUI : MonoBehaviour
 
     private void Awake()
     {
+        // Auto-find popup panel if not assigned
+        if (popupPanel == null)
+        {
+            // Tìm child object có tên chứa "Panel" hoặc lấy child đầu tiên
+            Transform panelTransform = transform.Find("Panel");
+            if (panelTransform == null && transform.childCount > 0)
+                panelTransform = transform.GetChild(0);
+            
+            if (panelTransform != null)
+                popupPanel = panelTransform.gameObject;
+            else
+                popupPanel = gameObject; // Fallback to self
+        }
 
         // Initialize UI elements if not set
         if (quantityInputField == null)
@@ -38,17 +57,25 @@ public class InputQuantityUI : MonoBehaviour
         // Add listeners to buttons
         confirmButton?.onClick.AddListener(ConfirmQuantity);
         cancelButton?.onClick.AddListener(CancelInput);
+        
+        // Đảm bảo popup ẩn ban đầu
+        Hide();
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        // Initialize input field with default value
-        quantityInputField.text = defaultQuantity.ToString();
-        quantityInputField.Select();
-        quantityInputField.ActivateInputField();
-
-        // Set up input validation
-        quantityInputField.onValueChanged.AddListener(ValidateInput);
+        // Set up input validation once
+        if (quantityInputField != null)
+            quantityInputField.onValueChanged.AddListener(ValidateInput);
+    }
+    
+    private void Update()
+    {
+        // Close popup with ESC key
+        if (isShowing && Input.GetKeyDown(KeyCode.Escape))
+        {
+            CancelInput();
+        }
     }
 
     private void ValidateInput(string inputQuantity)
@@ -75,6 +102,8 @@ public class InputQuantityUI : MonoBehaviour
 
     private void ConfirmQuantity()
     {
+        if (!isShowing) return; // Tránh double-click
+        
         if (int.TryParse(quantityInputField.text, out int quantity) && int.TryParse(priceInputField.text, out int price))
         {
             // Trigger the confirm event
@@ -86,16 +115,18 @@ public class InputQuantityUI : MonoBehaviour
         }
 
         // Hide panel after confirming
-        gameObject.SetActive(false);
+        Hide();
     }
 
     private void CancelInput()
     {
+        if (!isShowing) return; // Tránh double-click
+        
         // Trigger the cancel event
         onCancelled?.Invoke();
 
         // Hide panel after cancelling
-        gameObject.SetActive(false);
+        Hide();
     }
 
     // Public methods to register callbacks
@@ -109,19 +140,72 @@ public class InputQuantityUI : MonoBehaviour
         onCancelled = callback;
     }
 
+    // Hide the popup
+    public void Hide()
+    {
+        if (popupPanel != null)
+        {
+            popupPanel.SetActive(false);
+            isShowing = false;
+        }
+    }
+    
     // Show the panel with default settings
     public void Show()
     {
-        gameObject.SetActive(true);
+        if (isShowing) return; // Tránh hiện nhiều lần
+        
+        if (popupPanel != null)
+        {
+            popupPanel.SetActive(true);
+            isShowing = true;
+            
+            // Reset input values
+            if (quantityInputField != null)
+            {
+                quantityInputField.text = defaultQuantity.ToString();
+                quantityInputField.Select();
+                quantityInputField.ActivateInputField();
+            }
+        }
     }
 
     // Show the panel with custom default quantity
     public void Show(int defaultValue, int maxValue = -1)
     {
+        if (isShowing) return; // Tránh hiện nhiều lần
+        
         defaultQuantity = defaultValue;
         if (maxValue > 0)
             maxQuantity = maxValue;
 
-        gameObject.SetActive(true);
+        if (popupPanel != null)
+        {
+            popupPanel.SetActive(true);
+            isShowing = true;
+            
+            // Set custom values
+            if (quantityInputField != null)
+            {
+                quantityInputField.text = defaultQuantity.ToString();
+                quantityInputField.Select();
+                quantityInputField.ActivateInputField();
+            }
+        }
+    }
+    
+    // Check if popup is currently showing
+    public bool IsShowing()
+    {
+        return isShowing && popupPanel != null && popupPanel.activeSelf;
+    }
+    
+    // Force close popup without triggering callbacks (emergency close)
+    public void ForceClose()
+    {
+        Hide();
+        // Clear callbacks
+        onQuantityConfirmed = null;
+        onCancelled = null;
     }
 }

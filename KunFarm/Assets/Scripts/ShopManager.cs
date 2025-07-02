@@ -43,11 +43,8 @@ public class ShopManager : MonoBehaviour
 
     void Update()
     {
-        // Toggle shop bằng phím B chẳng hạn
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            ToggleShop();
-        }
+        // Input handling moved to UIManager  
+        // B key is now handled by UIManager
     }
 
     public void ToggleShop()

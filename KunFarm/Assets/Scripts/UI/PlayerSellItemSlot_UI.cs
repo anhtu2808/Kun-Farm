@@ -80,7 +80,15 @@ public class PlayerSellItemSlot_UI : MonoBehaviour
             {
                 if (currentItemType != CollectableType.NONE && currentQuantity > 0)
                 {
+                    // Kiểm tra xem popup đã mở chưa
+                    if (inputQuantityUI.IsShowing())
+                    {
+                        Debug.Log("[PlayerSellItemSlot] Popup already showing, ignoring click");
+                        return;
+                    }
+                    
                     Debug.Log($"[SellItemSlot] Open input for {currentItemType}");
+                    
                     // Gọi UI để nhập số lượng và giá
                     inputQuantityUI.SetConfirmCallback((quantity, price) =>
                     {

@@ -28,11 +28,8 @@ public class OnlSellShopManager : MonoBehaviour
 
     void Update()
     {
-        // Toggle shop bằng phím B chẳng hạn
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            ToggleShop();
-        }
+        // Input handling moved to UIManager
+        // O key is now handled by UIManager
     }
 
     public void ToggleShop()

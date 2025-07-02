@@ -39,11 +39,8 @@ public class OnlBuyShopManager : MonoBehaviour
 
     void Update()
     {
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            ToggleShop();
-        }
+        // Input handling moved to UIManager
+        // P key is now handled by UIManager
     }
 
     public void ToggleShop()
