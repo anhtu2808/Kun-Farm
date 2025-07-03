@@ -18,9 +18,9 @@ MonoBehaviour:
   - {fileID: -1962887668, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
   - {fileID: 1451148598, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
   stageDurations:
-  - 1
-  - 2
-  - 3
+  - 30
+  - 60
+  - 90
   harvestDrops:
   - itemPrefab: {fileID: 29784602559576804, guid: 9b48d78018c9f874cba820d5b9e0cd98, type: 3}
     quantity: 2
