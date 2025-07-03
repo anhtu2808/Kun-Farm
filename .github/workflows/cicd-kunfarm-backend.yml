@@ -62,7 +62,7 @@ jobs:
         username: root
         key: ${{ secrets.SECRET_KEY }}
         script: |
-          cd /var/docker/kunfarm
+          cd /var/docker/kun-farm
           echo "🚀 Deploying KunFarm..."
           
           # Set environment variables
