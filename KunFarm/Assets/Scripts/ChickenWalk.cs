@@ -26,7 +26,7 @@ public class ChickenWalk : MonoBehaviour
 
     [Header("Egg Laying Settings")]
     public GameObject eggPrefab; // Prefab của quả trứng
-    public float eggLayInterval = 30f; // Thời gian giữa mỗi lần đẻ trứng (giây)
+    public float eggLayInterval = 180f; // Thời gian giữa mỗi lần đẻ trứng (giây)
     public bool layEggsOnlyWhenIdle = true; // Chỉ đẻ trứng khi đứng yên
     public Vector3 eggOffset = new Vector3(0, 0, 0); // Spawn trứng tại vị trí của gà
     public int maxEggsPerChicken = 5; // Số lượng trứng tối đa mỗi con gà
