@@ -61,7 +61,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   eggPrefab: {fileID: 0}
-  eggLayInterval: 30
+  eggLayInterval: 180
   layEggsOnlyWhenIdle: 1
   eggOffset: {x: 0, y: 0, z: 0}
   maxEggsPerChicken: 5
@@ -155,7 +155,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: b1521b82005de4e948e1a1132c672ea4, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
