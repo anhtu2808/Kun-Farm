@@ -61,7 +61,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   eggPrefab: {fileID: 29784602559576804, guid: 37d7a59d81b592745acf3f26b57a93fe, type: 3}
-  eggLayInterval: 3
+  eggLayInterval: 180
   layEggsOnlyWhenIdle: 1
   eggOffset: {x: 0, y: 0, z: 0}
   maxEggsPerChicken: 3
