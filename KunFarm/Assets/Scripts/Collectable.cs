@@ -42,7 +42,7 @@ public class Collectable : MonoBehaviour
     private IEnumerator HatchEgg()
 {
     // Đợi 10 giây (hoặc 120f cho 2 phút)
-    yield return new WaitForSeconds(10f);
+    yield return new WaitForSeconds(180f);
 
     if (chickenPrefab != null)
     {
