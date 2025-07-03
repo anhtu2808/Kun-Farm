@@ -17,6 +17,7 @@ public class RegisterManager : MonoBehaviour
     public TMP_InputField passwordInput;
     public TMP_InputField confirmPasswordInput;
     public Button registerButton;
+    public Button backButton;
 
     /* ---------- Settings ---------- */
     [Header("Settings")]
@@ -68,6 +69,11 @@ public class RegisterManager : MonoBehaviour
             registerButton.onClick.AddListener(OnRegister);
         }
 
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(OnBack);
+        }
+
         // Ensure ApiClient exists
         if (ApiClient.Instance == null)
         {
@@ -88,10 +94,16 @@ public class RegisterManager : MonoBehaviour
         StartCoroutine(RegisterRoutine());
     }
 
+    public void OnBack()
+    {
+        SceneManager.LoadScene("LoginScene");
+    }
+
+
     bool ValidateInputs()
     {
         // Check if UI components are assigned
-        if (nameInput == null || emailInput == null || userNameInput == null || 
+        if (nameInput == null || emailInput == null || userNameInput == null ||
             passwordInput == null || confirmPasswordInput == null)
         {
             SimpleNotificationPopup.Show("UI components not properly assigned!");
@@ -172,7 +184,7 @@ public class RegisterManager : MonoBehaviour
 
     IEnumerator RegisterRoutine()
     {
-        if (registerButton != null) 
+        if (registerButton != null)
             registerButton.interactable = false;
 
         // Build payload
@@ -184,7 +196,7 @@ public class RegisterManager : MonoBehaviour
 
         string jsonPayload = JsonUtility.ToJson(registerRequest);
 
-        if (showDebug) 
+        if (showDebug)
             Debug.Log("[Register] POST " + registerUrl + " Payload: " + jsonPayload);
 
         // Send request
@@ -198,7 +210,7 @@ public class RegisterManager : MonoBehaviour
         // Handle response
         bool success = false;
         string errorMessage = "";
-        
+
         try
         {
             if (req.result != UnityWebRequest.Result.Success)
@@ -223,7 +235,7 @@ public class RegisterManager : MonoBehaviour
             else
             {
                 string rawJson = req.downloadHandler.text;
-                if (showDebug) 
+                if (showDebug)
                     Debug.Log("[Register] HTTP " + req.responseCode + " Response: " + rawJson);
 
                 if (string.IsNullOrEmpty(rawJson))
@@ -233,12 +245,12 @@ public class RegisterManager : MonoBehaviour
                 else
                 {
                     ApiResponse resp = JsonUtility.FromJson<ApiResponse>(rawJson);
-                    
+
                     if (resp != null && req.responseCode == 200 && resp.code == 200)
                     {
                         if (resp.data != null && resp.data.user != null)
                         {
-                            if (showDebug) 
+                            if (showDebug)
                                 Debug.Log("Registration successful! Welcome " + resp.data.user.displayName);
 
                             SimpleNotificationPopup.Show("Registration successful! Welcome " + resp.data.user.displayName + "!");
@@ -272,7 +284,7 @@ public class RegisterManager : MonoBehaviour
                     else
                     {
                         string respErrorMsg = resp != null ? resp.message : "Registration failed";
-                        if (showDebug) 
+                        if (showDebug)
                             Debug.LogWarning("[Register] Failed: " + respErrorMsg);
 
                         if (respErrorMsg.ToLower().Contains("username"))
@@ -293,15 +305,15 @@ public class RegisterManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            if (showDebug) 
+            if (showDebug)
                 Debug.LogError("Registration Exception: " + ex.Message);
             errorMessage = "An unexpected error occurred. Please try again.";
         }
         finally
         {
             req.Dispose();
-            
-            if (registerButton != null) 
+
+            if (registerButton != null)
                 registerButton.interactable = true;
         }
 
@@ -339,4 +351,4 @@ public class RegisterManager : MonoBehaviour
         if (passwordInput != null) passwordInput.text = "";
         if (confirmPasswordInput != null) confirmPasswordInput.text = "";
     }
-} 
+}

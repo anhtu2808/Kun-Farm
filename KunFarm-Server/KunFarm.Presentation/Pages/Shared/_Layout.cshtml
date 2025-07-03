@@ -7,38 +7,98 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/KunFarm.Presentation.styles.css" asp-append-version="true" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'farm-green': '#4ade80',
+                        'farm-brown': '#a3834b',
+                        'farm-yellow': '#fbbf24',
+                        'farm-blue': '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">KunFarm.Presentation</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
+        <nav class="bg-white shadow-lg border-b border-green-200">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <a class="text-2xl font-bold text-farm-green hover:text-farm-brown transition-colors duration-200" asp-area="" asp-page="/Index">
+                        <i class="fas fa-seedling mr-2"></i>KunFarm
+                    </a>
+                    <button class="md:hidden text-gray-600 hover:text-farm-green" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div class="hidden md:flex space-x-6">
+                        <a class="text-gray-600 hover:text-farm-green transition-colors duration-200 flex items-center" asp-area="" asp-page="/Index">
+                            <i class="fas fa-home mr-2"></i>Trang chủ
+                        </a>
+                        <a class="text-gray-600 hover:text-farm-green transition-colors duration-200 flex items-center" asp-area="" asp-page="/Leaderboard/Index">
+                            <i class="fas fa-trophy mr-2"></i>Bảng xếp hạng
+                        </a>
+                        <a class="text-gray-600 hover:text-farm-green transition-colors duration-200 flex items-center" asp-area="" asp-page="/Admin/Users">
+                            <i class="fas fa-users-cog mr-2"></i>Quản lý
+                        </a>
+                        <a class="text-gray-600 hover:text-farm-green transition-colors duration-200 flex items-center" asp-area="" asp-page="/Privacy">
+                            <i class="fas fa-shield-alt mr-2"></i>Chính sách
+                        </a>
+                    </div>
+                </div>
+                <!-- Mobile menu -->
+                <div class="navbar-collapse collapse md:hidden">
+                    <div class="py-4 space-y-2">
+                        <a class="block px-4 py-2 text-gray-600 hover:text-farm-green hover:bg-green-50 rounded transition-colors duration-200" asp-area="" asp-page="/Index">
+                            <i class="fas fa-home mr-2"></i>Trang chủ
+                        </a>
+                        <a class="block px-4 py-2 text-gray-600 hover:text-farm-green hover:bg-green-50 rounded transition-colors duration-200" asp-area="" asp-page="/Leaderboard/Index">
+                            <i class="fas fa-trophy mr-2"></i>Bảng xếp hạng
+                        </a>
+                        <a class="block px-4 py-2 text-gray-600 hover:text-farm-green hover:bg-green-50 rounded transition-colors duration-200" asp-area="" asp-page="/Admin/Users">
+                            <i class="fas fa-users-cog mr-2"></i>Quản lý
+                        </a>
+                        <a class="block px-4 py-2 text-gray-600 hover:text-farm-green hover:bg-green-50 rounded transition-colors duration-200" asp-area="" asp-page="/Privacy">
+                            <i class="fas fa-shield-alt mr-2"></i>Chính sách
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    
+    <div class="container mx-auto px-4 py-8">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - KunFarm.Presentation - <a asp-area="" asp-page="/Privacy">Privacy</a>
+    <footer class="bg-white border-t border-green-200 mt-auto">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center text-gray-600">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-seedling text-farm-green mr-2"></i>
+                    <span>&copy; 2025 - KunFarm - Nông trại thông minh</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a class="hover:text-farm-green transition-colors duration-200" asp-area="" asp-page="/Privacy">
+                        <i class="fas fa-shield-alt mr-1"></i>Chính sách bảo mật
+                    </a>
+                    <a class="hover:text-farm-green transition-colors duration-200" href="/swagger">
+                        <i class="fas fa-code mr-1"></i>API Docs
+                    </a>
+                </div>
+            </div>
         </div>
     </footer>
 

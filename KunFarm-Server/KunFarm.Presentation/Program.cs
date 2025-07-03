@@ -46,6 +46,8 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IRegularShopSlotService, RegularShopSlotService>();
 builder.Services.AddScoped<IInventorySlotService, InventorySlotService>();
 builder.Services.AddScoped<IOnlineShopService, OnlineShopService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<KunFarm.BLL.Services.DatabaseSeederService>();
 
 // JWT Authentication
