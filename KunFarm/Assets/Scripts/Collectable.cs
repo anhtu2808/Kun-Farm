@@ -40,100 +40,61 @@ public class Collectable : MonoBehaviour
             rb2d.constraints = RigidbodyConstraints2D.FreezeRotation; // Prevent rotation
         }
     }
+
     private void Start()
     {
         GetComponent<SpriteRenderer>().sortingOrder = 5;
         if (type == CollectableType.EGG)
         {
-            // Luôn lấy default hatch time từ ChickenManager khi khởi tạo egg
             if (ChickenManager.Instance != null)
             {
                 float managerHatchTime = ChickenManager.Instance.GetDefaultHatchTime();
-                // Chỉ override nếu không phải restored từ save data (hatchTimer = 0)
                 if (hatchTimer == 0f)
                 {
                     hatchTime = managerHatchTime;
-                    Debug.Log($"[Collectable] Egg {name} sử dụng ChickenManager hatch time: {hatchTime}s");
-                }
-                else
-                {
-                    Debug.Log($"[Collectable] Egg {name} restored từ save data - HatchTime: {hatchTime}s, Timer: {hatchTimer}s");
                 }
             }
             else
             {
-                // Fallback nếu ChickenManager không tồn tại và chưa set hatchTime
                 if (hatchTime <= 0f)
                 {
                     hatchTime = 180f; // Fallback default
                 }
-                Debug.LogWarning($"[Collectable] ChickenManager not found, egg {name} sử dụng fallback hatch time: {hatchTime}s");
             }
             
-            // Kiểm tra xem ChickenManager có thể load được prefab gà không
             if (ChickenManager.Instance != null && ChickenManager.Instance.GetChickenPrefab() != null)
             {
                 hatchCoroutine = StartCoroutine(HatchEgg());
-            }
-            else
-            {
-                Debug.LogWarning("Không tìm thấy ChickenManager hoặc prefab gà!");
             }
         }
     }
 
     private IEnumerator HatchEgg()
     {
-        Debug.Log($"[Collectable] Trứng {name} bắt đầu nở - HatchTime: {hatchTime}s, Current Timer: {hatchTimer}s");
-        
-        // Nếu đã có progress từ save data, continue từ đó
         float remainingTime = RemainingHatchTime;
-        
         if (remainingTime <= 0f)
         {
-            // Trứng đã sẵn sàng nở
-            Debug.Log($"[Collectable] Trứng {name} sẵn sàng nở ngay lập tức!");
             SpawnChickenFromEgg();
             yield break;
         }
         
-        // Update timer trong quá trình chờ
-        float startTime = Time.time;
         while (hatchTimer < hatchTime)
         {
-            yield return null; // Wait for next frame
+            yield return null;
             hatchTimer += Time.deltaTime;
-            
-            // Optional: Debug log progress every 30 seconds
-            if (Time.time - startTime >= 30f)
-            {
-                Debug.Log($"[Collectable] Trứng {name} nở progress: {(hatchTimer/hatchTime*100):F1}% ({RemainingHatchTime:F1}s remaining)");
-                startTime = Time.time;
-            }
         }
         
-        // Trứng đã nở
         SpawnChickenFromEgg();
     }
     
     private void SpawnChickenFromEgg()
     {
-        // Tạo gà mới tại vị trí trứng hiện tại - sử dụng ChickenManager
         Vector3 spawnPos = transform.position;
         GameObject newChicken = null;
         
         if (ChickenManager.Instance != null)
         {
             newChicken = ChickenManager.Instance.SpawnChicken(spawnPos);
-        }
-
-        if (newChicken != null)
-        {
-            Debug.Log($"[Collectable] Trứng {name} đã nở thành gà tại vị trí: {spawnPos}");
-        }
-        else
-        {
-            Debug.LogWarning($"[Collectable] Không thể tạo gà từ trứng {name}!");
         }
 
         Destroy(this.gameObject);
@@ -180,7 +141,6 @@ public class Collectable : MonoBehaviour
         }
         else if (player && !requiresInteraction)
         {
-            // Legacy auto-pickup behavior
             player.inventory.Add(this, 1);
             Destroy(this.gameObject);
         }
@@ -209,7 +169,6 @@ public class Collectable : MonoBehaviour
         if (nearbyPlayer != null)
         {
             nearbyPlayer.inventory.Add(this, 1);
-            Debug.Log($"[Collectable] Picked up {type} manually");
             Destroy(this.gameObject);
         }
     }

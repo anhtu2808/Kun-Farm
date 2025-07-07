@@ -198,7 +198,7 @@ public class ShopManager : MonoBehaviour
                 player.inventory.Add(collectable, 1);
                 player.inventory.NotifyInventoryChanged();
                 Debug.Log($"✅ [Regular Shop] Đã thêm {data.itemName} vào inventory");
-                SimpleNotificationPopup.Show($"Mua thành công {data.itemName} với giá {data.buyPrice}G! Còn lại: {player.wallet.Money}G");
+                SimpleNotificationPopup.Show($"Successfully purchased {data.itemName} for {data.buyPrice}G! Remaining balance: {player.wallet.Money}G");
             }
             else
             {

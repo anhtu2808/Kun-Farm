@@ -59,8 +59,7 @@ public class ToolManager : MonoBehaviour
         // Đảm bảo Hand Tool luôn có ở slot đầu tiên
         EnsureHandTool();
         
-        if (showDebugInfo)
-            Debug.Log($"[ToolManager] Initialized with userId: {currentUserId}");
+
     }
 
     void Update()
@@ -95,8 +94,7 @@ public class ToolManager : MonoBehaviour
             }
         }
         
-        if (showDebugInfo)
-            Debug.Log("[ToolManager] Hand Tool với icon đã được đặt ở slot đầu tiên");
+
     }
 
     private void CheckToolSelection()
@@ -147,7 +145,6 @@ public class ToolManager : MonoBehaviour
                     // For other foods (Apple, Grape), player eats normally
                     foodTool.EatFood();
                     HandleToolConsumption(foodTool);
-                    Debug.Log($"[ToolManager] Player ate {foodTool.toolName}. Remaining: {foodTool.quantity}");
                 }
             }
         }
@@ -195,52 +192,32 @@ public class ToolManager : MonoBehaviour
                      SimpleNotificationPopup.Show($"Fed chicken with {wheatTool.toolName}!");
                  }
                  
-                 Debug.Log($"[ToolManager] Fed chicken with {wheatTool.toolName}. Remaining: {wheatTool.quantity}");
+
              }
-            else
-            {
-                Debug.LogWarning("[ToolManager] Failed to feed chicken with wheat!");
-            }
+
         }
                  else
          {
              // No chicken nearby - show message with distance info
              SimpleNotificationPopup.Show($"🐔 No chicken nearby to feed!\n📏 Move within {chickenFeedingDistance:F1} units of a chicken");
-             Debug.Log("[ToolManager] No chicken found within feeding distance");
          }
     }
     
     private ChickenWalk FindNearestChicken()
     {
-        if (ChickenManager.Instance == null)
-        {
-            Debug.LogWarning("[ToolManager] ChickenManager.Instance is null!");
+        if (ChickenManager.Instance == null || playerMovement == null)
             return null;
-        }
-        
-        if (playerMovement == null)
-        {
-            Debug.LogWarning("[ToolManager] playerMovement is null!");
-            return null;
-        }
         
         Vector3 playerPos = playerMovement.transform.position;
-        Debug.Log($"[ToolManager] Player position: {playerPos}");
-        
         ChickenWalk nearestChicken = null;
         float nearestDistance = float.MaxValue;
         
         // Get all chickens from ChickenManager
         var allChickens = ChickenManager.Instance.GetAllChickens();
-        Debug.Log($"[ToolManager] Found {allChickens.Count} chickens in total");
         
         foreach (var chicken in allChickens)
         {
-            if (chicken == null) 
-            {
-                Debug.Log("[ToolManager] Skipping null chicken");
-                continue;
-            }
+            if (chicken == null) continue;
             
             Vector3 chickenPos = chicken.transform.position;
             
@@ -249,24 +226,12 @@ public class ToolManager : MonoBehaviour
             Vector2 chickenPos2D = new Vector2(chickenPos.x, chickenPos.y);
             float distance = Vector2.Distance(playerPos2D, chickenPos2D);
             
-            Debug.Log($"[ToolManager] Player 2D: {playerPos2D}, Chicken 2D: {chickenPos2D}, distance 2D: {distance:F2}, feeding distance limit: {chickenFeedingDistance}");
-            
             // Check if within feeding distance and closer than previous
             if (distance <= chickenFeedingDistance && distance < nearestDistance)
             {
                 nearestDistance = distance;
                 nearestChicken = chicken;
-                Debug.Log($"[ToolManager] Found closer chicken at distance: {distance:F2}");
             }
-        }
-        
-        if (nearestChicken != null)
-        {
-            Debug.Log($"[ToolManager] Found nearest chicken at distance: {nearestDistance:F2}");
-        }
-        else
-        {
-            Debug.Log($"[ToolManager] No chicken found within feeding distance of {chickenFeedingDistance}");
         }
         
         return nearestChicken;
@@ -305,7 +270,6 @@ public class ToolManager : MonoBehaviour
         // Check distance from player to target cell
         if (!IsWithinInteractionRange(cellPosition))
         {
-            Debug.Log("Target is too far away! Move closer to dig.");
             return;
         }
 
@@ -315,7 +279,6 @@ public class ToolManager : MonoBehaviour
             // Don't use food tools through normal interaction (only through Space key)
             if (currentTool is FoodTool)
             {
-                Debug.Log("Use Space key to eat food!");
                 return;
             }
             
