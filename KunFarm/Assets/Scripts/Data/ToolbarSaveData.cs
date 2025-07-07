@@ -117,6 +117,13 @@ public class ToolbarSaveData
                     LoadToolIcon(food, data.iconPath);
                     return food;
 
+                case "WateringCanTool":
+                    var wateringCan = new WateringCanTool(data.quantity);
+                    wateringCan.toolName = data.toolName;
+                    wateringCan.animatorToolIndex = data.animatorToolIndex;
+                    LoadToolIcon(wateringCan, data.iconPath);
+                    return wateringCan;
+
                 case "SeedTool":
                     // Find the crop data for seed tool
                     CropData cropData = GetCropDataFromName(data.toolName);

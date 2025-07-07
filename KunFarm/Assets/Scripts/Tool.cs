@@ -242,3 +242,58 @@ public class FoodTool : Tool
         }
     }
 } 
+
+/// <summary>
+/// Tool để tưới cây và giảm thời gian grow
+/// </summary>
+[System.Serializable]
+public class WateringCanTool : Tool
+{
+    public WateringCanTool(int waterUses = 10)
+    {
+        toolName = "Watering Can";
+        animatorToolIndex = 5; // Index cho watering animation
+        quantity = waterUses; // Số lần tưới
+    }
+
+    public override void Use(Vector3Int cellPosition, TileManager tileManager)
+    {
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            if (cropGrower != null && !cropGrower.isMature)
+            {
+                // Apply direct time reduction
+                float timeReduced = cropGrower.ApplyWateringReduction(0.3f); // 30% reduction
+                
+                // Show notification
+                SimpleNotificationPopup.Show($"🌧️ Watered {cropGrower.cropData?.cropName ?? "plant"}!\n⚡ Growth time reduced by {timeReduced:F0} seconds");
+            }
+        }
+    }
+
+    public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
+    {
+        if (quantity <= 0) return false;
+        
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            return cropGrower != null && !cropGrower.isMature; // Chỉ tưới cây chưa trưởng thành
+        }
+        return false;
+    }
+    
+    public override bool ConsumeOnUse()
+    {
+        quantity--;
+        return quantity > 0; // Return false nếu hết nước
+    }
+    
+    public override bool IsConsumable()
+    {
+        return true; // Watering can có thể hết nước
+    }
+} 

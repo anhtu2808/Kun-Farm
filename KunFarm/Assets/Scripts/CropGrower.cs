@@ -14,6 +14,8 @@ public class CropGrower : MonoBehaviour
     private TileManager tileManager;
     private Vector3Int myCellPosition; // Vị trí ô của cây này trên Tilemap
 
+
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -157,6 +159,29 @@ public class CropGrower : MonoBehaviour
         }
         }
         // GameObject cây sẽ được phá hủy bởi TileManager/PlayerInteraction sau khi Deregister
+    }
+
+    /// <summary>
+    /// Apply watering to directly reduce current stage time
+    /// </summary>
+    public float ApplyWateringReduction(float reductionPercent)
+    {
+        if (isMature) return 0f; // Can't water mature plants
+        if (currentStage >= cropData.growthStages.Length - 1) return 0f; // Already at final stage
+        
+        // Calculate remaining time for current stage
+        float remainingTime = cropData.stageDurations[currentStage] - timer;
+        
+        // Calculate time to reduce (30% of remaining time)
+        float timeToReduce = remainingTime * reductionPercent;
+        
+        // Apply the reduction by advancing the timer
+        timer += timeToReduce;
+        
+        // Ensure timer doesn't exceed stage duration
+        timer = Mathf.Min(timer, cropData.stageDurations[currentStage]);
+        
+        return timeToReduce;
     }
 
     // Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)

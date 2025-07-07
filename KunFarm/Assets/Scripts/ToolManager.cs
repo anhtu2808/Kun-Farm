@@ -287,6 +287,11 @@ public class ToolManager : MonoBehaviour
             {
                 StartCoroutine(PlayHoeAnimation(cellPosition, currentTool));
             }
+            // Check if this is a watering can tool for watering animation
+            else if (currentTool is WateringCanTool)
+            {
+                StartCoroutine(PlayWateringAnimation(cellPosition, currentTool));
+            }
             else
             {
                 // Use other tools immediately
@@ -358,6 +363,82 @@ public class ToolManager : MonoBehaviour
         }
         
         isUsingTool = false;
+    }
+
+    private IEnumerator PlayWateringAnimation(Vector3Int cellPosition, Tool tool)
+    {
+        isUsingTool = true;
+        
+        // Debug log to see if method is called
+        Debug.Log($"[ToolManager] PlayWateringAnimation called with tool: {tool?.toolName ?? "null"}");
+        
+        if (playerMovement != null && playerMovement.GetAnimator() != null)
+        {
+            var animator = playerMovement.GetAnimator();
+            
+            // Get direction to target for very close targets, otherwise use facing direction
+            Vector3 playerPos = playerMovement.transform.position;
+            Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
+            Vector3 directionToTarget = (targetPos - playerPos).normalized;
+            
+            // If target is very close (direction is nearly zero), use player's facing direction
+            Vector3 finalDirection;
+            if (Vector3.Distance(playerPos, targetPos) < 0.5f)
+            {
+                // Use player's current facing direction when target is very close
+                finalDirection = playerMovement.GetFacingDirection();
+            }
+            else
+            {
+                // Use direction to target when target is further away
+                finalDirection = directionToTarget;
+            }
+            
+            // Determine watering direction using 2D blend tree coordinates
+            Vector2 wateringBlendDirection = GetHoeBlendDirection(finalDirection); // Reuse same logic
+            
+            // Debug logs for animation parameters
+            Debug.Log($"[ToolManager] Setting animation parameters - horizontal: {wateringBlendDirection.x}, vertical: {wateringBlendDirection.y}");
+            Debug.Log($"[ToolManager] Setting isWatering to true");
+            
+            // Set animator parameters for 2D blend tree
+            animator.SetFloat("horizontal", wateringBlendDirection.x);
+            animator.SetFloat("vertical", wateringBlendDirection.y);
+            animator.SetBool("isWatering", true); // Assumes you have this bool parameter
+            
+            // Apply animation speed if specified
+            if (hoeAnimationSpeed != 1f)
+            {
+                animator.speed = hoeAnimationSpeed;
+            }
+            
+            // Wait for animation to play (dynamic based on animation speed)
+            float waitTime = 0.7f / hoeAnimationSpeed; // Watering takes slightly longer
+            Debug.Log($"[ToolManager] Waiting {waitTime} seconds for watering animation");
+            yield return new WaitForSeconds(waitTime);
+            
+            // Reset animation speed to normal
+            animator.speed = 1f;
+            
+            // Use the tool
+            Debug.Log($"[ToolManager] Using watering tool on position: {cellPosition}");
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+            
+            // Stop watering animation
+            Debug.Log("[ToolManager] Setting isWatering to false");
+            animator.SetBool("isWatering", false);
+        }
+        else
+        {
+            // Fallback if no animator
+            Debug.LogWarning("[ToolManager] No animator found, using tool without animation");
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+        }
+        
+        isUsingTool = false;
+        Debug.Log("[ToolManager] PlayWateringAnimation completed");
     }
 
     private Vector2 GetHoeBlendDirection(Vector3 direction)
