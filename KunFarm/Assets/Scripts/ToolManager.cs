@@ -14,6 +14,7 @@ public class ToolManager : MonoBehaviour
     
     [Header("Interaction Settings")]
     [SerializeField] private float maxInteractionDistance = 1.5f; // Maximum distance to interact with tiles
+    [SerializeField] private float chickenFeedingDistance = 2.0f; // Maximum distance to feed chickens (2D)
     
     [Header("References")]
     [SerializeField] private Toolbar_UI toolbarUI;
@@ -136,15 +137,139 @@ public class ToolManager : MonoBehaviour
             Tool currentTool = SelectedTool;
             if (currentTool is FoodTool foodTool && foodTool.quantity > 0)
             {
-                // Eat the food
-                foodTool.EatFood();
-                
-                // Handle consumption
-                HandleToolConsumption(foodTool);
-                
-                Debug.Log($"[ToolManager] Player ate {foodTool.toolName}. Remaining: {foodTool.quantity}");
+                // Check if this is wheat - use for chicken feeding only
+                if (IsWheatFood(foodTool))
+                {
+                    HandleWheatFeeding(foodTool);
+                }
+                else
+                {
+                    // For other foods (Apple, Grape), player eats normally
+                    foodTool.EatFood();
+                    HandleToolConsumption(foodTool);
+                    Debug.Log($"[ToolManager] Player ate {foodTool.toolName}. Remaining: {foodTool.quantity}");
+                }
             }
         }
+    }
+    
+    private bool IsWheatFood(FoodTool foodTool)
+    {
+        return foodTool.toolName != null && 
+               (foodTool.toolName.ToLower().Contains("wheat") || 
+                foodTool.toolName.ToLower().Contains("lúa"));
+    }
+    
+    private void HandleWheatFeeding(FoodTool wheatTool)
+    {
+        // Find the nearest chicken within feeding distance
+        ChickenWalk nearestChicken = FindNearestChicken();
+        
+        if (nearestChicken != null)
+        {
+            // Feed the chicken with wheat
+            bool feedSuccess = nearestChicken.Feed(CollectableType.WHEAT);
+            
+                         if (feedSuccess)
+             {
+                 // Consume the wheat from toolbar
+                 HandleToolConsumption(wheatTool);
+                 
+                 // Get feeding info from ChickenManager for detailed message
+                 if (ChickenManager.Instance != null)
+                 {
+                     float speedBoost = ChickenManager.Instance.GetFeedingSpeedBoost();
+                     float duration = ChickenManager.Instance.GetFeedingDuration();
+                     float baseInterval = ChickenManager.Instance.GetDefaultEggLayInterval();
+                     
+                     float timeReduced = baseInterval * speedBoost; // seconds saved
+                     int durationMinutes = Mathf.RoundToInt(duration / 60f);
+                     int boostPercent = Mathf.RoundToInt(speedBoost * 100f);
+                     
+                     // Show detailed notification
+                     SimpleNotificationPopup.Show($"🌾 Fed chicken with {wheatTool.toolName}!\n⚡ Egg laying speed +{boostPercent}% ({timeReduced:F0}s faster)\n⏰ Effect lasts {durationMinutes} minutes");
+                 }
+                 else
+                 {
+                     // Fallback message
+                     SimpleNotificationPopup.Show($"Fed chicken with {wheatTool.toolName}!");
+                 }
+                 
+                 Debug.Log($"[ToolManager] Fed chicken with {wheatTool.toolName}. Remaining: {wheatTool.quantity}");
+             }
+            else
+            {
+                Debug.LogWarning("[ToolManager] Failed to feed chicken with wheat!");
+            }
+        }
+                 else
+         {
+             // No chicken nearby - show message with distance info
+             SimpleNotificationPopup.Show($"🐔 No chicken nearby to feed!\n📏 Move within {chickenFeedingDistance:F1} units of a chicken");
+             Debug.Log("[ToolManager] No chicken found within feeding distance");
+         }
+    }
+    
+    private ChickenWalk FindNearestChicken()
+    {
+        if (ChickenManager.Instance == null)
+        {
+            Debug.LogWarning("[ToolManager] ChickenManager.Instance is null!");
+            return null;
+        }
+        
+        if (playerMovement == null)
+        {
+            Debug.LogWarning("[ToolManager] playerMovement is null!");
+            return null;
+        }
+        
+        Vector3 playerPos = playerMovement.transform.position;
+        Debug.Log($"[ToolManager] Player position: {playerPos}");
+        
+        ChickenWalk nearestChicken = null;
+        float nearestDistance = float.MaxValue;
+        
+        // Get all chickens from ChickenManager
+        var allChickens = ChickenManager.Instance.GetAllChickens();
+        Debug.Log($"[ToolManager] Found {allChickens.Count} chickens in total");
+        
+        foreach (var chicken in allChickens)
+        {
+            if (chicken == null) 
+            {
+                Debug.Log("[ToolManager] Skipping null chicken");
+                continue;
+            }
+            
+            Vector3 chickenPos = chicken.transform.position;
+            
+            // Calculate 2D distance (ignore Z axis) for proper 2D game distance
+            Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
+            Vector2 chickenPos2D = new Vector2(chickenPos.x, chickenPos.y);
+            float distance = Vector2.Distance(playerPos2D, chickenPos2D);
+            
+            Debug.Log($"[ToolManager] Player 2D: {playerPos2D}, Chicken 2D: {chickenPos2D}, distance 2D: {distance:F2}, feeding distance limit: {chickenFeedingDistance}");
+            
+            // Check if within feeding distance and closer than previous
+            if (distance <= chickenFeedingDistance && distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestChicken = chicken;
+                Debug.Log($"[ToolManager] Found closer chicken at distance: {distance:F2}");
+            }
+        }
+        
+        if (nearestChicken != null)
+        {
+            Debug.Log($"[ToolManager] Found nearest chicken at distance: {nearestDistance:F2}");
+        }
+        else
+        {
+            Debug.Log($"[ToolManager] No chicken found within feeding distance of {chickenFeedingDistance}");
+        }
+        
+        return nearestChicken;
     }
 
     public void SelectTool(int index, bool updateUI = true)
@@ -453,7 +578,11 @@ public class ToolManager : MonoBehaviour
         
         Vector3 playerPos = playerMovement.transform.position;
         Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
-        float distance = Vector3.Distance(playerPos, targetPos);
+        
+        // Calculate 2D distance (ignore Z axis) for proper 2D game distance
+        Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
+        Vector2 targetPos2D = new Vector2(targetPos.x, targetPos.y);
+        float distance = Vector2.Distance(playerPos2D, targetPos2D);
         
         return distance <= maxInteractionDistance;
     }

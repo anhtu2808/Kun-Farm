@@ -473,6 +473,22 @@ public class ChickenManager : MonoBehaviour
             Debug.Log($"[ChickenManager] Đã đặt thời gian nở trứng mặc định: {defaultHatchTime}s");
     }
     
+    /// <summary>
+    /// Get feeding speed boost percentage (0.5 = 50% faster)
+    /// </summary>
+    public float GetFeedingSpeedBoost()
+    {
+        return feedingSpeedBoost;
+    }
+    
+    /// <summary>
+    /// Get feeding duration in seconds
+    /// </summary>
+    public float GetFeedingDuration()
+    {
+        return feedingDuration;
+    }
+    
     #endregion
 
     private void Update()
