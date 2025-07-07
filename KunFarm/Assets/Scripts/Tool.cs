@@ -150,12 +150,29 @@ public class HandTool : Tool
         if (plant != null)
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
-            if (cropGrower != null && cropGrower.isMature)
+            if (cropGrower != null)
             {
-                cropGrower.Harvest();
-                tileManager.DeregisterPlant(cellPosition);
-                tileManager.SetTileState(cellPosition, TileState.Dug);
-                Object.Destroy(plant);
+                if (cropGrower.isMature)
+                {
+                    // Plant is mature - harvest it
+                    cropGrower.Harvest();
+                    tileManager.DeregisterPlant(cellPosition);
+                    tileManager.SetTileState(cellPosition, TileState.Dug);
+                    Object.Destroy(plant);
+                    
+                    // Show harvest success notification
+                    string cropName = cropGrower.cropData?.cropName ?? "Plant";
+                    SimpleNotificationPopup.Show($"🌾 Harvested {cropName}!");
+                }
+                else
+                {
+                    // Plant is not mature - show remaining time
+                    string cropName = cropGrower.cropData?.cropName ?? "Plant";
+                    string remainingTime = cropGrower.GetFormattedRemainingTime();
+                    float progress = cropGrower.GetGrowthProgress();
+                    
+                    SimpleNotificationPopup.Show($"🌱 {cropName} not ready yet!\n⏰ Time remaining: {remainingTime}\n📊 Growth progress: {progress:F0}%");
+                }
             }
         }
     }
@@ -166,7 +183,7 @@ public class HandTool : Tool
         if (plant != null)
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
-            return cropGrower != null && cropGrower.isMature;
+            return cropGrower != null; // Can use on any plant, regardless of maturity
         }
         return false;
     }
