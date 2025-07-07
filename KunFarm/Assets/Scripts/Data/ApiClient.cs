@@ -121,6 +121,8 @@ public class ApiClient : MonoBehaviour
                         Debug.Log($"[ApiClient] Server data - UserId: {apiResponse.data.userId}");
                         Debug.Log($"[ApiClient] Server data - TileStates: {apiResponse.data.tileStates?.Length ?? 0}");
                         Debug.Log($"[ApiClient] Server data - Plants: {apiResponse.data.plants?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - ChickensStateJson length: {apiResponse.data.chickensStateJson?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - EggsStateJson length: {apiResponse.data.eggsStateJson?.Length ?? 0}");
                         
                         // Debug first few plants
                         if (apiResponse.data.plants != null && apiResponse.data.plants.Length > 0)
@@ -135,13 +137,30 @@ public class ApiClient : MonoBehaviour
                     
                     if (apiResponse.success && apiResponse.data != null)
                     {
+                        // Helper function để clean JSON strings từ server
+                        string CleanJsonString(string jsonString)
+                        {
+                            if (string.IsNullOrEmpty(jsonString) || 
+                                jsonString.Trim().ToLower() == "null" ||
+                                jsonString.Trim() == "{}" ||
+                                string.IsNullOrWhiteSpace(jsonString))
+                            {
+                                return "[]";
+                            }
+                            return jsonString.Trim();
+                        }
+                        
                         // Convert server response to Unity format
                         var farmData = new FarmSaveData
                         {
                             userId = apiResponse.data.userId,
                             tileStates = new System.Collections.Generic.List<TileStateData>(),
-                            plants = new System.Collections.Generic.List<PlantData>()
+                            plants = new System.Collections.Generic.List<PlantData>(),
+                            chickensStateJson = CleanJsonString(apiResponse.data.chickensStateJson),
+                            eggsStateJson = CleanJsonString(apiResponse.data.eggsStateJson)
                         };
+                        
+                        Debug.Log($"[ApiClient] Cleaned JSON - Chickens: '{farmData.chickensStateJson}', Eggs: '{farmData.eggsStateJson}'");
 
                         // Convert tile states
                         if (apiResponse.data.tileStates != null)
@@ -183,7 +202,7 @@ public class ApiClient : MonoBehaviour
                             }
                         }
 
-                        Debug.Log($"[ApiClient] ✅ Farm load successful - {farmData.tileStates.Count} tiles, {farmData.plants.Count} plants");
+                        Debug.Log($"[ApiClient] ✅ Farm load successful - {farmData.tileStates.Count} tiles, {farmData.plants.Count} plants, chickens: {(string.IsNullOrEmpty(farmData.chickensStateJson) ? 0 : farmData.chickensStateJson.Length)} chars, eggs: {(string.IsNullOrEmpty(farmData.eggsStateJson) ? 0 : farmData.eggsStateJson.Length)} chars");
                         onComplete?.Invoke(farmData);
                     }
                     else
@@ -244,6 +263,8 @@ public class FarmStateServerResponse
     public int userId;
     public ServerTileStateData[] tileStates;
     public ServerPlantData[] plants;
+    public string chickensStateJson;
+    public string eggsStateJson;
     public string lastSaved; // Server includes this field
 }
 

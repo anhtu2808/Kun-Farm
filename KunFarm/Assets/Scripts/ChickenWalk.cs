@@ -366,6 +366,42 @@ public class ChickenWalk : MonoBehaviour
         return Mathf.Max(0, currentEggLayInterval - eggLayTimer);
     }
 
+    /// <summary>
+    /// Get current egg lay timer (public accessor cho save/restore)
+    /// </summary>
+    public float GetEggLayTimer()
+    {
+        return eggLayTimer;
+    }
+    
+    /// <summary>
+    /// Set egg lay timer (public setter cho save/restore)
+    /// </summary>
+    public void SetEggLayTimer(float timer)
+    {
+        eggLayTimer = Mathf.Clamp(timer, 0f, currentEggLayInterval);
+        if (showDebugInfo)
+            Debug.Log($"[{gameObject.name}] Egg lay timer set to: {eggLayTimer:F1}s (Interval: {currentEggLayInterval:F1}s)");
+    }
+    
+    /// <summary>
+    /// Get current egg lay interval (public accessor)
+    /// </summary>
+    public float GetCurrentEggLayInterval()
+    {
+        return currentEggLayInterval;
+    }
+    
+    /// <summary>
+    /// Force reset egg lay timer to 0 (for testing or events)
+    /// </summary>
+    public void ResetEggLayTimer()
+    {
+        eggLayTimer = 0f;
+        if (showDebugInfo)
+            Debug.Log($"[{gameObject.name}] Egg lay timer reset to 0");
+    }
+
     #region Feeding System Methods
 
     /// <summary>

@@ -146,3 +146,6 @@ MonoBehaviour:
   type: 1
   icon: {fileID: 1272668285, guid: c69c4caf20c9bdb4b9234455af70233a, type: 3}
   rb2d: {fileID: 0}
+  hatchTime: 0
+  hatchTimer: 0
+  requiresInteraction: 1

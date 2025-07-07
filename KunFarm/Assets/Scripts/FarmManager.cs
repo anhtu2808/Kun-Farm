@@ -147,6 +147,8 @@ public class FarmManager : MonoBehaviour
             Debug.Log($"farmData.userId: {farmData.userId}");
             Debug.Log($"farmData.tileStates count: {farmData.tileStates?.Count ?? 0}");
             Debug.Log($"farmData.plants count: {farmData.plants?.Count ?? 0}");
+            Debug.Log($"farmData.chickensStateJson length: {farmData.chickensStateJson?.Length ?? 0}");
+            Debug.Log($"farmData.eggsStateJson length: {farmData.eggsStateJson?.Length ?? 0}");
             
             if (farmData.tileStates != null)
             {
@@ -177,7 +179,10 @@ public class FarmManager : MonoBehaviour
         if (farmData != null && tileManager != null)
         {
             Debug.Log($"[FarmManager] ✅ Farm state loaded successfully for user {currentUserId}!");
+            
+            // Clear existing farm content
             ClearExistingPlants();
+            ClearExistingChickensAndEggs();
             
             // First restore base tile states from server
             tileManager.RestoreTileStates(farmData.tileStates);
@@ -185,7 +190,11 @@ public class FarmManager : MonoBehaviour
             // Then restore plants - they will set correct tile states based on maturity
             tileManager.RestorePlants(farmData.plants);
             
-            Debug.Log("[FarmManager] Restore order: TileStates first, then Plants (plants override tile states if needed)");
+            // Restore chickens and eggs
+            RestoreChickens(farmData.chickensStateJson);
+            RestoreEggs(farmData.eggsStateJson);
+            
+            Debug.Log("[FarmManager] Restore order: TileStates -> Plants -> Chickens -> Eggs");
             
             // Clear loading flag and set completion time
             isLoading = false;
@@ -222,6 +231,208 @@ public class FarmManager : MonoBehaviour
         }
     }
 
+    private void ClearExistingChickensAndEggs()
+    {
+        // Clear existing chickens
+        var existingChickens = FindObjectsOfType<ChickenWalk>();
+        foreach (var chicken in existingChickens)
+        {
+            if (chicken != null)
+            {
+                // Unregister từ ChickenManager trước khi destroy
+                if (ChickenManager.Instance != null)
+                {
+                    ChickenManager.Instance.UnregisterChicken(chicken);
+                }
+                Destroy(chicken.gameObject);
+            }
+        }
+        
+        // Clear existing eggs
+        var existingEggs = FindObjectsOfType<Collectable>();
+        foreach (var collectable in existingEggs)
+        {
+            if (collectable != null && collectable.type == CollectableType.EGG)
+            {
+                Destroy(collectable.gameObject);
+            }
+        }
+        
+        Debug.Log("[FarmManager] Cleared all existing chickens and eggs");
+    }
+
+    private void RestoreChickens(string chickensStateJson)
+    {
+        Debug.Log($"[FarmManager] RestoreChickens called with: '{chickensStateJson}' (length: {chickensStateJson?.Length ?? -1})");
+        
+        // Handle null, empty, or invalid JSON cases
+        if (string.IsNullOrEmpty(chickensStateJson) || 
+            chickensStateJson.Trim() == "null" || 
+            chickensStateJson.Trim() == "[]" ||
+            chickensStateJson.Trim() == "{}")
+        {
+            Debug.Log("[FarmManager] No chickens to restore (null/empty/invalid data)");
+            return;
+        }
+        
+        if (ChickenManager.Instance == null)
+        {
+            Debug.LogWarning("[FarmManager] ChickenManager not found, cannot restore chickens");
+            return;
+        }
+        
+        try
+        {
+            // Validate JSON format before parsing
+            chickensStateJson = chickensStateJson.Trim();
+            if (!chickensStateJson.StartsWith("{"))
+            {
+                Debug.LogWarning($"[FarmManager] Invalid chickens JSON format: '{chickensStateJson}' - skipping restore");
+                return;
+            }
+            
+            var wrapper = JsonUtility.FromJson<ChickenStatesWrapper>(chickensStateJson);
+            if (wrapper?.chickens == null || wrapper.chickens.Count == 0) 
+            {
+                Debug.Log("[FarmManager] Empty chickens data after parsing");
+                return;
+            }
+            
+            Debug.Log($"[FarmManager] Restoring {wrapper.chickens.Count} chickens...");
+            
+            foreach (var chickenSaveState in wrapper.chickens)
+            {
+                Vector3 position = new Vector3(chickenSaveState.positionX, chickenSaveState.positionY, chickenSaveState.positionZ);
+                GameObject restoredChicken = ChickenManager.Instance.SpawnChicken(position);
+                
+                if (restoredChicken != null)
+                {
+                    // Set chicken ID
+                    var chickenData = restoredChicken.GetComponent<ChickenData>();
+                    if (chickenData == null)
+                    {
+                        chickenData = restoredChicken.AddComponent<ChickenData>();
+                    }
+                    chickenData.chickenId = chickenSaveState.chickenId;
+                    restoredChicken.name = chickenSaveState.chickenId;
+                    
+                    // Restore chicken state trong ChickenManager
+                    var chickenWalk = restoredChicken.GetComponent<ChickenWalk>();
+                    if (chickenWalk != null)
+                    {
+                        ChickenManager.Instance.RegisterChicken(chickenWalk, chickenSaveState.chickenId);
+                        
+                        // Get và update state
+                        var chickenState = ChickenManager.Instance.GetChickenState(chickenSaveState.chickenId);
+                        if (chickenState != null)
+                        {
+                            chickenState.position = position;
+                            chickenState.isFed = chickenSaveState.isFed;
+                            chickenState.feedEndTime = chickenSaveState.feedEndTime;
+                            chickenState.totalEggsLaid = chickenSaveState.totalEggsLaid;
+                            chickenState.currentEggLayInterval = chickenSaveState.currentEggLayInterval;
+                            chickenState.baseEggLayInterval = chickenSaveState.baseEggLayInterval;
+                            chickenState.isMoving = chickenSaveState.isMoving;
+                            chickenState.speedMultiplier = chickenSaveState.speedMultiplier;
+                            chickenState.isBoosted = chickenSaveState.isBoosted;
+                        }
+                        
+                        // Update timing settings nếu cần
+                        chickenWalk.eggLayInterval = chickenSaveState.currentEggLayInterval;
+                        // Restore egg lay timer
+                        chickenWalk.SetEggLayTimer(chickenSaveState.eggLayTimer);
+                    }
+                    
+                    Debug.Log($"[FarmManager] Restored chicken: {chickenSaveState.chickenId} at {position} with eggLayTimer: {chickenSaveState.eggLayTimer:F1}s");
+                }
+                else
+                {
+                    Debug.LogError($"[FarmManager] Failed to spawn chicken: {chickenSaveState.chickenId}");
+                }
+            }
+            
+            Debug.Log($"[FarmManager] ✅ Successfully restored {wrapper.chickens.Count} chickens");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[FarmManager] Error restoring chickens: {e.Message}\nJSON: '{chickensStateJson}'");
+        }
+    }
+
+    private void RestoreEggs(string eggsStateJson)
+    {
+        Debug.Log($"[FarmManager] RestoreEggs called with: '{eggsStateJson}' (length: {eggsStateJson?.Length ?? -1})");
+        
+        // Handle null, empty, or invalid JSON cases
+        if (string.IsNullOrEmpty(eggsStateJson) || 
+            eggsStateJson.Trim() == "null" || 
+            eggsStateJson.Trim() == "[]" ||
+            eggsStateJson.Trim() == "{}")
+        {
+            Debug.Log("[FarmManager] No eggs to restore (null/empty/invalid data)");
+            return;
+        }
+        
+        if (ChickenManager.Instance == null)
+        {
+            Debug.LogWarning("[FarmManager] ChickenManager not found, cannot restore eggs");
+            return;
+        }
+        
+        try
+        {
+            // Validate JSON format before parsing
+            eggsStateJson = eggsStateJson.Trim();
+            if (!eggsStateJson.StartsWith("{"))
+            {
+                Debug.LogWarning($"[FarmManager] Invalid eggs JSON format: '{eggsStateJson}' - skipping restore");
+                return;
+            }
+            
+            var wrapper = JsonUtility.FromJson<EggStatesWrapper>(eggsStateJson);
+            if (wrapper?.eggs == null || wrapper.eggs.Count == 0) 
+            {
+                Debug.Log("[FarmManager] Empty eggs data after parsing");
+                return;
+            }
+            
+            Debug.Log($"[FarmManager] Restoring {wrapper.eggs.Count} eggs...");
+            
+            foreach (var eggSaveState in wrapper.eggs)
+            {
+                Vector3 position = new Vector3(eggSaveState.positionX, eggSaveState.positionY, eggSaveState.positionZ);
+                GameObject restoredEgg = ChickenManager.Instance.SpawnEgg(position);
+                
+                if (restoredEgg != null)
+                {
+                    restoredEgg.name = eggSaveState.eggId;
+                    
+                    // Restore egg properties including timing
+                    var collectable = restoredEgg.GetComponent<Collectable>();
+                    if (collectable != null)
+                    {
+                        collectable.type = CollectableType.EGG;
+                        // Restore timing data
+                        collectable.HatchTime = eggSaveState.hatchTime;
+                        collectable.HatchTimer = eggSaveState.hatchTimer;
+                    }
+                    
+                    Debug.Log($"[FarmManager] Restored egg: {eggSaveState.eggId} at {position}, hatchTimer: {eggSaveState.hatchTimer:F1}s/{eggSaveState.hatchTime:F1}s");
+                }
+                else
+                {
+                    Debug.LogError($"[FarmManager] Failed to spawn egg: {eggSaveState.eggId}");
+                }
+            }
+            
+            Debug.Log($"[FarmManager] ✅ Successfully restored {wrapper.eggs.Count} eggs");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[FarmManager] Error restoring eggs: {e.Message}\nJSON: '{eggsStateJson}'");
+        }
+    }
+
     public void SaveAndQuit()
     {
         SaveFarmState();
@@ -242,6 +453,9 @@ public class FarmManager : MonoBehaviour
                 tileManager.SetTileState(kvp, TileState.Undug);
             }
         }
+        
+        // Clear chickens và eggs
+        ClearExistingChickensAndEggs();
         
         // Save empty state to server
         SaveFarmState();
