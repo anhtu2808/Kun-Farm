@@ -42,6 +42,10 @@ public class ChickenWalk : MonoBehaviour
     private float eggLayTimer = 0f; // Bộ đếm thời gian cho việc đẻ trứng
     private List<GameObject> eggsLaid = new List<GameObject>(); // Danh sách các quả trứng đã đẻ
 
+    // Feeding system variables
+    private float currentEggLayInterval; // Thời gian đẻ trứng hiện tại (có thể bị ảnh hưởng bởi feeding)
+    private float speedMultiplier = 1f; // Nhân tốc độ đẻ trứng (1 = bình thường, <1 = nhanh hơn)
+
 
     void Awake()
     {
@@ -84,18 +88,21 @@ public class ChickenWalk : MonoBehaviour
             }
         }
 
-        // Tự động gán prefab trứng nếu chưa có
+        // Tự động gán prefab trứng nếu chưa có - sử dụng ChickenManager
         if (eggPrefab == null)
         {
-            eggPrefab = Resources.Load<GameObject>("Prelabs/Collectable");
+            if (ChickenManager.Instance != null)
+            {
+                eggPrefab = ChickenManager.Instance.GetEggPrefab();
+            }
 
             if (eggPrefab == null)
             {
-                Debug.LogWarning("Không thể tìm thấy Prefab 'Prefabs/Collectable' trong Resources!");
+                Debug.LogWarning("Không thể tìm thấy Prefab trứng trong Resources!");
             }
             else if (showDebugInfo)
             {
-                Debug.Log("Đã tự động gán prefab trứng từ Resources/Prefabs/Collectable cho " + gameObject.name);
+                Debug.Log("Đã tự động gán prefab trứng từ ChickenManager cho " + gameObject.name);
             }
         }
 
@@ -113,10 +120,34 @@ public class ChickenWalk : MonoBehaviour
     void Start()
     {
         if (!isInitialized) InitializeComponents();
+        
+        // Khởi tạo feeding system - sử dụng thời gian từ ChickenManager
+        if (ChickenManager.Instance != null)
+        {
+            eggLayInterval = ChickenManager.Instance.GetDefaultEggLayInterval();
+        }
+        currentEggLayInterval = eggLayInterval;
+        
+        // Đăng ký với ChickenManager nếu có
+        if (ChickenManager.Instance != null)
+        {
+            string chickenId = "Chicken_" + System.DateTime.Now.Ticks + "_" + GetInstanceID();
+            ChickenManager.Instance.RegisterChicken(this, chickenId);
+        }
+        
         StartCoroutine(ChickenAI());
 
         // Khởi tạo timer đẻ trứng với giá trị ngẫu nhiên để tránh tất cả gà đẻ cùng lúc
-        eggLayTimer = Random.Range(0f, eggLayInterval * 0.5f);
+        eggLayTimer = Random.Range(0f, currentEggLayInterval * 0.5f);
+    }
+
+    void OnDestroy()
+    {
+        // Hủy đăng ký khỏi ChickenManager
+        if (ChickenManager.Instance != null)
+        {
+            ChickenManager.Instance.UnregisterChicken(this);
+        }
     }
 
     void Update()
@@ -154,8 +185,8 @@ public class ChickenWalk : MonoBehaviour
         // Cập nhật bộ đếm thời gian đẻ trứng
         eggLayTimer += Time.deltaTime;
 
-        // Kiểm tra xem đã đến thời gian đẻ trứng chưa
-        if (eggLayTimer >= eggLayInterval)
+        // Kiểm tra xem đã đến thời gian đẻ trứng chưa (sử dụng currentEggLayInterval có thể bị ảnh hưởng bởi feeding)
+        if (eggLayTimer >= currentEggLayInterval)
         {
             // Nếu chỉ đẻ trứng khi đứng yên và đang di chuyển, thì chưa đẻ
             if (layEggsOnlyWhenIdle && isMoving)
@@ -173,12 +204,6 @@ public class ChickenWalk : MonoBehaviour
 
     void LayEgg()
     {
-        if (eggPrefab == null)
-        {
-            Debug.LogWarning("Không thể đẻ trứng vì eggPrefab chưa được gán!");
-            return;
-        }
-
         // Kiểm tra giới hạn số trứng
         if (maxEggsPerChicken > 0 && eggsLaid.Count >= maxEggsPerChicken)
         {
@@ -190,11 +215,17 @@ public class ChickenWalk : MonoBehaviour
             eggsLaid.RemoveAt(0);
         }
 
-        // Tạo quả trứng mới tại vị trí của gà (với offset)
+        // Tạo quả trứng mới tại vị trí của gà (với offset) - sử dụng ChickenManager
         Vector3 eggPosition = transform.position + eggOffset;
-        eggPosition.z = 0;
-        GameObject newEgg = Instantiate(eggPrefab, eggPosition, Quaternion.identity);
+        GameObject newEgg = null;
+        
+        if (ChickenManager.Instance != null)
+        {
+            newEgg = ChickenManager.Instance.SpawnEgg(eggPosition);
+        }
 
+        if (newEgg != null)
+        {
         // Thêm vào danh sách quản lý
         eggsLaid.Add(newEgg);
 
@@ -202,6 +233,11 @@ public class ChickenWalk : MonoBehaviour
         newEgg.name = "Egg_" + gameObject.name + "_" + eggsLaid.Count;
 
         if (showDebugInfo) Debug.Log("Gà " + gameObject.name + " đã đẻ một quả trứng!");
+        }
+        else
+        {
+            Debug.LogWarning("Không thể đẻ trứng vì ChickenManager không tìm thấy prefab!");
+        }
     }
 
     void FixedUpdate()
@@ -327,8 +363,116 @@ public class ChickenWalk : MonoBehaviour
     // Phương thức mới để lấy thời gian còn lại trước khi đẻ trứng tiếp theo
     public float GetTimeUntilNextEgg()
     {
-        return Mathf.Max(0, eggLayInterval - eggLayTimer);
+        return Mathf.Max(0, currentEggLayInterval - eggLayTimer);
     }
 
+    #region Feeding System Methods
+
+    /// <summary>
+    /// Áp dụng speed boost từ feeding
+    /// </summary>
+    /// <param name="multiplier">Multiplier cho tốc độ (< 1 = nhanh hơn, > 1 = chậm hơn)</param>
+    public void ApplySpeedBoost(float multiplier)
+    {
+        speedMultiplier = multiplier;
+        currentEggLayInterval = eggLayInterval * speedMultiplier;
+        
+        if (showDebugInfo)
+            Debug.Log($"[{gameObject.name}] Speed boost áp dụng: {multiplier:F2}x, Thời gian đẻ trứng mới: {currentEggLayInterval:F1}s");
+    }
+
+    /// <summary>
+    /// Loại bỏ speed boost, trở về bình thường
+    /// </summary>
+    public void RemoveSpeedBoost()
+    {
+        speedMultiplier = 1f;
+        currentEggLayInterval = eggLayInterval;
+        
+        if (showDebugInfo)
+            Debug.Log($"[{gameObject.name}] Speed boost đã hết hạn, trở về bình thường: {currentEggLayInterval:F1}s");
+    }
+
+    /// <summary>
+    /// Kiểm tra xem gà có đang được boost không
+    /// </summary>
+    public bool IsBoosted()
+    {
+        return speedMultiplier != 1f;
+    }
+
+    /// <summary>
+    /// Lấy speed multiplier hiện tại
+    /// </summary>
+    public float GetCurrentSpeedMultiplier()
+    {
+        return speedMultiplier;
+    }
+
+    /// <summary>
+    /// Cập nhật thời gian đẻ trứng mặc định từ ChickenManager
+    /// </summary>
+    public void UpdateEggLayInterval(float newInterval)
+    {
+        eggLayInterval = newInterval;
+        
+        // Chỉ cập nhật nếu không đang boost
+        if (!IsBoosted())
+        {
+            currentEggLayInterval = eggLayInterval;
+        }
+        
+        if (showDebugInfo)
+            Debug.Log($"[{gameObject.name}] Thời gian đẻ trứng cập nhật: {eggLayInterval}s");
+    }
+
+    /// <summary>
+    /// Cho gà ăn - gọi từ player hoặc UI
+    /// </summary>
+    /// <param name="foodType">Loại thức ăn</param>
+    /// <returns>True nếu thành công</returns>
+    public bool Feed(CollectableType foodType)
+    {
+        if (ChickenManager.Instance != null)
+        {
+            return ChickenManager.Instance.FeedChicken(this, foodType);
+        }
+        
+        Debug.LogWarning("[ChickenWalk] Không thể cho ăn vì không tìm thấy ChickenManager!");
+        return false;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem gà có đang được feed không
+    /// </summary>
+    public bool IsFed()
+    {
+        if (ChickenManager.Instance != null)
+        {
+            ChickenData chickenData = GetComponent<ChickenData>();
+            if (chickenData != null)
+            {
+                return ChickenManager.Instance.IsChickenFed(chickenData.chickenId);
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Lấy thông tin trạng thái gà
+    /// </summary>
+    public string GetStatusInfo()
+    {
+        string status = $"Gà {gameObject.name}\n";
+        status += $"Đang di chuyển: {(isMoving ? "Có" : "Không")}\n";
+        status += $"Thời gian đẻ trứng tiếp theo: {GetTimeUntilNextEgg():F1}s\n";
+        status += $"Speed multiplier: {speedMultiplier:F2}x\n";
+        status += $"Đã đẻ: {eggsLaid.Count}/{maxEggsPerChicken} trứng\n";
+        status += $"Được feed: {(IsFed() ? "Có" : "Không")}";
+        
+        return status;
+    }
+
+    #endregion
 
 }

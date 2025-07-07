@@ -19,6 +19,12 @@ namespace KunFarm.DAL.Entities
         [Column(TypeName = "json")]
         public string PlantsJson { get; set; } = "[]";
         
+        [Column(TypeName = "json")]
+        public string ChickensStateJson { get; set; } = "[]";
+        
+        [Column(TypeName = "json")]
+        public string EggsStateJson { get; set; } = "[]";
+        
         public DateTime LastSaved { get; set; } = DateTime.UtcNow;
         
         // Navigation property

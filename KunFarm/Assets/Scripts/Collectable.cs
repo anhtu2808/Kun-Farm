@@ -4,7 +4,6 @@ using UnityEngine;
 public class Collectable : MonoBehaviour
 {
     public CollectableType type;
-    private GameObject chickenPrefab;
     public Sprite icon;
     public Rigidbody2D rb2d;
 
@@ -25,34 +24,50 @@ public class Collectable : MonoBehaviour
         GetComponent<SpriteRenderer>().sortingOrder = 5;
         if (type == CollectableType.EGG)
         {
-            // Load prefab gà
-            chickenPrefab = Resources.Load<GameObject>("Prelabs/Chicken");
-
-            if (chickenPrefab == null)
+            // Kiểm tra xem ChickenManager có thể load được prefab gà không
+            if (ChickenManager.Instance != null && ChickenManager.Instance.GetChickenPrefab() != null)
             {
-                Debug.LogWarning("Không tìm thấy prefab 'Prelabs/Chicken' trong Resources!");
+                StartCoroutine(HatchEgg());
             }
             else
             {
-                StartCoroutine(HatchEgg());
+                Debug.LogWarning("Không tìm thấy ChickenManager hoặc prefab gà!");
             }
         }
     }
 
     private IEnumerator HatchEgg()
-{
-    // Đợi 10 giây (hoặc 120f cho 2 phút)
-    yield return new WaitForSeconds(180f);
-
-    if (chickenPrefab != null)
     {
-        // Tạo vị trí mới với z = -10
-        Vector3 spawnPos = new Vector3(0f, 0f, -10f);
-        Instantiate(chickenPrefab, spawnPos, Quaternion.identity);
-    }
+        // Lấy thời gian nở từ ChickenManager
+        float hatchTime = 180f; // fallback default
+        if (ChickenManager.Instance != null)
+        {
+            hatchTime = ChickenManager.Instance.GetDefaultHatchTime();
+        }
+        
+        Debug.Log($"Trứng sẽ nở sau {hatchTime} giây");
+        yield return new WaitForSeconds(hatchTime);
 
-    Destroy(this.gameObject);
-}
+        // Tạo gà mới tại vị trí trứng hiện tại - sử dụng ChickenManager
+        Vector3 spawnPos = transform.position;
+        GameObject newChicken = null;
+        
+        if (ChickenManager.Instance != null)
+        {
+            newChicken = ChickenManager.Instance.SpawnChicken(spawnPos);
+        }
+
+        if (newChicken != null)
+        {
+            Debug.Log("Trứng đã nở thành gà tại vị trí: " + spawnPos);
+        }
+        else
+        {
+            Debug.LogWarning("Không thể tạo gà từ trứng!");
+        }
+
+        Destroy(this.gameObject);
+    }
 
     [Header("Pickup Settings")]
     public bool requiresInteraction = true;

@@ -10,6 +10,10 @@ namespace KunFarm.BLL.DTOs.Request
         public List<TileStateData> tileStates { get; set; } = new List<TileStateData>();
         
         public List<PlantData> plants { get; set; } = new List<PlantData>();
+        
+        public string? chickensStateJson { get; set; } = "[]";
+        
+        public string? eggsStateJson { get; set; } = "[]";
     }
 
     public class TileStateData
