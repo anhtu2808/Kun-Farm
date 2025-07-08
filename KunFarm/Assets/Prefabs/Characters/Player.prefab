@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 944264181672840308}
   - component: {fileID: 2083536048103807085}
   - component: {fileID: 2944437466567668381}
+  - component: {fileID: 7149962806614191304}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -241,6 +242,21 @@ MonoBehaviour:
   showDebugInfo: 1
   autoSaveEnabled: 1
   saveThreshold: 5
+--- !u!114 &7149962806614191304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962883390979477551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e183c3c5ba77b847803f219f3c4cdbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  diggingSound: {fileID: 8300000, guid: 7f46f6ecf9c4a314ea4c38e80d691040, type: 3}
+  volume: 1
+  pitch: 1
 --- !u!1 &4358920708629238525
 GameObject:
   m_ObjectHideFlags: 0
