@@ -31,6 +31,10 @@ public static class ToolHelpers
                 }
                 break;
                 
+            case CollectableType.WATERING_CAN_TOOL:
+                tool = new WateringCanTool(quantity);
+                break;
+                
             case CollectableType.WHEATSEED:
             case CollectableType.GRAPESEED:
             case CollectableType.APPLETREESEED:
@@ -66,6 +70,7 @@ public static class ToolHelpers
         
         if (tool is ShovelTool) return CollectableType.SHOVEL_TOOL;
         if (tool is HandTool) return CollectableType.HAND_TOOL;
+        if (tool is WateringCanTool) return CollectableType.WATERING_CAN_TOOL;
                 
         // For SeedTool, determine type from cropData
         if (tool is SeedTool seedTool && seedTool.cropData != null)
@@ -105,6 +110,7 @@ public static class ToolHelpers
             // Tool items
             case CollectableType.SHOVEL_TOOL:
             case CollectableType.HAND_TOOL:
+            case CollectableType.WATERING_CAN_TOOL:
                 canBeTool = true;
                 break;
                 
@@ -214,6 +220,7 @@ public static class ToolHelpers
     {
             case CollectableType.SHOVEL_TOOL: return "Shovel";
             case CollectableType.HAND_TOOL: return "Hand";
+            case CollectableType.WATERING_CAN_TOOL: return "Watering Can";
             case CollectableType.WHEATSEED: return "Wheat Seed";
             case CollectableType.GRAPESEED: return "Grape Seed";
             case CollectableType.APPLETREESEED: return "Apple Tree Seed";

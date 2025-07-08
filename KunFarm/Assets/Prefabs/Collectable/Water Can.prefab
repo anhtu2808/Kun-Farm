@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3980683272431111161}
   - component: {fileID: 8980870103730399970}
   m_Layer: 0
-  m_Name: Collectable
+  m_Name: Water Can
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 1272668285, guid: c69c4caf20c9bdb4b9234455af70233a, type: 3}
+  m_Sprite: {fileID: -232492551, guid: 62e41a9e38c064b77a30abd1105dd0a5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -122,7 +122,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.4375, y: 0.25}
     newSize: {x: 0.5, y: 0.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -143,8 +143,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74977f11a7d1f2741ba3911bfb4c0fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
-  icon: {fileID: 1272668285, guid: c69c4caf20c9bdb4b9234455af70233a, type: 3}
+  type: 10
+  icon: {fileID: -232492551, guid: 62e41a9e38c064b77a30abd1105dd0a5, type: 3}
   rb2d: {fileID: 0}
   hatchTime: 0
   hatchTimer: 0

@@ -7,6 +7,10 @@ public class FarmSaveData
     public int userId;
     public List<TileStateData> tileStates = new List<TileStateData>();
     public List<PlantData> plants = new List<PlantData>();
+    
+    // Thêm chicken và egg data - sử dụng JSON để compatibility với API
+    public string chickensStateJson = "[]";
+    public string eggsStateJson = "[]";
 
     public static FarmSaveData FromTileManager(TileManager tileManager, int userId)
     {
@@ -58,6 +62,91 @@ public class FarmSaveData
             }
         }
 
+        // Collect chicken data từ ChickenManager
+        if (ChickenManager.Instance != null)
+        {
+            try
+            {
+                // Lấy chicken states và serialize thành JSON
+                var chickenStates = new List<ChickenSaveState>();
+                var allChickens = ChickenManager.Instance.GetAllChickens();
+                
+                foreach (var chicken in allChickens)
+                {
+                    if (chicken != null && chicken.gameObject != null)
+                    {
+                        var chickenData = chicken.GetComponent<ChickenData>();
+                        string chickenId = chickenData != null ? chickenData.chickenId : chicken.name;
+                        var chickenState = ChickenManager.Instance.GetChickenState(chickenId);
+                        
+                        if (chickenState != null)
+                        {
+                            chickenStates.Add(new ChickenSaveState
+                            {
+                                chickenId = chickenState.chickenId,
+                                positionX = chickenState.position.x,
+                                positionY = chickenState.position.y,
+                                positionZ = chickenState.position.z,
+                                isFed = chickenState.isFed,
+                                feedEndTime = chickenState.feedEndTime,
+                                totalEggsLaid = chickenState.totalEggsLaid,
+                                currentEggLayInterval = chickenState.currentEggLayInterval,
+                                baseEggLayInterval = chickenState.baseEggLayInterval,
+                                isMoving = chickenState.isMoving,
+                                speedMultiplier = chickenState.speedMultiplier,
+                                isBoosted = chickenState.isBoosted,
+                                eggLayTimer = chicken.GetEggLayTimer()
+                            });
+                        }
+                    }
+                }
+                
+                farmData.chickensStateJson = JsonUtility.ToJson(new ChickenStatesWrapper { chickens = chickenStates });
+                Debug.Log($"[FarmSaveData] Saving {chickenStates.Count} chickens to farm state");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[FarmSaveData] Error collecting chicken data: {e.Message}");
+                farmData.chickensStateJson = "[]";
+            }
+        }
+        else
+        {
+            Debug.Log("[FarmSaveData] ChickenManager not found, saving empty chicken state");
+            farmData.chickensStateJson = "[]";
+        }
+
+        // Collect egg data từ scene
+        try
+        {
+            var eggStates = new List<EggSaveState>();
+            var allEggs = Object.FindObjectsOfType<Collectable>();
+            
+            foreach (var egg in allEggs)
+            {
+                if (egg != null && egg.type == CollectableType.EGG)
+                {
+                    eggStates.Add(new EggSaveState
+                    {
+                        eggId = egg.name,
+                        positionX = egg.transform.position.x,
+                        positionY = egg.transform.position.y,
+                        positionZ = egg.transform.position.z,
+                        hatchTime = egg.HatchTime,
+                        hatchTimer = egg.HatchTimer
+                    });
+                }
+            }
+            
+            farmData.eggsStateJson = JsonUtility.ToJson(new EggStatesWrapper { eggs = eggStates });
+            Debug.Log($"[FarmSaveData] Saving {eggStates.Count} eggs to farm state");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[FarmSaveData] Error collecting egg data: {e.Message}");
+            farmData.eggsStateJson = "[]";
+        }
+
         return farmData;
     }
 }
@@ -81,4 +170,47 @@ public class PlantData
     public int currentStage;
     public float timer;
     public bool isMature;
+}
+
+// Chicken save data structures
+[System.Serializable]
+public class ChickenSaveState
+{
+    public string chickenId;
+    public float positionX;
+    public float positionY;
+    public float positionZ;
+    public bool isFed;
+    public float feedEndTime;
+    public int totalEggsLaid;
+    public float currentEggLayInterval;
+    public float baseEggLayInterval;
+    public bool isMoving;
+    public float speedMultiplier;
+    public bool isBoosted;
+    public float eggLayTimer;
+}
+
+[System.Serializable]
+public class ChickenStatesWrapper
+{
+    public List<ChickenSaveState> chickens;
+}
+
+// Egg save data structures - only save what actually exists
+[System.Serializable]
+public class EggSaveState
+{
+    public string eggId;
+    public float positionX;
+    public float positionY;
+    public float positionZ;
+    public float hatchTime;
+    public float hatchTimer;
+}
+
+[System.Serializable]
+public class EggStatesWrapper
+{
+    public List<EggSaveState> eggs;
 } 

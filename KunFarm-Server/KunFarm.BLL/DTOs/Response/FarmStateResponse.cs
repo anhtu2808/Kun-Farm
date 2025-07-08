@@ -6,6 +6,10 @@ namespace KunFarm.BLL.DTOs.Response
         public List<TileStateResponseData> TileStates { get; set; } = new List<TileStateResponseData>();
         public List<PlantResponseData> Plants { get; set; } = new List<PlantResponseData>();
         public DateTime LastSaved { get; set; }
+        
+        // Di chuyển từ PlayerStateResponse
+        public string ChickensStateJson { get; set; } = "[]";
+        public string EggsStateJson { get; set; } = "[]";
     }
 
     public class TileStateResponseData

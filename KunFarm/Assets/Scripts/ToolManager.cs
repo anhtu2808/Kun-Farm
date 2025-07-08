@@ -14,6 +14,7 @@ public class ToolManager : MonoBehaviour
     
     [Header("Interaction Settings")]
     [SerializeField] private float maxInteractionDistance = 1.5f; // Maximum distance to interact with tiles
+    [SerializeField] private float chickenFeedingDistance = 2.0f; // Maximum distance to feed chickens (2D)
     
     [Header("References")]
     [SerializeField] private Toolbar_UI toolbarUI;
@@ -58,8 +59,7 @@ public class ToolManager : MonoBehaviour
         // Đảm bảo Hand Tool luôn có ở slot đầu tiên
         EnsureHandTool();
         
-        if (showDebugInfo)
-            Debug.Log($"[ToolManager] Initialized with userId: {currentUserId}");
+
     }
 
     void Update()
@@ -94,8 +94,7 @@ public class ToolManager : MonoBehaviour
             }
         }
         
-        if (showDebugInfo)
-            Debug.Log("[ToolManager] Hand Tool với icon đã được đặt ở slot đầu tiên");
+
     }
 
     private void CheckToolSelection()
@@ -136,15 +135,106 @@ public class ToolManager : MonoBehaviour
             Tool currentTool = SelectedTool;
             if (currentTool is FoodTool foodTool && foodTool.quantity > 0)
             {
-                // Eat the food
-                foodTool.EatFood();
-                
-                // Handle consumption
-                HandleToolConsumption(foodTool);
-                
-                Debug.Log($"[ToolManager] Player ate {foodTool.toolName}. Remaining: {foodTool.quantity}");
+                // Check if this is wheat - use for chicken feeding only
+                if (IsWheatFood(foodTool))
+                {
+                    HandleWheatFeeding(foodTool);
+                }
+                else
+                {
+                    // For other foods (Apple, Grape), player eats normally
+                    foodTool.EatFood();
+                    HandleToolConsumption(foodTool);
+                }
             }
         }
+    }
+    
+    private bool IsWheatFood(FoodTool foodTool)
+    {
+        return foodTool.toolName != null && 
+               (foodTool.toolName.ToLower().Contains("wheat") || 
+                foodTool.toolName.ToLower().Contains("lúa"));
+    }
+    
+    private void HandleWheatFeeding(FoodTool wheatTool)
+    {
+        // Find the nearest chicken within feeding distance
+        ChickenWalk nearestChicken = FindNearestChicken();
+        
+        if (nearestChicken != null)
+        {
+            // Feed the chicken with wheat
+            bool feedSuccess = nearestChicken.Feed(CollectableType.WHEAT);
+            
+                         if (feedSuccess)
+             {
+                 // Consume the wheat from toolbar
+                 HandleToolConsumption(wheatTool);
+                 
+                 // Get feeding info from ChickenManager for detailed message
+                 if (ChickenManager.Instance != null)
+                 {
+                     float speedBoost = ChickenManager.Instance.GetFeedingSpeedBoost();
+                     float duration = ChickenManager.Instance.GetFeedingDuration();
+                     float baseInterval = ChickenManager.Instance.GetDefaultEggLayInterval();
+                     
+                     float timeReduced = baseInterval * speedBoost; // seconds saved
+                     int durationMinutes = Mathf.RoundToInt(duration / 60f);
+                     int boostPercent = Mathf.RoundToInt(speedBoost * 100f);
+                     
+                     // Show detailed notification
+                     SimpleNotificationPopup.Show($"🌾 Fed chicken with {wheatTool.toolName}!\n⚡ Egg laying speed +{boostPercent}% ({timeReduced:F0}s faster)\n⏰ Effect lasts {durationMinutes} minutes");
+                 }
+                 else
+                 {
+                     // Fallback message
+                     SimpleNotificationPopup.Show($"Fed chicken with {wheatTool.toolName}!");
+                 }
+                 
+
+             }
+
+        }
+                 else
+         {
+             // No chicken nearby - show message with distance info
+             SimpleNotificationPopup.Show($"🐔 No chicken nearby to feed!\n📏 Move within {chickenFeedingDistance:F1} units of a chicken");
+         }
+    }
+    
+    private ChickenWalk FindNearestChicken()
+    {
+        if (ChickenManager.Instance == null || playerMovement == null)
+            return null;
+        
+        Vector3 playerPos = playerMovement.transform.position;
+        ChickenWalk nearestChicken = null;
+        float nearestDistance = float.MaxValue;
+        
+        // Get all chickens from ChickenManager
+        var allChickens = ChickenManager.Instance.GetAllChickens();
+        
+        foreach (var chicken in allChickens)
+        {
+            if (chicken == null) continue;
+            
+            Vector3 chickenPos = chicken.transform.position;
+            
+            // Calculate 2D distance (ignore Z axis) for proper 2D game distance
+            Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
+            Vector2 chickenPos2D = new Vector2(chickenPos.x, chickenPos.y);
+            float distance = Vector2.Distance(playerPos2D, chickenPos2D);
+            
+            // Check if within feeding distance and closer than previous
+            if (distance <= chickenFeedingDistance && distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestChicken = chicken;
+            }
+        }
+        
+        return nearestChicken;
     }
 
     public void SelectTool(int index, bool updateUI = true)
@@ -180,7 +270,6 @@ public class ToolManager : MonoBehaviour
         // Check distance from player to target cell
         if (!IsWithinInteractionRange(cellPosition))
         {
-            Debug.Log("Target is too far away! Move closer to dig.");
             return;
         }
 
@@ -190,7 +279,6 @@ public class ToolManager : MonoBehaviour
             // Don't use food tools through normal interaction (only through Space key)
             if (currentTool is FoodTool)
             {
-                Debug.Log("Use Space key to eat food!");
                 return;
             }
             
@@ -198,6 +286,11 @@ public class ToolManager : MonoBehaviour
             if (currentTool is ShovelTool)
             {
                 StartCoroutine(PlayHoeAnimation(cellPosition, currentTool));
+            }
+            // Check if this is a watering can tool for watering animation
+            else if (currentTool is WateringCanTool)
+            {
+                StartCoroutine(PlayWateringAnimation(cellPosition, currentTool));
             }
             else
             {
@@ -270,6 +363,82 @@ public class ToolManager : MonoBehaviour
         }
         
         isUsingTool = false;
+    }
+
+    private IEnumerator PlayWateringAnimation(Vector3Int cellPosition, Tool tool)
+    {
+        isUsingTool = true;
+        
+        // Debug log to see if method is called
+        Debug.Log($"[ToolManager] PlayWateringAnimation called with tool: {tool?.toolName ?? "null"}");
+        
+        if (playerMovement != null && playerMovement.GetAnimator() != null)
+        {
+            var animator = playerMovement.GetAnimator();
+            
+            // Get direction to target for very close targets, otherwise use facing direction
+            Vector3 playerPos = playerMovement.transform.position;
+            Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
+            Vector3 directionToTarget = (targetPos - playerPos).normalized;
+            
+            // If target is very close (direction is nearly zero), use player's facing direction
+            Vector3 finalDirection;
+            if (Vector3.Distance(playerPos, targetPos) < 0.5f)
+            {
+                // Use player's current facing direction when target is very close
+                finalDirection = playerMovement.GetFacingDirection();
+            }
+            else
+            {
+                // Use direction to target when target is further away
+                finalDirection = directionToTarget;
+            }
+            
+            // Determine watering direction using 2D blend tree coordinates
+            Vector2 wateringBlendDirection = GetHoeBlendDirection(finalDirection); // Reuse same logic
+            
+            // Debug logs for animation parameters
+            Debug.Log($"[ToolManager] Setting animation parameters - horizontal: {wateringBlendDirection.x}, vertical: {wateringBlendDirection.y}");
+            Debug.Log($"[ToolManager] Setting isWatering to true");
+            
+            // Set animator parameters for 2D blend tree
+            animator.SetFloat("horizontal", wateringBlendDirection.x);
+            animator.SetFloat("vertical", wateringBlendDirection.y);
+            animator.SetBool("isWatering", true); // Assumes you have this bool parameter
+            
+            // Apply animation speed if specified
+            if (hoeAnimationSpeed != 1f)
+            {
+                animator.speed = hoeAnimationSpeed;
+            }
+            
+            // Wait for animation to play (dynamic based on animation speed)
+            float waitTime = 0.7f / hoeAnimationSpeed; // Watering takes slightly longer
+            Debug.Log($"[ToolManager] Waiting {waitTime} seconds for watering animation");
+            yield return new WaitForSeconds(waitTime);
+            
+            // Reset animation speed to normal
+            animator.speed = 1f;
+            
+            // Use the tool
+            Debug.Log($"[ToolManager] Using watering tool on position: {cellPosition}");
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+            
+            // Stop watering animation
+            Debug.Log("[ToolManager] Setting isWatering to false");
+            animator.SetBool("isWatering", false);
+        }
+        else
+        {
+            // Fallback if no animator
+            Debug.LogWarning("[ToolManager] No animator found, using tool without animation");
+            tool.Use(cellPosition, tileManager);
+            HandleToolConsumption(tool);
+        }
+        
+        isUsingTool = false;
+        Debug.Log("[ToolManager] PlayWateringAnimation completed");
     }
 
     private Vector2 GetHoeBlendDirection(Vector3 direction)
@@ -453,7 +622,11 @@ public class ToolManager : MonoBehaviour
         
         Vector3 playerPos = playerMovement.transform.position;
         Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
-        float distance = Vector3.Distance(playerPos, targetPos);
+        
+        // Calculate 2D distance (ignore Z axis) for proper 2D game distance
+        Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
+        Vector2 targetPos2D = new Vector2(targetPos.x, targetPos.y);
+        float distance = Vector2.Distance(playerPos2D, targetPos2D);
         
         return distance <= maxInteractionDistance;
     }

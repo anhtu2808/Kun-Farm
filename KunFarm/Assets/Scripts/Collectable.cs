@@ -4,9 +4,29 @@ using UnityEngine;
 public class Collectable : MonoBehaviour
 {
     public CollectableType type;
-    private GameObject chickenPrefab;
     public Sprite icon;
     public Rigidbody2D rb2d;
+
+    [Header("Egg Hatching Settings")]
+    [SerializeField] private float hatchTime = 0f; // Will be set from ChickenManager, default fallback
+    [SerializeField] private float hatchTimer = 0f; // Thời gian đã đếm
+    
+    // Public properties để save/restore
+    public float HatchTime 
+    { 
+        get => hatchTime; 
+        set => hatchTime = value; 
+    }
+    
+    public float HatchTimer 
+    { 
+        get => hatchTimer; 
+        set => hatchTimer = value; 
+    }
+    
+    public float RemainingHatchTime => Mathf.Max(0f, hatchTime - hatchTimer);
+    
+    private Coroutine hatchCoroutine;
 
     private void Awake()
     {
@@ -20,39 +40,90 @@ public class Collectable : MonoBehaviour
             rb2d.constraints = RigidbodyConstraints2D.FreezeRotation; // Prevent rotation
         }
     }
+
     private void Start()
     {
         GetComponent<SpriteRenderer>().sortingOrder = 5;
         if (type == CollectableType.EGG)
         {
-            // Load prefab gà
-            chickenPrefab = Resources.Load<GameObject>("Prelabs/Chicken");
-
-            if (chickenPrefab == null)
+            if (ChickenManager.Instance != null)
             {
-                Debug.LogWarning("Không tìm thấy prefab 'Prelabs/Chicken' trong Resources!");
+                float managerHatchTime = ChickenManager.Instance.GetDefaultHatchTime();
+                if (hatchTimer == 0f)
+                {
+                    hatchTime = managerHatchTime;
+                }
             }
             else
             {
-                StartCoroutine(HatchEgg());
+                if (hatchTime <= 0f)
+                {
+                    hatchTime = 180f; // Fallback default
+                }
+            }
+            
+            if (ChickenManager.Instance != null && ChickenManager.Instance.GetChickenPrefab() != null)
+            {
+                hatchCoroutine = StartCoroutine(HatchEgg());
             }
         }
     }
 
     private IEnumerator HatchEgg()
-{
-    // Đợi 10 giây (hoặc 120f cho 2 phút)
-    yield return new WaitForSeconds(180f);
-
-    if (chickenPrefab != null)
     {
-        // Tạo vị trí mới với z = -10
-        Vector3 spawnPos = new Vector3(0f, 0f, -10f);
-        Instantiate(chickenPrefab, spawnPos, Quaternion.identity);
+        float remainingTime = RemainingHatchTime;
+        if (remainingTime <= 0f)
+        {
+            SpawnChickenFromEgg();
+            yield break;
+        }
+        
+        while (hatchTimer < hatchTime)
+        {
+            yield return null;
+            hatchTimer += Time.deltaTime;
+        }
+        
+        SpawnChickenFromEgg();
     }
+    
+    private void SpawnChickenFromEgg()
+    {
+        Vector3 spawnPos = transform.position;
+        GameObject newChicken = null;
+        
+        if (ChickenManager.Instance != null)
+        {
+            newChicken = ChickenManager.Instance.SpawnChicken(spawnPos);
+        }
 
-    Destroy(this.gameObject);
-}
+        Destroy(this.gameObject);
+    }
+    
+    /// <summary>
+    /// Force egg to hatch immediately (for testing or special events)
+    /// </summary>
+    public void ForceHatch()
+    {
+        if (type == CollectableType.EGG && hatchCoroutine != null)
+        {
+            StopCoroutine(hatchCoroutine);
+            hatchTimer = hatchTime; // Set to completed
+            SpawnChickenFromEgg();
+        }
+    }
+    
+    /// <summary>
+    /// Reset hatch timer (for testing or special events)
+    /// </summary>
+    public void ResetHatchTimer()
+    {
+        hatchTimer = 0f;
+        if (type == CollectableType.EGG && hatchCoroutine == null)
+        {
+            hatchCoroutine = StartCoroutine(HatchEgg());
+        }
+    }
 
     [Header("Pickup Settings")]
     public bool requiresInteraction = true;
@@ -70,7 +141,6 @@ public class Collectable : MonoBehaviour
         }
         else if (player && !requiresInteraction)
         {
-            // Legacy auto-pickup behavior
             player.inventory.Add(this, 1);
             Destroy(this.gameObject);
         }
@@ -99,7 +169,6 @@ public class Collectable : MonoBehaviour
         if (nearbyPlayer != null)
         {
             nearbyPlayer.inventory.Add(this, 1);
-            Debug.Log($"[Collectable] Picked up {type} manually");
             Destroy(this.gameObject);
         }
     }
@@ -108,5 +177,5 @@ public class Collectable : MonoBehaviour
 public enum CollectableType
 {
     NONE, EGG, WHEAT, GRAPE, APPLETREE, WHEATSEED, GRAPESEED, APPLETREESEED,
-    SHOVEL_TOOL, HAND_TOOL, APPLE
+    SHOVEL_TOOL, HAND_TOOL, WATERING_CAN_TOOL, APPLE
 }

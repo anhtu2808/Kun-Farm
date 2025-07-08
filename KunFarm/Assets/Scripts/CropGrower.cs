@@ -14,6 +14,8 @@ public class CropGrower : MonoBehaviour
     private TileManager tileManager;
     private Vector3Int myCellPosition; // Vị trí ô của cây này trên Tilemap
 
+
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -134,6 +136,82 @@ public class CropGrower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Calculate remaining time until plant is fully mature
+    /// </summary>
+    public float GetRemainingGrowthTime()
+    {
+        if (isMature) return 0f;
+        if (cropData == null || cropData.stageDurations == null) return 0f;
+        
+        float totalRemainingTime = 0f;
+        
+        // Add remaining time for current stage
+        if (currentStage < cropData.stageDurations.Length)
+        {
+            float remainingCurrentStage = cropData.stageDurations[currentStage] - timer;
+            totalRemainingTime += remainingCurrentStage;
+        }
+        
+        // Add time for all future stages
+        for (int i = currentStage + 1; i < cropData.stageDurations.Length; i++)
+        {
+            totalRemainingTime += cropData.stageDurations[i];
+        }
+        
+        return Mathf.Max(0f, totalRemainingTime);
+    }
+
+    /// <summary>
+    /// Get formatted remaining time as string (e.g., "2m 30s", "45s")
+    /// </summary>
+    public string GetFormattedRemainingTime()
+    {
+        float remainingSeconds = GetRemainingGrowthTime();
+        
+        if (remainingSeconds <= 0) return "Ready!";
+        
+        int minutes = Mathf.FloorToInt(remainingSeconds / 60f);
+        int seconds = Mathf.FloorToInt(remainingSeconds % 60f);
+        
+        if (minutes > 0)
+        {
+            return $"{minutes}m {seconds}s";
+        }
+        else
+        {
+            return $"{seconds}s";
+        }
+    }
+
+    /// <summary>
+    /// Get current growth progress as percentage (0-100)
+    /// </summary>
+    public float GetGrowthProgress()
+    {
+        if (isMature) return 100f;
+        if (cropData == null || cropData.stageDurations == null) return 0f;
+        
+        // Calculate total duration for all stages
+        float totalDuration = 0f;
+        for (int i = 0; i < cropData.stageDurations.Length; i++)
+        {
+            totalDuration += cropData.stageDurations[i];
+        }
+        
+        // Calculate elapsed time
+        float elapsedTime = 0f;
+        for (int i = 0; i < currentStage; i++)
+        {
+            elapsedTime += cropData.stageDurations[i];
+        }
+        elapsedTime += timer; // Add current stage progress
+        
+        if (totalDuration <= 0) return 0f;
+        
+        return Mathf.Clamp01(elapsedTime / totalDuration) * 100f;
+    }
+
     // Hàm Harvest() được gọi từ PlayerInteraction
     public void Harvest() // Đảm bảo là public
     {
@@ -157,6 +235,29 @@ public class CropGrower : MonoBehaviour
         }
         }
         // GameObject cây sẽ được phá hủy bởi TileManager/PlayerInteraction sau khi Deregister
+    }
+
+    /// <summary>
+    /// Apply watering to directly reduce current stage time
+    /// </summary>
+    public float ApplyWateringReduction(float reductionPercent)
+    {
+        if (isMature) return 0f; // Can't water mature plants
+        if (currentStage >= cropData.growthStages.Length - 1) return 0f; // Already at final stage
+        
+        // Calculate remaining time for current stage
+        float remainingTime = cropData.stageDurations[currentStage] - timer;
+        
+        // Calculate time to reduce (30% of remaining time)
+        float timeToReduce = remainingTime * reductionPercent;
+        
+        // Apply the reduction by advancing the timer
+        timer += timeToReduce;
+        
+        // Ensure timer doesn't exceed stage duration
+        timer = Mathf.Min(timer, cropData.stageDurations[currentStage]);
+        
+        return timeToReduce;
     }
 
     // Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)

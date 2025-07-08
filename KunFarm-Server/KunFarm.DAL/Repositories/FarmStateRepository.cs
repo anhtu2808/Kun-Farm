@@ -21,7 +21,7 @@ namespace KunFarm.DAL.Repositories
                 .FirstOrDefaultAsync(fs => fs.UserId == userId);
         }
 
-        public async Task<bool> SaveFarmStateAsync(int userId, string tileStatesJson, string plantsJson)
+        public async Task<bool> SaveFarmStateAsync(int userId, string tileStatesJson, string plantsJson, string? chickensStateJson = null, string? eggsStateJson = null)
         {
             try
             {
@@ -34,6 +34,17 @@ namespace KunFarm.DAL.Repositories
                     existingState.PlantsJson = plantsJson;
                     existingState.LastSaved = DateTime.UtcNow;
                     
+                    // Cập nhật chickens và eggs state nếu được provide
+                    if (!string.IsNullOrEmpty(chickensStateJson))
+                    {
+                        existingState.ChickensStateJson = chickensStateJson;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(eggsStateJson))
+                    {
+                        existingState.EggsStateJson = eggsStateJson;
+                    }
+                    
                     _context.FarmStates.Update(existingState);
                 }
                 else
@@ -44,6 +55,8 @@ namespace KunFarm.DAL.Repositories
                         UserId = userId,
                         TileStatesJson = tileStatesJson,
                         PlantsJson = plantsJson,
+                        ChickensStateJson = chickensStateJson ?? "[]",
+                        EggsStateJson = eggsStateJson ?? "[]",
                         LastSaved = DateTime.UtcNow
                     };
                     

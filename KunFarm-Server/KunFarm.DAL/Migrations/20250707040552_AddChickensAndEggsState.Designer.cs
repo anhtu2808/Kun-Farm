@@ -4,6 +4,7 @@ using KunFarm.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KunFarm.DAL.Migrations
 {
     [DbContext(typeof(KunFarmDbContext))]
-    partial class KunFarmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250707040552_AddChickensAndEggsState")]
+    partial class AddChickensAndEggsState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,18 +33,10 @@ namespace KunFarm.DAL.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ChickensStateJson")
-                        .IsRequired()
-                        .HasColumnType("json");
-
-                    b.Property<string>("EggsStateJson")
-                        .IsRequired()
-                        .HasColumnType("json");
-
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 7, 4, 15, 20, 925, DateTimeKind.Utc).AddTicks(6560));
+                        .HasDefaultValue(new DateTime(2025, 7, 7, 4, 5, 51, 978, DateTimeKind.Utc).AddTicks(3900));
 
                     b.Property<string>("PlantsJson")
                         .IsRequired()
@@ -205,6 +200,14 @@ namespace KunFarm.DAL.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ChickensStateJson")
+                        .IsRequired()
+                        .HasColumnType("json");
+
+                    b.Property<string>("EggsStateJson")
+                        .IsRequired()
+                        .HasColumnType("json");
+
                     b.Property<float>("Health")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -218,7 +221,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 7, 11, 15, 20, 925, DateTimeKind.Local).AddTicks(3130));
+                        .HasDefaultValue(new DateTime(2025, 7, 7, 11, 5, 51, 978, DateTimeKind.Local).AddTicks(880));
 
                     b.Property<int>("Money")
                         .ValueGeneratedOnAdd()
@@ -247,7 +250,7 @@ namespace KunFarm.DAL.Migrations
                     b.Property<DateTime>("LastSaved")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2025, 7, 7, 11, 15, 20, 925, DateTimeKind.Local).AddTicks(6010));
+                        .HasDefaultValue(new DateTime(2025, 7, 7, 11, 5, 51, 978, DateTimeKind.Local).AddTicks(3390));
 
                     b.Property<string>("ToolsJson")
                         .IsRequired()

@@ -150,12 +150,29 @@ public class HandTool : Tool
         if (plant != null)
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
-            if (cropGrower != null && cropGrower.isMature)
+            if (cropGrower != null)
             {
-                cropGrower.Harvest();
-                tileManager.DeregisterPlant(cellPosition);
-                tileManager.SetTileState(cellPosition, TileState.Dug);
-                Object.Destroy(plant);
+                if (cropGrower.isMature)
+                {
+                    // Plant is mature - harvest it
+                    cropGrower.Harvest();
+                    tileManager.DeregisterPlant(cellPosition);
+                    tileManager.SetTileState(cellPosition, TileState.Dug);
+                    Object.Destroy(plant);
+                    
+                    // Show harvest success notification
+                    string cropName = cropGrower.cropData?.cropName ?? "Plant";
+                    SimpleNotificationPopup.Show($"🌾 Harvested {cropName}!");
+                }
+                else
+                {
+                    // Plant is not mature - show remaining time
+                    string cropName = cropGrower.cropData?.cropName ?? "Plant";
+                    string remainingTime = cropGrower.GetFormattedRemainingTime();
+                    float progress = cropGrower.GetGrowthProgress();
+                    
+                    SimpleNotificationPopup.Show($"🌱 {cropName} not ready yet!\n⏰ Time remaining: {remainingTime}\n📊 Growth progress: {progress:F0}%");
+                }
             }
         }
     }
@@ -166,7 +183,7 @@ public class HandTool : Tool
         if (plant != null)
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
-            return cropGrower != null && cropGrower.isMature;
+            return cropGrower != null; // Can use on any plant, regardless of maturity
         }
         return false;
     }
@@ -240,5 +257,60 @@ public class FoodTool : Tool
         {
             Debug.LogWarning("[FoodTool] PlayerStats not found!");
         }
+    }
+} 
+
+/// <summary>
+/// Tool để tưới cây và giảm thời gian grow
+/// </summary>
+[System.Serializable]
+public class WateringCanTool : Tool
+{
+    public WateringCanTool(int waterUses = 10)
+    {
+        toolName = "Watering Can";
+        animatorToolIndex = 5; // Index cho watering animation
+        quantity = waterUses; // Số lần tưới
+    }
+
+    public override void Use(Vector3Int cellPosition, TileManager tileManager)
+    {
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            if (cropGrower != null && !cropGrower.isMature)
+            {
+                // Apply direct time reduction
+                float timeReduced = cropGrower.ApplyWateringReduction(0.3f); // 30% reduction
+                
+                // Show notification
+                SimpleNotificationPopup.Show($"🌧️ Watered {cropGrower.cropData?.cropName ?? "plant"}!\n⚡ Growth time reduced by {timeReduced:F0} seconds");
+            }
+        }
+    }
+
+    public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
+    {
+        if (quantity <= 0) return false;
+        
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            return cropGrower != null && !cropGrower.isMature; // Chỉ tưới cây chưa trưởng thành
+        }
+        return false;
+    }
+    
+    public override bool ConsumeOnUse()
+    {
+        quantity--;
+        return quantity > 0; // Return false nếu hết nước
+    }
+    
+    public override bool IsConsumable()
+    {
+        return true; // Watering can có thể hết nước
     }
 } 

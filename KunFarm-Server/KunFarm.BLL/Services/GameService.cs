@@ -112,7 +112,7 @@ namespace KunFarm.BLL.Services
                     return false;
                 }
 
-                // Save player state
+                // Save player state (không còn chickens/eggs)
                 var success = await _playerStateRepository.SavePlayerStateAsync(
                     userId, 
                     request.money, 
@@ -167,6 +167,8 @@ namespace KunFarm.BLL.Services
                         UserId = userId,
                         TileStatesJson = "[]",
                         PlantsJson = "[]",
+                        ChickensStateJson = "[]",
+                        EggsStateJson = "[]",
                         LastSaved = DateTime.UtcNow
                     };
 
@@ -176,7 +178,9 @@ namespace KunFarm.BLL.Services
                         UserId = defaultFarmState.UserId,
                         TileStates = new List<DTOs.Response.TileStateResponseData>(),
                         Plants = new List<DTOs.Response.PlantResponseData>(),
-                        LastSaved = defaultFarmState.LastSaved
+                        LastSaved = defaultFarmState.LastSaved,
+                        ChickensStateJson = defaultFarmState.ChickensStateJson,
+                        EggsStateJson = defaultFarmState.EggsStateJson
                     };
                 }
 
@@ -215,7 +219,9 @@ namespace KunFarm.BLL.Services
                     UserId = farmState.UserId,
                     TileStates = tileStates,
                     Plants = plants,
-                    LastSaved = farmState.LastSaved
+                    LastSaved = farmState.LastSaved,
+                    ChickensStateJson = farmState.ChickensStateJson,
+                    EggsStateJson = farmState.EggsStateJson
                 };
             }
             catch (Exception ex)
@@ -254,7 +260,9 @@ namespace KunFarm.BLL.Services
                 var success = await _farmStateRepository.SaveFarmStateAsync(
                     userId, 
                     tileStatesJson, 
-                    plantsJson);
+                    plantsJson,
+                    request.chickensStateJson,
+                    request.eggsStateJson);
 
                 if (success)
                 {
