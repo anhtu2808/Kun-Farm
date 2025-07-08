@@ -308,6 +308,7 @@ public class ToolManager : MonoBehaviour
 
     private IEnumerator PlayChopAnimation(Vector3Int cellPosition, Tool axe)
     {
+        Debug.Log("[ToolManager] ▶️ PlayChopAnimation bắt đầu");
         isUsingTool = true;
 
         if (playerMovement != null && playerMovement.GetAnimator() != null)
@@ -337,7 +338,7 @@ public class ToolManager : MonoBehaviour
             // Set animator parameters for 2D blend tree
             animator.SetFloat("horizontal", chopBlendDirection.x);
             animator.SetFloat("vertical", chopBlendDirection.y);
-            animator.SetBool("isChoping", true);
+            animator.SetBool("isChopping", true);
 
             // Apply animation speed if specified
             if (chopAnimationSpeed != 1f)
@@ -356,7 +357,7 @@ public class ToolManager : MonoBehaviour
             axe.Use(cellPosition, tileManager);
             HandleToolConsumption(axe);
 
-            animator.SetBool("isChoping", false);
+            animator.SetBool("isChopping", false);
         }
         else
         {
