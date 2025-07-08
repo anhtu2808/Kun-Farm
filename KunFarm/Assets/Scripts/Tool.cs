@@ -333,12 +333,23 @@ public class AxeTool : Tool
         var crop = plantGO.GetComponent<CropGrower>();
         if (crop == null) return;
 
-        // Thu hoạch cả hạt và quả
-        crop.Harvest();                            // spawn tất cả harvestDrops
-        tileManager.DeregisterPlant(cellPosition); // remove reference
-        Object.Destroy(plantGO);                   // xoá cây
-        tileManager.SetTileState(cellPosition, TileState.Dug);
+        if (crop.isMature)
+        {
+            // Thu hoạch cả hạt và quả
+            crop.Harvest();                            // spawn tất cả harvestDrops
+            tileManager.DeregisterPlant(cellPosition); // remove reference
+            Object.Destroy(plantGO);                   // xoá cây
+            tileManager.SetTileState(cellPosition, TileState.Dug);
+        }
+        else
+        {
+            // Plant is not mature - show remaining time
+            string cropName = crop.cropData?.cropName ?? "Plant";
+            string remainingTime = crop.GetFormattedRemainingTime();
+            float progress = crop.GetGrowthProgress();
 
+            SimpleNotificationPopup.Show($"🌱 {cropName} not ready yet!\n⏰ Time remaining: {remainingTime}\n📊 Growth progress: {progress:F0}%");
+        }
         // tileManager.DeregisterPlant(cellPosition);
         // tileManager.SetTileState(cellPosition, TileState.Dug);
         // Object.Destroy(plant);
@@ -348,7 +359,13 @@ public class AxeTool : Tool
 
     public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
     {
-        return quantity > 0 && tileManager.GetTileState(cellPosition) == TileState.Undug;
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            return cropGrower != null; // Can use on any plant, regardless of maturity
+        }
+        return false;
     }
 
     public override bool ConsumeOnUse()

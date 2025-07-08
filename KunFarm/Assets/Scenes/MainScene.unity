@@ -410,6 +410,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3889439660985576900, guid: baa4aa149b25f4c96a5073892ea87d4f, type: 3}
+      propertyPath: collectableItems.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3889439660985576900, guid: baa4aa149b25f4c96a5073892ea87d4f, type: 3}
+      propertyPath: collectableItems.Array.data[8]
+      value: 
+      objectReference: {fileID: 8980870103730399970, guid: dbcb271421f7f464994aa7dbdfe9e7c1, type: 3}
+    - target: {fileID: 3889439660985576900, guid: baa4aa149b25f4c96a5073892ea87d4f, type: 3}
+      propertyPath: collectableItems.Array.data[9]
+      value: 
+      objectReference: {fileID: 7447655558905882107, guid: 34689e14d013cf7459986ef24d614562, type: 3}
     - target: {fileID: 7111629027074667479, guid: baa4aa149b25f4c96a5073892ea87d4f, type: 3}
       propertyPath: interactableMap
       value: 
@@ -3271,7 +3283,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5164305956383702499, guid: de0ede790a28226488e2a36ba547ff5a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 238.87938
+      value: 238.74666
       objectReference: {fileID: 0}
     - target: {fileID: 5212495960655428788, guid: de0ede790a28226488e2a36ba547ff5a, type: 3}
       propertyPath: m_TargetGraphic
@@ -6299,7 +6311,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4630950396337497824, guid: 9b48d78018c9f874cba820d5b9e0cd98, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -81.63999
+      value: -81.9
       objectReference: {fileID: 0}
     - target: {fileID: 4630950396337497824, guid: 9b48d78018c9f874cba820d5b9e0cd98, type: 3}
       propertyPath: m_LocalPosition.y

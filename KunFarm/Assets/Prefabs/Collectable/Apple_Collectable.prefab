@@ -143,6 +143,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74977f11a7d1f2741ba3911bfb4c0fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 10
+  type: 11
   icon: {fileID: 1212611662, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
   rb2d: {fileID: 0}
+  hatchTime: 0
+  hatchTimer: 0
+  requiresInteraction: 1

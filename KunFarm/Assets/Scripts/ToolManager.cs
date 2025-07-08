@@ -11,6 +11,7 @@ public class ToolManager : MonoBehaviour
 
     [Header("Animation Settings")]
     [SerializeField] private float hoeAnimationSpeed = 0.7f; // Adjustable animation speed
+    [SerializeField] private float chopAnimationSpeed = 0.7f; // Adjustable animation speed
 
     [Header("Interaction Settings")]
     [SerializeField] private float maxInteractionDistance = 1.5f; // Maximum distance to interact with tiles
@@ -292,9 +293,9 @@ public class ToolManager : MonoBehaviour
             {
                 StartCoroutine(PlayWateringAnimation(cellPosition, currentTool));
             }
-            else if (currentTool is AxeTool axe)
+            else if (currentTool is AxeTool)
             {
-                StartCoroutine(PlayChopAnimation(cellPosition, axe));
+                StartCoroutine(PlayChopAnimation(cellPosition, currentTool));
             }
             else
             {
@@ -305,7 +306,7 @@ public class ToolManager : MonoBehaviour
         }
     }
 
-    private IEnumerator PlayChopAnimation(Vector3Int cellPosition, AxeTool axe)
+    private IEnumerator PlayChopAnimation(Vector3Int cellPosition, Tool axe)
     {
         isUsingTool = true;
 
@@ -318,32 +319,44 @@ public class ToolManager : MonoBehaviour
             Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
             Vector3 directionToTarget = (targetPos - playerPos).normalized;
 
-            // Nếu gần quá thì dùng hướng đang quay mặt
-            Vector3 finalDirection = (Vector3.Distance(playerPos, targetPos) < 0.5f)
-                ? playerMovement.GetFacingDirection()
-                : directionToTarget;
-
-            // Xác định trigger animation dựa trên hướng
-            string trigger;
-            if (Mathf.Abs(finalDirection.x) > Mathf.Abs(finalDirection.y))
-                trigger = finalDirection.x > 0 ? "Chop_Right" : "Chop_Left";
+            Vector3 finalDirection;
+            if (Vector3.Distance(playerPos, targetPos) < 0.5f)
+            {
+                // Use player's current facing direction when target is very close
+                finalDirection = playerMovement.GetFacingDirection();
+            }
             else
-                trigger = finalDirection.y > 0 ? "Chop_Up" : "Chop_Down";
+            {
+                // Use direction to target when target is further away
+                finalDirection = directionToTarget;
+            }
 
-            // Reset hết rồi set trigger
-            animator.ResetTrigger("Chop_Down");
-            animator.ResetTrigger("Chop_Left");
-            animator.ResetTrigger("Chop_Right");
-            animator.ResetTrigger("Chop_Up");
-            animator.SetTrigger(trigger);
+            // Determine hoe direction using 2D blend tree coordinates
+            Vector2 chopBlendDirection = GetHoeBlendDirection(finalDirection);
 
-            // Chờ animation (giả sử mỗi clip ~0.5s, có thể điều chỉnh)
-            float waitTime = 0.5f;
+            // Set animator parameters for 2D blend tree
+            animator.SetFloat("horizontal", chopBlendDirection.x);
+            animator.SetFloat("vertical", chopBlendDirection.y);
+            animator.SetBool("isChoping", true);
+
+            // Apply animation speed if specified
+            if (chopAnimationSpeed != 1f)
+            {
+                animator.speed = chopAnimationSpeed;
+            }
+
+            // Wait for animation to play (dynamic based on animation speed)
+            float waitTime = 0.5f / chopAnimationSpeed; // Base duration / speed
             yield return new WaitForSeconds(waitTime);
+
+            // Reset animation speed to normal
+            animator.speed = 1f;
 
             // Thực hiện hành động chặt
             axe.Use(cellPosition, tileManager);
             HandleToolConsumption(axe);
+
+            animator.SetBool("isChoping", false);
         }
         else
         {
