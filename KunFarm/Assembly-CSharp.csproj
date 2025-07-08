@@ -73,8 +73,10 @@
     <Compile Include="Assets\Scripts\ChickenWalk.cs" />
     <Compile Include="Assets\Scripts\HarvestDrop.cs" />
     <Compile Include="Assets\Scripts\Data\ShopResponse.cs" />
+    <Compile Include="Assets\Scripts\WateringAudio.cs" />
     <Compile Include="Assets\Scripts\UI\NotificationPopup.cs" />
     <Compile Include="Assets\Scripts\LoginManager.cs" />
+    <Compile Include="Assets\Scripts\ChickenManager.cs" />
     <Compile Include="Assets\Scripts\UI\ShopBuySlot_UI.cs" />
     <Compile Include="Assets\Scripts\UI\ShopSlot_UI.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory_UI.cs" />
