@@ -10,6 +10,9 @@ public class Movement : MonoBehaviour
     [Header("References")]
     public Animator animator;
     
+    [Header("Audio")]
+    private MovementAudio movementAudio;
+    
     // Speed modifier for PlayerStats system
     private float speedModifier = 1f;
     
@@ -22,6 +25,9 @@ public class Movement : MonoBehaviour
         // Auto-find animator if not assigned
         if (animator == null)
             animator = GetComponent<Animator>();
+            
+        // Auto-find MovementAudio component
+        movementAudio = GetComponent<MovementAudio>();
     }
 
     void Update()
@@ -154,5 +160,13 @@ public class Movement : MonoBehaviour
     public float GetSpeedModifier()
     {
         return speedModifier;
+    }
+    
+    /// <summary>
+    /// Get the MovementAudio component for external access
+    /// </summary>
+    public MovementAudio GetMovementAudio()
+    {
+        return movementAudio;
     }
 }
