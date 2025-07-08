@@ -1,0 +1,29 @@
+# Example footstep audio file names for the MovementAudio system
+# Place your actual audio files here with these naming conventions:
+
+# Recommended file names:
+# - footstep_grass_01.mp3
+# - footstep_grass_02.mp3
+# - footstep_grass_03.mp3
+# - footstep_stone_01.mp3
+# - footstep_stone_02.mp3
+# - footstep_dirt_01.mp3
+# - footstep_dirt_02.mp3
+
+# Supported formats: .mp3, .wav, .ogg
+# Recommended audio settings:
+# - Sample Rate: 44.1 kHz
+# - Bit Depth: 16-bit
+# - Mono or Stereo
+# - Duration: 0.1-0.5 seconds
+# - File Size: <1MB each
+
+# To use these audio files:
+# 1. Import audio files to this folder
+# 2. Select the Player GameObject in Unity
+# 3. Add MovementAudio component if not already present
+# 4. Drag the audio files to the "Footstep Sounds" array in the inspector
+# 5. Adjust volume and interval settings as needed
+
+# Note: Audio files are not included in the repository to keep it lightweight
+# Download or record appropriate footstep sounds and add them manually
