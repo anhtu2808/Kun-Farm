@@ -184,6 +184,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e51e6fbf737e464da2455fda77dc848, type: 2}
   - {fileID: 11400000, guid: 813f4a49664af459ebd5023c76b49b08, type: 2}
   hoeAnimationSpeed: 0.7
+  chopAnimationSpeed: 0.7
   maxInteractionDistance: 1.5
   chickenFeedingDistance: 2
   toolbarUI: {fileID: 0}
@@ -245,6 +246,7 @@ GameObject:
   - component: {fileID: 7808048774374347505}
   - component: {fileID: 3303522334341118072}
   - component: {fileID: 2481978417326783628}
+  - component: {fileID: 7084835355044183311}
   m_Layer: 0
   m_Name: Visuals
   m_TagString: Untagged
@@ -353,3 +355,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   wateringSound: {fileID: 8300000, guid: 3b064550465135543a3ad3511425df5e, type: 3}
+--- !u!114 &7084835355044183311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4358920708629238525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2363de2fb271f0e4fa9af3c1f58199be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  choppingSound: {fileID: 8300000, guid: 374c6851223c9e740901900aafd79270, type: 3}
