@@ -155,10 +155,10 @@ public class HandTool : Tool
                 if (cropGrower.isMature)
                 {
                     // Plant is mature - harvest it
-                    cropGrower.Harvest();
-                    tileManager.DeregisterPlant(cellPosition);
-                    tileManager.SetTileState(cellPosition, TileState.Dug);
-                    Object.Destroy(plant);
+                cropGrower.Harvest();
+                tileManager.DeregisterPlant(cellPosition);
+                tileManager.SetTileState(cellPosition, TileState.Dug);
+                Object.Destroy(plant);
                     
                     // Show harvest success notification
                     string cropName = cropGrower.cropData?.cropName ?? "Plant";

@@ -75,6 +75,32 @@ public class ApiClient : MonoBehaviour
             onError?.Invoke(req.error);
     }
 
+    public void ResetGame(int userId, Action<bool> onComplete)
+    {
+        Debug.Log($"[ApiClient] Resetting game for user {userId}");
+        
+        StartCoroutine(PostJson($"/game/reset/{userId}", "", 
+            response => {
+                try 
+                {
+                    Debug.Log($"[ApiClient] Raw reset response: {response}");
+                    var apiResponse = JsonUtility.FromJson<ApiResponseWrapper<bool>>(response);
+                    bool success = apiResponse.success && apiResponse.data;
+                    Debug.Log($"[ApiClient] Parsed reset response - Code: {apiResponse.code}, Success: {success}");
+                    onComplete?.Invoke(success);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[ApiClient] ❌ Error parsing reset response: {e.Message}\nResponse: {response}");
+                    onComplete?.Invoke(false);
+                }
+            },
+            error => {
+                Debug.LogError($"[ApiClient] ❌ Network error resetting game: {error}");
+                onComplete?.Invoke(false);
+            }));
+    }
+
     // Farm State API methods
     public void SaveFarmState(FarmSaveData farmData, Action<bool> onComplete)
     {

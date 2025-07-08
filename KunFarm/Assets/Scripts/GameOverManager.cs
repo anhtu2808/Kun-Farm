@@ -217,36 +217,146 @@ public class GameOverManager : MonoBehaviour
         // Resume time scale
         Time.timeScale = 1f;
         
-        // Option 1: Revive player in current scene
-        if (playerStats != null)
+        // Get user ID for reset
+        int userId = PlayerPrefs.GetInt("PLAYER_ID", 0);
+        
+        if (userId > 0 && ApiClient.Instance != null)
         {
-            playerStats.Revive();
-            isGameOver = false;
+            // Call API to reset game state
+            bool resetSuccess = false;
+            bool resetCompleted = false;
             
-            // Hide game over panel
-            if (gameOverPanel != null)
+            if (showDebugLogs)
             {
-                gameOverPanel.SetActive(false);
+                Debug.Log($"[GameOverManager] Resetting game data for user {userId}");
+            }
+            
+            ApiClient.Instance.ResetGame(userId, (success) => {
+                resetSuccess = success;
+                resetCompleted = true;
+                
+                if (showDebugLogs)
+                {
+                    Debug.Log($"[GameOverManager] Reset API completed - Success: {success}");
+                }
+            });
+            
+            // Wait for API call to complete
+            float timeout = 5f;
+            float elapsed = 0f;
+            
+            while (!resetCompleted && elapsed < timeout)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
             }
             
             if (showDebugLogs)
             {
-                Debug.Log("[GameOverManager] Player revived in current scene");
+                if (resetCompleted && resetSuccess)
+                {
+                    Debug.Log("[GameOverManager] Game reset successful, resetting local state");
+                }
+                else
+                {
+                    Debug.LogWarning($"[GameOverManager] Reset API issue (completed: {resetCompleted}, success: {resetSuccess}), still resetting local state");
+                }
             }
         }
-        // Option 2: Reload current scene
         else
         {
-            string currentSceneName = SceneManager.GetActiveScene().name;
-            SceneManager.LoadScene(currentSceneName);
-            
             if (showDebugLogs)
             {
-                Debug.Log($"[GameOverManager] Reloading scene: {currentSceneName}");
+                Debug.LogWarning("[GameOverManager] No valid user ID or ApiClient, resetting local state anyway");
             }
         }
         
+        // Reset local game state without reloading scene
+        ResetLocalGameState();
+        
         yield return null;
+    }
+    
+    private void ResetLocalGameState()
+    {
+        if (showDebugLogs)
+        {
+            Debug.Log("[GameOverManager] Resetting local game state");
+        }
+        
+        // 1. Reset player stats to full
+        if (playerStats != null)
+        {
+            playerStats.Revive(); // This should restore health and hunger to full
+            isGameOver = false;
+        }
+        
+        // 2. Reset player position to spawn point
+        var player = FindObjectOfType<Player>();
+        if (player != null)
+        {
+            player.transform.position = new Vector3(0f, 0f, 0f); // Spawn position
+            
+            if (showDebugLogs)
+            {
+                Debug.Log("[GameOverManager] Reset player position to spawn point");
+            }
+        }
+        
+        // 3. Reset money to 0
+        var wallet = FindObjectOfType<Wallet>();
+        if (wallet != null)
+        {
+            wallet.SetMoney(200);
+            
+            if (showDebugLogs)
+            {
+                Debug.Log("[GameOverManager] Reset money to 0");
+            }
+        }
+        
+        // 4. Clear farm tiles and plants
+        var farmManager = FindObjectOfType<FarmManager>();
+        if (farmManager != null)
+        {
+            // Use existing ClearFarmState method
+            farmManager.ClearFarmState();
+            
+            if (showDebugLogs)
+            {
+                Debug.Log("[GameOverManager] Cleared farm state using FarmManager.ClearFarmState()");
+            }
+        }
+        
+        // 5. Clear inventory slots
+        var inventory = FindObjectOfType<Inventory>();
+        if (inventory != null)
+        {
+            // Clear all 27 slots individually
+            for (int i = 0; i < inventory.slots.Count; i++)
+            {
+                inventory.ClearSlot(i);
+            }
+            
+            // Refresh inventory UI
+            inventory.Refresh();
+            
+            if (showDebugLogs)
+            {
+                Debug.Log($"[GameOverManager] Cleared all {inventory.slots.Count} inventory slots");
+            }
+        }
+        
+        // 6. Hide game over panel
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        if (showDebugLogs)
+        {
+            Debug.Log("[GameOverManager] Local game state reset completed - game should be playable again");
+        }
     }
     
     // Public methods for external access
