@@ -13,7 +13,7 @@ public abstract class Tool
 
     public abstract void Use(Vector3Int cellPosition, TileManager tileManager);
     public abstract bool CanUse(Vector3Int cellPosition, TileManager tileManager);
-    
+
     /// <summary>
     /// Consume tool khi sử dụng. Return true nếu tool còn sử dụng được
     /// </summary>
@@ -21,7 +21,7 @@ public abstract class Tool
     {
         return true; // Mặc định không consume
     }
-    
+
     /// <summary>
     /// Check xem tool có thể bị consume không
     /// </summary>
@@ -57,13 +57,13 @@ public class ShovelTool : Tool
     {
         return quantity > 0 && tileManager.GetTileState(cellPosition) == TileState.Undug;
     }
-    
+
     public override bool ConsumeOnUse()
     {
         quantity--;
         return quantity > 0; // Return false nếu hết độ bền
     }
-    
+
     public override bool IsConsumable()
     {
         return true; // Shovel có thể hết độ bền
@@ -114,17 +114,17 @@ public class SeedTool : Tool
     public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
     {
         return quantity > 0 &&
-               cropData != null && 
-               cropData.cropPrefab != null && 
+               cropData != null &&
+               cropData.cropPrefab != null &&
                tileManager.GetTileState(cellPosition) == TileState.Dug;
     }
-    
+
     public override bool ConsumeOnUse()
     {
         quantity--;
         return quantity > 0; // Return false nếu hết hạt giống
     }
-    
+
     public override bool IsConsumable()
     {
         return true; // Seed có thể hết
@@ -155,11 +155,11 @@ public class HandTool : Tool
                 if (cropGrower.isMature)
                 {
                     // Plant is mature - harvest it
-                    cropGrower.Harvest();
-                    tileManager.DeregisterPlant(cellPosition);
-                    tileManager.SetTileState(cellPosition, TileState.Dug);
-                    Object.Destroy(plant);
-                    
+                    cropGrower.HarvestFruitOnly();
+                    // tileManager.DeregisterPlant(cellPosition);
+                    // tileManager.SetTileState(cellPosition, TileState.Dug);
+                    // Object.Destroy(plant);
+
                     // Show harvest success notification
                     string cropName = cropGrower.cropData?.cropName ?? "Plant";
                     SimpleNotificationPopup.Show($"🌾 Harvested {cropName}!");
@@ -170,7 +170,7 @@ public class HandTool : Tool
                     string cropName = cropGrower.cropData?.cropName ?? "Plant";
                     string remainingTime = cropGrower.GetFormattedRemainingTime();
                     float progress = cropGrower.GetGrowthProgress();
-                    
+
                     SimpleNotificationPopup.Show($"🌱 {cropName} not ready yet!\n⏰ Time remaining: {remainingTime}\n📊 Growth progress: {progress:F0}%");
                 }
             }
@@ -187,17 +187,17 @@ public class HandTool : Tool
         }
         return false;
     }
-    
+
     public override bool ConsumeOnUse()
     {
         return true; // Hand tool không bao giờ hết
     }
-    
+
     public override bool IsConsumable()
     {
         return false; // Hand tool vĩnh viễn
     }
-} 
+}
 
 /// <summary>
 /// Tool để ăn food và restore health/hunger
@@ -208,7 +208,7 @@ public class FoodTool : Tool
     [Header("Food Properties")]
     public float hungerRestore = 50f;
     public float healthRestore = 30f;
-    
+
     public FoodTool(int foodCount = 1)
     {
         toolName = "Food";
@@ -227,18 +227,18 @@ public class FoodTool : Tool
         // Food luôn có thể dùng miễn là còn quantity
         return quantity > 0;
     }
-    
+
     public override bool ConsumeOnUse()
     {
         quantity--;
         return quantity > 0; // Return false nếu hết food
     }
-    
+
     public override bool IsConsumable()
     {
         return true; // Food có thể hết
     }
-    
+
     /// <summary>
     /// Eat food và restore player stats
     /// </summary>
@@ -249,7 +249,7 @@ public class FoodTool : Tool
         {
             playerStats.RestoreHunger(hungerRestore);
             playerStats.RestoreHealth(healthRestore);
-            
+
             SimpleNotificationPopup.Show($"Ate {toolName}! +{hungerRestore} Hunger, +{healthRestore} Health");
             Debug.Log($"[FoodTool] Ate {toolName}: +{hungerRestore} hunger, +{healthRestore} health");
         }
@@ -258,7 +258,7 @@ public class FoodTool : Tool
             Debug.LogWarning("[FoodTool] PlayerStats not found!");
         }
     }
-} 
+}
 
 /// <summary>
 /// Tool để tưới cây và giảm thời gian grow
@@ -283,7 +283,7 @@ public class WateringCanTool : Tool
             {
                 // Apply direct time reduction
                 float timeReduced = cropGrower.ApplyWateringReduction(0.3f); // 30% reduction
-                
+
                 // Show notification
                 SimpleNotificationPopup.Show($"🌧️ Watered {cropGrower.cropData?.cropName ?? "plant"}!\n⚡ Growth time reduced by {timeReduced:F0} seconds");
             }
@@ -293,7 +293,7 @@ public class WateringCanTool : Tool
     public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
     {
         if (quantity <= 0) return false;
-        
+
         GameObject plant = tileManager.GetPlantAt(cellPosition);
         if (plant != null)
         {
@@ -302,15 +302,80 @@ public class WateringCanTool : Tool
         }
         return false;
     }
-    
+
     public override bool ConsumeOnUse()
     {
         quantity--;
         return quantity > 0; // Return false nếu hết nước
     }
-    
+
     public override bool IsConsumable()
     {
         return true; // Watering can có thể hết nước
     }
-} 
+}
+
+[System.Serializable]
+public class AxeTool : Tool
+{
+    public AxeTool(int durability = 10)
+    {
+        toolName = "Axe";
+        animatorToolIndex = 6; // Index for shovel tool in animator
+        quantity = durability; // Độ bền của xẻng
+    }
+
+    public override void Use(Vector3Int cellPosition, TileManager tileManager)
+    {
+        GameObject plantGO = tileManager.GetPlantAt(cellPosition);
+        if (plantGO == null) return;
+
+        var crop = plantGO.GetComponent<CropGrower>();
+        if (crop == null) return;
+
+        if (crop.isMature)
+        {
+            // Thu hoạch cả hạt và quả
+            crop.Harvest();                            // spawn tất cả harvestDrops
+            tileManager.DeregisterPlant(cellPosition); // remove reference
+            Object.Destroy(plantGO);                   // xoá cây
+            tileManager.SetTileState(cellPosition, TileState.Dug);
+        }
+        else
+        {
+            // Plant is not mature - show remaining time
+            string cropName = crop.cropData?.cropName ?? "Plant";
+            string remainingTime = crop.GetFormattedRemainingTime();
+            float progress = crop.GetGrowthProgress();
+
+            SimpleNotificationPopup.Show($"🌱 {cropName} not ready yet!\n⏰ Time remaining: {remainingTime}\n📊 Growth progress: {progress:F0}%");
+        }
+        // tileManager.DeregisterPlant(cellPosition);
+        // tileManager.SetTileState(cellPosition, TileState.Dug);
+        // Object.Destroy(plant);
+
+        SimpleNotificationPopup.Show($"🪓 Chopped down {crop.cropData.cropName}!");
+    }
+
+    public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
+    {
+        GameObject plant = tileManager.GetPlantAt(cellPosition);
+        if (plant != null)
+        {
+            CropGrower cropGrower = plant.GetComponent<CropGrower>();
+            return cropGrower != null; // Can use on any plant, regardless of maturity
+        }
+        return false;
+    }
+
+    public override bool ConsumeOnUse()
+    {
+        quantity--;
+        return quantity > 0; // Return false nếu hết độ bền
+    }
+
+    public override bool IsConsumable()
+    {
+        return true; // Shovel có thể hết độ bền
+    }
+}

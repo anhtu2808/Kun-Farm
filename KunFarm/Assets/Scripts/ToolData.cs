@@ -18,11 +18,14 @@ public class ToolData : ScriptableObject
     public Tool CreateTool()
     {
         Tool tool = null;
-        
+
         switch (toolType)
         {
             case ToolType.Shovel:
                 tool = new ShovelTool();
+                break;
+            case ToolType.Axe:
+                tool = new AxeTool();
                 break;
             case ToolType.Hand:
                 tool = new HandTool();
@@ -55,5 +58,6 @@ public enum ToolType
     Hand,
     Seed,
     Food,
-    WateringCan
-} 
+    WateringCan,
+    Axe,
+}

@@ -23,7 +23,9 @@ MonoBehaviour:
   - 90
   harvestDrops:
   - itemPrefab: {fileID: 29784602559576804, guid: 9b48d78018c9f874cba820d5b9e0cd98, type: 3}
+    isFruit: 0
     quantity: 2
   - itemPrefab: {fileID: 29784602559576804, guid: 2a4415309e54e3645abec9f805f39a2c, type: 3}
+    isFruit: 1
     quantity: 1
   cropPrefab: {fileID: 7151990979037015821, guid: ac67407ab43c6f247a7adfb5be7c134c, type: 3}
