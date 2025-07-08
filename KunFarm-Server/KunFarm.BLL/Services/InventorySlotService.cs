@@ -204,5 +204,38 @@ namespace KunFarm.BLL.Services
                 Data = responses
             };
         }
+
+        public async Task<ApiResponse<bool>> InitInventory(int playerId)
+        {
+            InventorySlot inventorySlot0 = new()
+            {
+                SlotIndex = 0,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                ItemId = 3,
+                Quantity = 2,
+                PlayerStateId = playerId,
+            };
+            await _inventorySlotRepository.AddAsync(inventorySlot0);
+            InventorySlot inventorySlot1 = new()
+            {
+                SlotIndex = 1,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                ItemId = 7,
+                Quantity = 10,
+                PlayerStateId = playerId,
+            };
+            await _inventorySlotRepository.AddAsync(inventorySlot1);
+
+            return new ApiResponse<bool>
+            {
+                Code = 200,
+                Data = true
+            };
+        }
+
     }
 }
