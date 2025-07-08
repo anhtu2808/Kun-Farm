@@ -55,6 +55,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 7
   animator: {fileID: 3303522334341118072}
+  audioSource: {fileID: 0}
+  footstepSounds:
+  - {fileID: 8300000, guid: 7b23d47a15f1c8046be7109b56985f76, type: 3}
+  footstepInterval: 0.5
+  footstepVolume: 0.5
+  randomizePitch: 0
+  minPitch: 0.9
+  maxPitch: 1.1
 --- !u!61 &2978502120985998042
 BoxCollider2D:
   m_ObjectHideFlags: 0
