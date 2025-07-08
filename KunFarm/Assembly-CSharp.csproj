@@ -113,6 +113,7 @@
     <Compile Include="Assets\Scripts\TileManager.cs" />
     <Compile Include="Assets\Scripts\FarmManager.cs" />
     <Compile Include="Assets\Scripts\RegisterManager.cs" />
+    <Compile Include="Assets\Scripts\Audio\PickupAudio.cs" />
     <Compile Include="Assets\Scripts\ShopData.cs" />
     <Compile Include="Assets\Scripts\UI\SellShopScroll_UI.cs" />
     <Compile Include="Assets\Scripts\AudioManager.cs" />

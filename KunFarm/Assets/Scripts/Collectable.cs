@@ -141,6 +141,7 @@ public class Collectable : MonoBehaviour
         }
         else if (player && !requiresInteraction)
         {
+            player.PlayPickupSound();
             player.inventory.Add(this, 1);
             Destroy(this.gameObject);
         }
@@ -168,6 +169,7 @@ public class Collectable : MonoBehaviour
     {
         if (nearbyPlayer != null)
         {
+            nearbyPlayer.PlayPickupSound();
             nearbyPlayer.inventory.Add(this, 1);
             Destroy(this.gameObject);
         }
