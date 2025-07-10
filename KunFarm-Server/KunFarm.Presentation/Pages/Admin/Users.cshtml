@@ -142,7 +142,7 @@
 												<td>@u.Email</td>
 												<td>@u.DisplayName</td>
 												<td>@u.Role</td>
-												<td>@u.Money</td>
+												<td id="moneyCell-@u.Id">@u.Money</td>
 												<td>@u.Health</td>
 												<td>
 													@if (u.IsActive)
@@ -168,6 +168,10 @@
 															Activate
 														</button>
 													}
+													<button class="btn btn-sm btn-outline-primary"
+															onclick="openEditMoneyModal(@u.Id)">
+														Edit Money
+													</button>
 												</td>
 											</tr>
 										}
@@ -196,64 +200,26 @@
 	</div>
 </div>
 
-<!-- Edit User Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-	<div class="modal-dialog modal-lg">
+
+<div class="modal fade" id="editMoneyModal" tabindex="-1" aria-labelledby="editMoneyLabel" aria-hidden="true">
+	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">Edit User</h5>
+				<h5 class="modal-title" id="editMoneyLabel">Edit User Money</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 			</div>
 			<div class="modal-body">
-				<form id="editUserForm">
-					<input type="hidden" id="editUserId">
-					<div class="row">
-						<div class="col-md-6 mb-3">
-							<label for="editDisplayName" class="form-label">Display Name</label>
-							<input type="text" class="form-control" id="editDisplayName">
-						</div>
-						<div class="col-md-6 mb-3">
-							<label for="editEmail" class="form-label">Email</label>
-							<input type="email" class="form-control" id="editEmail">
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6 mb-3">
-							<label for="editRole" class="form-label">Role</label>
-							<select class="form-select" id="editRole">
-								<option value="PLAYER">Player</option>
-								<option value="ADMIN">Administrator</option>
-							</select>
-						</div>
-						<div class="col-md-6 mb-3">
-							<label for="editIsActive" class="form-label">Status</label>
-							<select class="form-select" id="editIsActive">
-								<option value="true">Active</option>
-								<option value="false">Inactive</option>
-							</select>
-						</div>
-					</div>
-					<hr />
-					<h6>Game State</h6>
-					<div class="row">
-						<div class="col-md-4 mb-3">
-							<label for="editMoney" class="form-label">Money</label>
-							<input type="number" class="form-control" id="editMoney" min="0">
-						</div>
-						<div class="col-md-4 mb-3">
-							<label for="editHealth" class="form-label">Health</label>
-							<input type="number" class="form-control" id="editHealth" min="0" max="100">
-						</div>
-						<div class="col-md-4 mb-3">
-							<label for="editHunger" class="form-label">Hunger</label>
-							<input type="number" class="form-control" id="editHunger" min="0" max="100">
-						</div>
+				<form id="editMoneyForm">
+					<input type="hidden" id="modalUserId" />
+					<div class="mb-3">
+						<label for="modalMoneyInput" class="form-label">New Money Amount</label>
+						<input type="number" class="form-control" id="modalMoneyInput" min="0" />
 					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-				<button type="button" class="btn btn-primary" onclick="saveUser()">Save Changes</button>
+				<button type="button" class="btn btn-primary" id="modalSaveMoneyBtn">Save</button>
 			</div>
 		</div>
 	</div>
@@ -337,6 +303,81 @@
 			} catch {
 				alert('Error calling the API');
 			}
+		}
+
+		function openEditMoneyModal(userId) {
+			// Grab the *current* value from the table cell
+			const cell = document.getElementById(`moneyCell-${userId}`);
+			if (!cell) {
+				console.error('money cell not found for user', userId);
+				return;
+			}
+
+			const currentMoney = parseInt(cell.textContent.trim(), 10) || 0;
+			document.getElementById('modalUserId').value = userId;
+			document.getElementById('modalMoneyInput').value = currentMoney;
+
+			new bootstrap.Modal(document.getElementById('editMoneyModal')).show();
+		}
+
+		// 2) Handle the Save button in the modal
+		document.getElementById('modalSaveMoneyBtn')
+			.addEventListener('click', applyMoneyUpdate);
+
+		async function applyMoneyUpdate() {
+			const userId = document.getElementById('modalUserId').value;
+			const inputEl = document.getElementById('modalMoneyInput');
+			const newMoney = parseInt(inputEl.value, 10);
+
+			if (isNaN(newMoney) || newMoney < 0) {
+				alert('Please enter a valid non‑negative number.');
+				return;
+			}
+
+			let response;
+			try {
+				response = await fetch(`/admin/user-management/${userId}/money`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ money: newMoney })
+				});
+			} catch (networkErr) {
+				console.error('Fetch failed:', networkErr);
+				alert('🚨 Network error: cannot reach server. Check your connection or CORS policy.');
+				return;
+			}
+
+			// If the server responded with 4xx/5xx
+			if (!response.ok) {
+				const text = await response.text();
+				console.error(`Server HTTP ${response.status}:`, text);
+				alert(`Server error ${response.status}: ${response.statusText}`);
+				return;
+			}
+
+			// Parse JSON body (if any)
+			let payload;
+			try {
+				payload = await response.json();
+			} catch (parseErr) {
+				console.error('Invalid JSON from server:', parseErr);
+				alert('⚠️ Unexpected response format from server.');
+				return;
+			}
+
+			// Check your API’s own “code” field
+			if (payload.code !== 200) {
+				console.warn('API signaled failure:', payload);
+				alert(payload.message || 'Operation failed on server.');
+				return;
+			}
+
+			// Success! Update the UI
+			document.getElementById(`moneyCell-${userId}`).textContent = newMoney;
+			bootstrap.Modal.getInstance(
+				document.getElementById('editMoneyModal')
+			).hide();
+			alert('💾 Money updated successfully');
 		}
 	</script>
 }

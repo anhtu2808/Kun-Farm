@@ -15,5 +15,8 @@ namespace KunFarm.BLL.Interfaces
         Task<List<UserListResponse>> SearchUsersAsync(string searchTerm);
         Task<int> GetTotalUsersCountAsync();
         Task<int> GetActiveUsersCountAsync();
-    }
+
+        Task<bool> UpdateUserMoneyAsync(int userId, int newMoney);
+
+	}
 } 
