@@ -41,5 +41,12 @@ namespace KunFarm.DAL.Repositories
                 await SaveChangesAsync();
             }
         }
+
+        public async Task<List<User>> GetAllOnlyPlayersAsync()
+        {
+            return await _dbSet
+                .Where(u => u.Role == 0)
+                .ToListAsync();
+        }
     }
-} 
+}

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace KunFarm.Presentation.Controllers
 {
     [ApiController]
-    [Route("/admin/users")]
+    [Route("/admin/user-management")]
     public class UserManagementController : ControllerBase
     {
         private readonly IUserManagementService _userManagementService;
