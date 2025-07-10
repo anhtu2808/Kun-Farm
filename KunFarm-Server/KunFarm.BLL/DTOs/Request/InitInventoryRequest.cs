@@ -12,3 +12,5 @@ namespace KunFarm.BLL.DTOs.Request
 
 		public int Quantity { get; set; }
 	}
+
+}
