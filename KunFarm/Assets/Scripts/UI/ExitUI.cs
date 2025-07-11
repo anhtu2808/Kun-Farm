@@ -23,14 +23,11 @@ public class ExitUI : MonoBehaviour
 
     private void Update()
     {
-        // Check for ESC key press
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            ToggleSettingsPanel();
-        }
+        // ESC key handling disabled to avoid conflict with SaveAndExitManager
+        // ESC is now handled by SaveAndExitManager which can call settings via button
     }
 
-    private void ToggleSettingsPanel()
+    public void ToggleSettingsPanel()
     {
         isPanelActive = !isPanelActive;
         settingsPanel.SetActive(isPanelActive);

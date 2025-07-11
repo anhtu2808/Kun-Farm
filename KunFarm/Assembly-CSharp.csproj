@@ -125,6 +125,7 @@
     <Compile Include="Assets/Scripts/UI/InputQuantityUI.cs" />
     <Compile Include="Assets/Scripts/ItemManager.cs" />
     <Compile Include="Assets/Scripts/Helper/IconProvider.cs" />
+    <Compile Include="Assets/Scripts/UI/SaveAndExitManager.cs" />
     <Compile Include="Assets/Scripts/ToolData.cs" />
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/PlayerStats.cs" />

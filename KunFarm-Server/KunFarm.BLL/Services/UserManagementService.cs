@@ -27,7 +27,7 @@ namespace KunFarm.BLL.Services
         {
             try
             {
-                var users = await _userRepository.GetAllOnlyPlayersAsync();
+                var users = await _userRepository.GetAllAsync();
                 var userResponses = new List<UserListResponse>();
 
                 foreach (var user in users)
@@ -318,7 +318,7 @@ namespace KunFarm.BLL.Services
         {
             try
             {
-                var users = await _userRepository.GetAllOnlyPlayersAsync();
+                var users = await _userRepository.GetAllAsync();
                 return users.Count();
             }
             catch (Exception ex)
@@ -332,7 +332,7 @@ namespace KunFarm.BLL.Services
         {
             try
             {
-                var users = await _userRepository.GetAllOnlyPlayersAsync();
+                var users = await _userRepository.GetAllAsync();
                 return users.Count(u => u.IsActive);
             }
             catch (Exception ex)
