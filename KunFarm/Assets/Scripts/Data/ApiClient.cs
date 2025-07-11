@@ -8,8 +8,19 @@ public class ApiClient : MonoBehaviour
 {
     public static ApiClient Instance { get; private set; }
 
-    [SerializeField] private string baseUrl = "http://localhost:5270"; // đổi khi build
+    [SerializeField] private string baseUrl = "http://localhost:5270"; // default for dev
     private string bearerToken;                                        // token hiện tại
+    
+    // Static property for other scripts to access API URL
+    public static string BaseUrl 
+    {
+        get 
+        {
+            if (Instance != null)
+                return Instance.baseUrl;
+            return "http://localhost:5270"; // fallback
+        }
+    }
 
     void Awake()
     {
@@ -20,6 +31,9 @@ public class ApiClient : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             
+            // Load API URL from config (PlayerPrefs or build settings)
+            LoadApiConfig();
+            
             // Load token from PlayerPrefs if exists
             string savedToken = PlayerPrefs.GetString("JWT_TOKEN", "");
             if (!string.IsNullOrEmpty(savedToken))
@@ -27,6 +41,49 @@ public class ApiClient : MonoBehaviour
                 SetToken(savedToken);
                 Debug.Log("[ApiClient] Token loaded from PlayerPrefs");
             }
+        }
+    }
+    
+    private void LoadApiConfig()
+    {
+        // Try to load from PlayerPrefs first (for runtime override)
+        string configUrl = PlayerPrefs.GetString("API_BASE_URL", "");
+        
+        if (!string.IsNullOrEmpty(configUrl))
+        {
+            baseUrl = configUrl;
+            Debug.Log($"[ApiClient] API URL loaded from PlayerPrefs: {baseUrl}");
+            return;
+        }
+        
+        // Try to load from Resources (for build config)
+        var configAsset = Resources.Load<TextAsset>("api_config");
+        if (configAsset != null)
+        {
+            string configText = configAsset.text.Trim();
+            if (!string.IsNullOrEmpty(configText))
+            {
+                baseUrl = configText;
+                Debug.Log($"[ApiClient] API URL loaded from Resources: {baseUrl}");
+                return;
+            }
+        }
+        
+        // Use default from Inspector
+        Debug.Log($"[ApiClient] Using default API URL: {baseUrl}");
+    }
+    
+    /// <summary>
+    /// Set API URL at runtime (useful for switching between dev/prod)
+    /// </summary>
+    public static void SetApiUrl(string url)
+    {
+        if (Instance != null)
+        {
+            Instance.baseUrl = url;
+            PlayerPrefs.SetString("API_BASE_URL", url);
+            PlayerPrefs.Save();
+            Debug.Log($"[ApiClient] API URL updated to: {url}");
         }
     }
 
