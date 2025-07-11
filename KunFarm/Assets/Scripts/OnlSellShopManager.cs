@@ -189,7 +189,7 @@ public class OnlSellShopManager : MonoBehaviour
         }
         
         Debug.Log($"📤 [Online Sell] Gửi yêu cầu bán: {collectableType}, Số lượng: {quantity}, Tổng giá: {totalPrice}");
-        string url = $"{ApiClient.BaseUrl}/online-shop/sell/{playerId}";
+        string url = $"http://localhost:5270/online-shop/sell/{playerId}";
 
         SellItemRequest requestData = new SellItemRequest
         {
@@ -340,7 +340,7 @@ public class OnlSellShopManager : MonoBehaviour
 
     private IEnumerator LoadSoldItemsCoroutine()
     {
-        string apiUrl = $"{ApiClient.BaseUrl}/online-shop/sold-items/{playerId}";
+        string apiUrl = $"http://localhost:5270/online-shop/sold-items/{playerId}";
         
         UnityWebRequest request = UnityWebRequest.Get(apiUrl);
         yield return request.SendWebRequest();
@@ -458,7 +458,7 @@ public class OnlSellShopManager : MonoBehaviour
     /// </summary>
     private IEnumerator ClaimMoneyCoroutine(List<int> itemIds, int expectedAmount)
     {
-        string apiUrl = $"{ApiClient.BaseUrl}/online-shop/claim-money/{playerId}";
+        string apiUrl = $"http://localhost:5270/online-shop/claim-money/{playerId}";
         string json = "[" + string.Join(",", itemIds) + "]";
         
         Debug.Log($"📤 [Sell Shop] Claiming money for items: {json}");

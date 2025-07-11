@@ -14,15 +14,15 @@
                 KunFarm Dashboard
             </h1>
             <p class="text-xl md:text-2xl mb-6 opacity-90">
-                Welcome to the smart farm management system
+                Chào mừng đến với hệ thống quản lý nông trại thông minh
             </p>
             <p class="text-lg opacity-80 mb-8">
-                A comprehensive system providing full APIs for Unity 2D games and modern management tools
+                Hệ thống cung cấp API đầy đủ cho game Unity 2D và các công cụ quản lý hiện đại
             </p>
             <div class="flex flex-col sm:flex-row gap-4">
                 <a href="/leaderboard" class="bg-farm-yellow hover:bg-farm-yellow/90 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center justify-center">
                     <i class="fas fa-trophy mr-2"></i>
-                    View Leaderboard
+                    Xem Bảng Xếp Hạng
                 </a>
                 <a href="/swagger" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center justify-center">
                     <i class="fas fa-code mr-2"></i>
@@ -47,32 +47,32 @@
         <div class="bg-gradient-to-r from-red-500 to-red-600 p-4">
             <h3 class="text-xl font-bold text-white flex items-center">
                 <i class="fas fa-users-cog mr-3"></i>
-                Admin Management
+                Quản Lý Admin
             </h3>
         </div>
         <div class="p-6">
-            <p class="text-gray-600 mb-4">Manage users, statistics and system configuration</p>
+            <p class="text-gray-600 mb-4">Quản lý người dùng, thống kê và cấu hình hệ thống</p>
             <ul class="space-y-2 mb-6">
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-check text-green-500 mr-2"></i>
-                    User management
+                    Quản lý người dùng
                 </li>
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-check text-green-500 mr-2"></i>
-                    System statistics
+                    Thống kê hệ thống
                 </li>
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-check text-green-500 mr-2"></i>
-                    Edit player state
+                    Chỉnh sửa player state
                 </li>
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-check text-green-500 mr-2"></i>
-                    Activate/deactivate accounts
+                    Kích hoạt/vô hiệu hóa tài khoản
                 </li>
             </ul>
             <a href="/admin/users" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 transform group-hover:scale-105 inline-flex items-center">
                 <i class="fas fa-arrow-right mr-2"></i>
-                Access Admin Panel
+                Truy cập Admin Panel
             </a>
         </div>
     </div>
@@ -82,32 +82,32 @@
         <div class="bg-gradient-to-r from-farm-yellow to-yellow-500 p-4">
             <h3 class="text-xl font-bold text-gray-900 flex items-center">
                 <i class="fas fa-trophy mr-3"></i>
-                Leaderboard
+                Bảng Xếp Hạng
             </h3>
         </div>
         <div class="p-6">
-            <p class="text-gray-600 mb-4">View player rankings based on money earned</p>
+            <p class="text-gray-600 mb-4">Xem bảng xếp hạng người chơi theo nhiều tiêu chí</p>
             <ul class="space-y-2 mb-6">
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-coins text-farm-yellow mr-2"></i>
-                    Top richest players
+                    Top người giàu nhất
+                </li>
+                <li class="flex items-center text-gray-700">
+                    <i class="fas fa-heart text-red-500 mr-2"></i>
+                    Top sức khỏe cao nhất
+                </li>
+                <li class="flex items-center text-gray-700">
+                    <i class="fas fa-drumstick-bite text-farm-green mr-2"></i>
+                    Top độ đói cao nhất
                 </li>
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-chart-line text-farm-blue mr-2"></i>
-                    Real-time statistics
-                </li>
-                <li class="flex items-center text-gray-700">
-                    <i class="fas fa-trophy text-orange-500 mr-2"></i>
-                    Achievement tracking
-                </li>
-                <li class="flex items-center text-gray-700">
-                    <i class="fas fa-users text-green-500 mr-2"></i>
-                    Player profiles
+                    Thống kê real-time
                 </li>
             </ul>
             <a href="/leaderboard" class="bg-farm-yellow hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-semibold transition-colors duration-200 transform group-hover:scale-105 inline-flex items-center">
                 <i class="fas fa-arrow-right mr-2"></i>
-                View Rankings
+                Xem Bảng Xếp Hạng
             </a>
         </div>
     </div>
@@ -121,7 +121,7 @@
             </h3>
         </div>
         <div class="p-6">
-            <p class="text-gray-600 mb-4">Complete API documentation for developers</p>
+            <p class="text-gray-600 mb-4">Tài liệu API đầy đủ cho developers</p>
             <ul class="space-y-2 mb-6">
                 <li class="flex items-center text-gray-700">
                     <i class="fas fa-check text-green-500 mr-2"></i>
@@ -140,10 +140,152 @@
                     Leaderboard API
                 </li>
             </ul>
-            <a href="/swagger" class="bg-farm-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 transform group-hover:scale-105 inline-flex items-center">
-                <i class="fas fa-arrow-right mr-2"></i>
-                View Documentation
+            <a href="/swagger" target="_blank" class="bg-farm-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 transform group-hover:scale-105 inline-flex items-center">
+                <i class="fas fa-external-link-alt mr-2"></i>
+                Mở Swagger UI
             </a>
         </div>
     </div>
 </div>
+
+<!-- System Status -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="bg-farm-green p-3 rounded-lg mr-4">
+            <i class="fas fa-server text-white text-xl"></i>
+        </div>
+        <div>
+            <h3 class="text-xl font-bold text-gray-900">Trạng Thái Hệ Thống</h3>
+            <p class="text-gray-600">Thông tin về tình trạng hoạt động của hệ thống</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+            <div class="text-3xl text-farm-green mb-2">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">API Status</div>
+            <div class="text-xs text-green-600">Hoạt động tốt</div>
+        </div>
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+            <div class="text-3xl text-farm-blue mb-2">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Database</div>
+            <div class="text-xs text-blue-600">Kết nối ổn định</div>
+        </div>
+        <div class="text-center p-4 bg-yellow-50 rounded-lg">
+            <div class="text-3xl text-farm-yellow mb-2">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Game Server</div>
+            <div class="text-xs text-yellow-600">Online</div>
+        </div>
+        <div class="text-center p-4 bg-purple-50 rounded-lg">
+            <div class="text-3xl text-purple-500 mb-2">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Uptime</div>
+            <div class="text-xs text-purple-600">99.9%</div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-center text-sm text-gray-500">
+        <i class="fas fa-sync-alt mr-1"></i>
+        Cập nhật: @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="flex items-center mb-6">
+        <div class="bg-farm-brown p-3 rounded-lg mr-4">
+            <i class="fas fa-chart-bar text-white text-xl"></i>
+        </div>
+        <div>
+            <h3 class="text-xl font-bold text-gray-900">Thống Kê Nhanh</h3>
+            <p class="text-gray-600">Tổng quan về hoạt động của hệ thống</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+            <div class="text-3xl font-bold text-farm-blue mb-2" id="quickTotalUsers">
+                <div class="animate-pulse bg-blue-200 h-8 w-16 mx-auto rounded"></div>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Tổng người dùng</div>
+            <div class="w-full bg-blue-200 rounded-full h-1 mt-2">
+                <div class="bg-farm-blue h-1 rounded-full w-3/4"></div>
+            </div>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+            <div class="text-3xl font-bold text-farm-green mb-2" id="quickActiveUsers">
+                <div class="animate-pulse bg-green-200 h-8 w-16 mx-auto rounded"></div>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Đang hoạt động</div>
+            <div class="w-full bg-green-200 rounded-full h-1 mt-2">
+                <div class="bg-farm-green h-1 rounded-full w-5/6"></div>
+            </div>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
+            <div class="text-3xl font-bold text-farm-yellow mb-2" id="quickOnlineUsers">
+                <div class="animate-pulse bg-yellow-200 h-8 w-16 mx-auto rounded"></div>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Online hiện tại</div>
+            <div class="w-full bg-yellow-200 rounded-full h-1 mt-2">
+                <div class="bg-farm-yellow h-1 rounded-full w-2/3"></div>
+            </div>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+            <div class="text-3xl font-bold text-purple-600 mb-2" id="quickTotalMoney">
+                <div class="animate-pulse bg-purple-200 h-8 w-20 mx-auto rounded"></div>
+            </div>
+            <div class="text-sm font-semibold text-gray-700">Tổng tiền trong game</div>
+            <div class="w-full bg-purple-200 rounded-full h-1 mt-2">
+                <div class="bg-purple-600 h-1 rounded-full w-4/5"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load quick stats
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/admin/users/stats');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    document.getElementById('quickTotalUsers').textContent = result.data.totalUsers;
+                    document.getElementById('quickActiveUsers').textContent = result.data.activeUsers;
+                    document.getElementById('quickOnlineUsers').textContent = result.data.activeUsers;
+                }
+            } catch (error) {
+                console.error('Error loading quick stats:', error);
+                document.getElementById('quickTotalUsers').textContent = '-';
+                document.getElementById('quickActiveUsers').textContent = '-';
+                document.getElementById('quickOnlineUsers').textContent = '-';
+            }
+            
+            try {
+                const leaderboardResponse = await fetch('/leaderboard/money?top=100');
+                const leaderboardResult = await leaderboardResponse.json();
+                
+                if (leaderboardResult.code === 200 && leaderboardResult.data.rankings.length > 0) {
+                    const totalMoney = leaderboardResult.data.rankings.reduce((sum, player) => sum + player.money, 0);
+                    document.getElementById('quickTotalMoney').textContent = totalMoney.toLocaleString('vi-VN') + ' 💰';
+                } else {
+                    document.getElementById('quickTotalMoney').textContent = '0 💰';
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard stats:', error);
+                document.getElementById('quickTotalMoney').textContent = '-';
+            }
+        });
+    </script>
+}

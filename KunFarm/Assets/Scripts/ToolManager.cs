@@ -8,15 +8,14 @@ public class ToolManager : MonoBehaviour
 {
     [Header("Tools Setup")]
     [SerializeField] private ToolData[] toolDataArray; // Mảng tools để setup trong editor
-
+    
     [Header("Animation Settings")]
     [SerializeField] private float hoeAnimationSpeed = 0.7f; // Adjustable animation speed
-    [SerializeField] private float chopAnimationSpeed = 0.7f; // Adjustable animation speed
-
+    
     [Header("Interaction Settings")]
     [SerializeField] private float maxInteractionDistance = 1.5f; // Maximum distance to interact with tiles
     [SerializeField] private float chickenFeedingDistance = 2.0f; // Maximum distance to feed chickens (2D)
-
+    
     [Header("References")]
     [SerializeField] private Toolbar_UI toolbarUI;
     [SerializeField] private TileManager tileManager;
@@ -26,17 +25,17 @@ public class ToolManager : MonoBehaviour
     private Tool[] tools; // Mảng tools trong toolbar (9 slots)
     private int selectedToolIndex = 0;
     private bool isUsingTool = false;
-
+    
     [Header("Auto-Save Settings")]
     [SerializeField] private bool autoSaveEnabled = true;
     [SerializeField] private float autoSaveInterval = 30f; // 30 seconds
     [SerializeField] private bool showDebugInfo = false;
-
+    
     // Auto-save tracking
     private bool hasToolbarChanges = false;
     private float lastAutoSaveTime = 0f;
     private int currentUserId = 0;
-
+    
     public Tool SelectedTool => tools != null && selectedToolIndex < tools.Length ? tools[selectedToolIndex] : null;
 
     void Awake()
@@ -47,19 +46,19 @@ public class ToolManager : MonoBehaviour
     void Start()
     {
         UpdateToolbarUI();
-
+        
         // Auto-find components if not assigned
         if (playerMovement == null)
             playerMovement = FindObjectOfType<Movement>();
         if (inventoryUI == null)
             inventoryUI = FindObjectOfType<Inventory>();
-
+        
         // Get user ID from PlayerPrefs
         currentUserId = PlayerPrefs.GetInt("PLAYER_ID", 0);
-
+        
         // Đảm bảo Hand Tool luôn có ở slot đầu tiên
         EnsureHandTool();
-
+        
 
     }
 
@@ -67,10 +66,10 @@ public class ToolManager : MonoBehaviour
     {
         // Listen for toolbar selection changes
         CheckToolSelection();
-
+        
         // Listen for food eating (Space key)
         CheckFoodEating();
-
+        
         // Auto-save toolbar if changes detected
         CheckAutoSave();
     }
@@ -78,10 +77,10 @@ public class ToolManager : MonoBehaviour
     private void InitializeTools()
     {
         tools = new Tool[9]; // 9 slots như trong Toolbar_UI
-
+        
         // Luôn đặt Hand Tool ở slot đầu tiên (index 0) với icon từ ToolData
         tools[0] = CreateHandToolWithIcon();
-
+        
         // Initialize tools từ ToolData array (bắt đầu từ slot 1)
         for (int i = 0; i < toolDataArray.Length && i + 1 < tools.Length; i++)
         {
@@ -94,7 +93,7 @@ public class ToolManager : MonoBehaviour
                 }
             }
         }
-
+        
 
     }
 
@@ -103,9 +102,9 @@ public class ToolManager : MonoBehaviour
         // Don't allow tool selection if inventory is open
         if (inventoryUI != null && inventoryUI.IsOpen)
             return;
-
+            
         int newSelection = -1;
-
+        
         if (Input.GetKeyDown(KeyCode.Alpha1)) newSelection = 0;
         else if (Input.GetKeyDown(KeyCode.Alpha2)) newSelection = 1;
         else if (Input.GetKeyDown(KeyCode.Alpha3)) newSelection = 2;
@@ -115,13 +114,13 @@ public class ToolManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha7)) newSelection = 6;
         else if (Input.GetKeyDown(KeyCode.Alpha8)) newSelection = 7;
         else if (Input.GetKeyDown(KeyCode.Alpha9)) newSelection = 8;
-
+        
         if (newSelection != -1 && newSelection != selectedToolIndex)
         {
             SelectTool(newSelection);
         }
     }
-
+    
     private void CheckFoodEating()
     {
         // Don't allow eating if inventory is open or tool is being used
@@ -129,7 +128,7 @@ public class ToolManager : MonoBehaviour
             return;
         if (isUsingTool)
             return;
-
+            
         // Check for Space key input
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -150,83 +149,83 @@ public class ToolManager : MonoBehaviour
             }
         }
     }
-
+    
     private bool IsWheatFood(FoodTool foodTool)
     {
-        return foodTool.toolName != null &&
-               (foodTool.toolName.ToLower().Contains("wheat") ||
+        return foodTool.toolName != null && 
+               (foodTool.toolName.ToLower().Contains("wheat") || 
                 foodTool.toolName.ToLower().Contains("lúa"));
     }
-
+    
     private void HandleWheatFeeding(FoodTool wheatTool)
     {
         // Find the nearest chicken within feeding distance
         ChickenWalk nearestChicken = FindNearestChicken();
-
+        
         if (nearestChicken != null)
         {
             // Feed the chicken with wheat
             bool feedSuccess = nearestChicken.Feed(CollectableType.WHEAT);
+            
+                         if (feedSuccess)
+             {
+                 // Consume the wheat from toolbar
+                 HandleToolConsumption(wheatTool);
+                 
+                 // Get feeding info from ChickenManager for detailed message
+                 if (ChickenManager.Instance != null)
+                 {
+                     float speedBoost = ChickenManager.Instance.GetFeedingSpeedBoost();
+                     float duration = ChickenManager.Instance.GetFeedingDuration();
+                     float baseInterval = ChickenManager.Instance.GetDefaultEggLayInterval();
+                     
+                     float timeReduced = baseInterval * speedBoost; // seconds saved
+                     int durationMinutes = Mathf.RoundToInt(duration / 60f);
+                     int boostPercent = Mathf.RoundToInt(speedBoost * 100f);
+                     
+                     // Show detailed notification
+                     SimpleNotificationPopup.Show($"🌾 Fed chicken with {wheatTool.toolName}!\n⚡ Egg laying speed +{boostPercent}% ({timeReduced:F0}s faster)\n⏰ Effect lasts {durationMinutes} minutes");
+                 }
+                 else
+                 {
+                     // Fallback message
+                     SimpleNotificationPopup.Show($"Fed chicken with {wheatTool.toolName}!");
+                 }
+                 
 
-            if (feedSuccess)
-            {
-                // Consume the wheat from toolbar
-                HandleToolConsumption(wheatTool);
-
-                // Get feeding info from ChickenManager for detailed message
-                if (ChickenManager.Instance != null)
-                {
-                    float speedBoost = ChickenManager.Instance.GetFeedingSpeedBoost();
-                    float duration = ChickenManager.Instance.GetFeedingDuration();
-                    float baseInterval = ChickenManager.Instance.GetDefaultEggLayInterval();
-
-                    float timeReduced = baseInterval * speedBoost; // seconds saved
-                    int durationMinutes = Mathf.RoundToInt(duration / 60f);
-                    int boostPercent = Mathf.RoundToInt(speedBoost * 100f);
-
-                    // Show detailed notification
-                    SimpleNotificationPopup.Show($"🌾 Fed chicken with {wheatTool.toolName}!\n⚡ Egg laying speed +{boostPercent}% ({timeReduced:F0}s faster)\n⏰ Effect lasts {durationMinutes} minutes");
-                }
-                else
-                {
-                    // Fallback message
-                    SimpleNotificationPopup.Show($"Fed chicken with {wheatTool.toolName}!");
-                }
-
-
-            }
+             }
 
         }
-        else
-        {
-            // No chicken nearby - show message with distance info
-            SimpleNotificationPopup.Show($"🐔 No chicken nearby to feed!\n📏 Move within {chickenFeedingDistance:F1} units of a chicken");
-        }
+                 else
+         {
+             // No chicken nearby - show message with distance info
+             SimpleNotificationPopup.Show($"🐔 No chicken nearby to feed!\n📏 Move within {chickenFeedingDistance:F1} units of a chicken");
+         }
     }
-
+    
     private ChickenWalk FindNearestChicken()
     {
         if (ChickenManager.Instance == null || playerMovement == null)
             return null;
-
+        
         Vector3 playerPos = playerMovement.transform.position;
         ChickenWalk nearestChicken = null;
         float nearestDistance = float.MaxValue;
-
+        
         // Get all chickens from ChickenManager
         var allChickens = ChickenManager.Instance.GetAllChickens();
-
+        
         foreach (var chicken in allChickens)
         {
             if (chicken == null) continue;
-
+            
             Vector3 chickenPos = chicken.transform.position;
-
+            
             // Calculate 2D distance (ignore Z axis) for proper 2D game distance
             Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
             Vector2 chickenPos2D = new Vector2(chickenPos.x, chickenPos.y);
             float distance = Vector2.Distance(playerPos2D, chickenPos2D);
-
+            
             // Check if within feeding distance and closer than previous
             if (distance <= chickenFeedingDistance && distance < nearestDistance)
             {
@@ -234,7 +233,7 @@ public class ToolManager : MonoBehaviour
                 nearestChicken = chicken;
             }
         }
-
+        
         return nearestChicken;
     }
 
@@ -245,15 +244,15 @@ public class ToolManager : MonoBehaviour
             Debug.LogWarning("ToolManager: tools array is null, skipping SelectTool");
             return;
         }
-
+        
         if (index >= 0 && index < tools.Length)
         {
             selectedToolIndex = index;
-
+            
             // Update toolbar UI only if requested (to avoid infinite loop)
             if (updateUI && toolbarUI != null)
                 toolbarUI.SelectSlot(index);
-
+            
             // Update player animation
             UpdatePlayerAnimation();
         }
@@ -282,7 +281,7 @@ public class ToolManager : MonoBehaviour
             {
                 return;
             }
-
+            
             // Check if this is a shovel tool for hoeing animation
             if (currentTool is ShovelTool)
             {
@@ -293,10 +292,6 @@ public class ToolManager : MonoBehaviour
             {
                 StartCoroutine(PlayWateringAnimation(cellPosition, currentTool));
             }
-            else if (currentTool is AxeTool)
-            {
-                StartCoroutine(PlayChopAnimation(cellPosition, currentTool));
-            }
             else
             {
                 // Use other tools immediately
@@ -306,82 +301,19 @@ public class ToolManager : MonoBehaviour
         }
     }
 
-    private IEnumerator PlayChopAnimation(Vector3Int cellPosition, Tool axe)
-    {
-        Debug.Log("[ToolManager] ▶️ PlayChopAnimation bắt đầu");
-        isUsingTool = true;
-
-        if (playerMovement != null && playerMovement.GetAnimator() != null)
-        {
-            var animator = playerMovement.GetAnimator();
-
-            // Tương tự: lấy hướng từ player tới ô cây
-            Vector3 playerPos = playerMovement.transform.position;
-            Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
-            Vector3 directionToTarget = (targetPos - playerPos).normalized;
-
-            Vector3 finalDirection;
-            if (Vector3.Distance(playerPos, targetPos) < 0.5f)
-            {
-                // Use player's current facing direction when target is very close
-                finalDirection = playerMovement.GetFacingDirection();
-            }
-            else
-            {
-                // Use direction to target when target is further away
-                finalDirection = directionToTarget;
-            }
-
-            // Determine hoe direction using 2D blend tree coordinates
-            Vector2 chopBlendDirection = GetHoeBlendDirection(finalDirection);
-
-            // Set animator parameters for 2D blend tree
-            animator.SetFloat("horizontal", chopBlendDirection.x);
-            animator.SetFloat("vertical", chopBlendDirection.y);
-            animator.SetBool("isChopping", true);
-
-            // Apply animation speed if specified
-            if (chopAnimationSpeed != 1f)
-            {
-                animator.speed = chopAnimationSpeed;
-            }
-
-            // Wait for animation to play (dynamic based on animation speed)
-            float waitTime = 0.5f / chopAnimationSpeed; // Base duration / speed
-            yield return new WaitForSeconds(waitTime);
-
-            // Reset animation speed to normal
-            animator.speed = 1f;
-
-            // Thực hiện hành động chặt
-            axe.Use(cellPosition, tileManager);
-            HandleToolConsumption(axe);
-
-            animator.SetBool("isChopping", false);
-        }
-        else
-        {
-            // Fallback nếu không có animator
-            axe.Use(cellPosition, tileManager);
-            HandleToolConsumption(axe);
-        }
-
-        isUsingTool = false;
-    }
-
     private IEnumerator PlayHoeAnimation(Vector3Int cellPosition, Tool tool)
     {
         isUsingTool = true;
-
+        
         if (playerMovement != null && playerMovement.GetAnimator() != null)
         {
             var animator = playerMovement.GetAnimator();
-
+            
             // Get direction to target for very close targets, otherwise use facing direction
             Vector3 playerPos = playerMovement.transform.position;
             Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
             Vector3 directionToTarget = (targetPos - playerPos).normalized;
-
+            
             // If target is very close (direction is nearly zero), use player's facing direction
             Vector3 finalDirection;
             if (Vector3.Distance(playerPos, targetPos) < 0.5f)
@@ -394,32 +326,32 @@ public class ToolManager : MonoBehaviour
                 // Use direction to target when target is further away
                 finalDirection = directionToTarget;
             }
-
+            
             // Determine hoe direction using 2D blend tree coordinates
             Vector2 hoeBlendDirection = GetHoeBlendDirection(finalDirection);
-
+            
             // Set animator parameters for 2D blend tree
             animator.SetFloat("horizontal", hoeBlendDirection.x);
             animator.SetFloat("vertical", hoeBlendDirection.y);
             animator.SetBool("isHoeing", true);
-
+            
             // Apply animation speed if specified
             if (hoeAnimationSpeed != 1f)
             {
                 animator.speed = hoeAnimationSpeed;
             }
-
+            
             // Wait for animation to play (dynamic based on animation speed)
             float waitTime = 0.5f / hoeAnimationSpeed; // Base duration / speed
             yield return new WaitForSeconds(waitTime);
-
+            
             // Reset animation speed to normal
             animator.speed = 1f;
-
+            
             // Use the tool
             tool.Use(cellPosition, tileManager);
             HandleToolConsumption(tool);
-
+            
             // Stop hoeing animation
             animator.SetBool("isHoeing", false);
         }
@@ -429,26 +361,26 @@ public class ToolManager : MonoBehaviour
             tool.Use(cellPosition, tileManager);
             HandleToolConsumption(tool);
         }
-
+        
         isUsingTool = false;
     }
 
     private IEnumerator PlayWateringAnimation(Vector3Int cellPosition, Tool tool)
     {
         isUsingTool = true;
-
+        
         // Debug log to see if method is called
         Debug.Log($"[ToolManager] PlayWateringAnimation called with tool: {tool?.toolName ?? "null"}");
-
+        
         if (playerMovement != null && playerMovement.GetAnimator() != null)
         {
             var animator = playerMovement.GetAnimator();
-
+            
             // Get direction to target for very close targets, otherwise use facing direction
             Vector3 playerPos = playerMovement.transform.position;
             Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
             Vector3 directionToTarget = (targetPos - playerPos).normalized;
-
+            
             // If target is very close (direction is nearly zero), use player's facing direction
             Vector3 finalDirection;
             if (Vector3.Distance(playerPos, targetPos) < 0.5f)
@@ -461,38 +393,38 @@ public class ToolManager : MonoBehaviour
                 // Use direction to target when target is further away
                 finalDirection = directionToTarget;
             }
-
+            
             // Determine watering direction using 2D blend tree coordinates
             Vector2 wateringBlendDirection = GetHoeBlendDirection(finalDirection); // Reuse same logic
-
+            
             // Debug logs for animation parameters
             Debug.Log($"[ToolManager] Setting animation parameters - horizontal: {wateringBlendDirection.x}, vertical: {wateringBlendDirection.y}");
             Debug.Log($"[ToolManager] Setting isWatering to true");
-
+            
             // Set animator parameters for 2D blend tree
             animator.SetFloat("horizontal", wateringBlendDirection.x);
             animator.SetFloat("vertical", wateringBlendDirection.y);
             animator.SetBool("isWatering", true); // Assumes you have this bool parameter
-
+            
             // Apply animation speed if specified
             if (hoeAnimationSpeed != 1f)
             {
                 animator.speed = hoeAnimationSpeed;
             }
-
+            
             // Wait for animation to play (dynamic based on animation speed)
             float waitTime = 0.7f / hoeAnimationSpeed; // Watering takes slightly longer
             Debug.Log($"[ToolManager] Waiting {waitTime} seconds for watering animation");
             yield return new WaitForSeconds(waitTime);
-
+            
             // Reset animation speed to normal
             animator.speed = 1f;
-
+            
             // Use the tool
             Debug.Log($"[ToolManager] Using watering tool on position: {cellPosition}");
             tool.Use(cellPosition, tileManager);
             HandleToolConsumption(tool);
-
+            
             // Stop watering animation
             Debug.Log("[ToolManager] Setting isWatering to false");
             animator.SetBool("isWatering", false);
@@ -504,7 +436,7 @@ public class ToolManager : MonoBehaviour
             tool.Use(cellPosition, tileManager);
             HandleToolConsumption(tool);
         }
-
+        
         isUsingTool = false;
         Debug.Log("[ToolManager] PlayWateringAnimation completed");
     }
@@ -513,7 +445,7 @@ public class ToolManager : MonoBehaviour
     {
         // Ensure direction is normalized
         direction = direction.normalized;
-
+        
         // Determine primary direction based on larger component
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
         {
@@ -545,14 +477,14 @@ public class ToolManager : MonoBehaviour
     {
         // Handle tool consumption
         if (tool.IsConsumable())
-        {
-            bool stillUsable = tool.ConsumeOnUse();
-
-            // If tool is depleted, remove it
-            if (!stillUsable)
             {
-                tools[selectedToolIndex] = null;
-
+            bool stillUsable = tool.ConsumeOnUse();
+                
+                // If tool is depleted, remove it
+                if (!stillUsable)
+                {
+                    tools[selectedToolIndex] = null;
+                
                 // Force refresh the specific slot to clear DragDropHandler cache
                 if (toolbarUI != null)
                 {
@@ -562,16 +494,16 @@ public class ToolManager : MonoBehaviour
                         toolbarSlots[selectedToolIndex].SetEmpty();
                     }
                 }
-            }
-
-            // Mark toolbar as changed for auto-save
-            hasToolbarChanges = true;
-
-            // Update display để show quantity mới hoặc xóa tool
-            UpdateToolbarDisplay();
-
-            // Đảm bảo Hand Tool luôn có ở slot đầu tiên (nếu bị xóa do lỗi)
-            EnsureHandTool();
+                }
+                
+                // Mark toolbar as changed for auto-save
+                hasToolbarChanges = true;
+                
+                // Update display để show quantity mới hoặc xóa tool
+                UpdateToolbarDisplay();
+                
+                // Đảm bảo Hand Tool luôn có ở slot đầu tiên (nếu bị xóa do lỗi)
+                EnsureHandTool();
         }
     }
 
@@ -594,12 +526,12 @@ public class ToolManager : MonoBehaviour
         if (toolbarUI == null || tools == null) return;
 
         var toolbarSlots = toolbarUI.GetToolbarSlots();
-
+        
         for (int i = 0; i < toolbarSlots.Count && i < tools.Length; i++)
         {
             // Initialize drag drop functionality
             toolbarSlots[i].InitializeDragDrop(SlotType.Toolbar, i);
-
+            
             if (tools[i] != null)
             {
                 toolbarSlots[i].SetTool(tools[i]);
@@ -637,12 +569,12 @@ public class ToolManager : MonoBehaviour
                     Debug.LogWarning($"[ToolManager] Cannot place {tool.GetType().Name} at slot 0. Slot 0 is reserved for HandTool.");
                 return;
             }
-
+            
             tools[index] = tool;
-
+            
             // Mark toolbar as changed for auto-save
             hasToolbarChanges = true;
-
+            
             if (showDebugInfo)
                 Debug.Log($"[ToolManager] Tool changed at index {index}: {tool?.toolName ?? "null"}");
         }
@@ -687,15 +619,15 @@ public class ToolManager : MonoBehaviour
     private bool IsWithinInteractionRange(Vector3Int cellPosition)
     {
         if (playerMovement == null) return false;
-
+        
         Vector3 playerPos = playerMovement.transform.position;
         Vector3 targetPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
-
+        
         // Calculate 2D distance (ignore Z axis) for proper 2D game distance
         Vector2 playerPos2D = new Vector2(playerPos.x, playerPos.y);
         Vector2 targetPos2D = new Vector2(targetPos.x, targetPos.y);
         float distance = Vector2.Distance(playerPos2D, targetPos2D);
-
+        
         return distance <= maxInteractionDistance;
     }
 
@@ -759,7 +691,7 @@ public class ToolManager : MonoBehaviour
         if (toolbarData != null)
         {
             toolbarData.ApplyToToolManager(this);
-
+            
             if (showDebugInfo)
                 Debug.Log($"[ToolManager] ✅ Toolbar loaded from server with {toolbarData.tools.Count} tools");
         }
@@ -794,15 +726,15 @@ public class ToolManager : MonoBehaviour
                 Debug.Log($"[ToolManager] Created HandTool with icon: {handTool.toolIcon?.name ?? "null"}");
             return handTool;
         }
-
+        
         // Fallback: tạo HandTool mới và thử load icon từ Resources
         var fallbackHand = new HandTool();
-
+        
         // Thử load icon từ các path có thể
-        Sprite handIcon = Resources.Load<Sprite>("Sprites/hand_icon") ??
+        Sprite handIcon = Resources.Load<Sprite>("Sprites/hand_icon") ?? 
                          Resources.Load<Sprite>("Tools/hand_icon") ??
                          Resources.Load<Sprite>("hand_icon");
-
+        
         if (handIcon != null)
         {
             fallbackHand.toolIcon = handIcon;
@@ -814,7 +746,7 @@ public class ToolManager : MonoBehaviour
             if (showDebugInfo)
                 Debug.LogWarning("[ToolManager] No icon found for HandTool!");
         }
-
+        
         return fallbackHand;
     }
 
@@ -831,7 +763,7 @@ public class ToolManager : MonoBehaviour
             // Tìm HandTool ở slot khác (nếu có)
             HandTool existingHand = null;
             int existingHandIndex = -1;
-
+            
             for (int i = 1; i < tools.Length; i++)
             {
                 if (tools[i] is HandTool handTool)
@@ -847,7 +779,7 @@ public class ToolManager : MonoBehaviour
             {
                 tools[existingHandIndex] = tools[0]; // Move tool ở slot 0 sang slot cũ của hand
                 tools[0] = existingHand;
-
+                
                 if (showDebugInfo)
                     Debug.Log($"[ToolManager] Moved HandTool from slot {existingHandIndex} to slot 0");
             }
@@ -855,7 +787,7 @@ public class ToolManager : MonoBehaviour
             {
                 // Nếu không có HandTool nào, tạo mới ở slot 0 với icon
                 tools[0] = CreateHandToolWithIcon();
-
+                
                 if (showDebugInfo)
                     Debug.Log("[ToolManager] Created new HandTool with icon at slot 0");
             }
@@ -865,4 +797,4 @@ public class ToolManager : MonoBehaviour
             hasToolbarChanges = true; // Mark for save
         }
     }
-}
+} 

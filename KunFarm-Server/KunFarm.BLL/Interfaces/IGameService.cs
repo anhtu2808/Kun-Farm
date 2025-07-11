@@ -11,6 +11,5 @@ namespace KunFarm.BLL.Interfaces
         Task<bool> SaveFarmStateAsync(int userId, SaveFarmStateRequest request);
         Task<ToolbarResponse?> LoadToolbarAsync(int userId);
         Task<bool> SaveToolbarAsync(int userId, SaveToolbarRequest request);
-        Task<bool> ResetGameAsync(int userId);
     }
 } 

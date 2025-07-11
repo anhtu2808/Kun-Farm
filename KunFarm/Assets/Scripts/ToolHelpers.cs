@@ -17,9 +17,6 @@ public static class ToolHelpers
             case CollectableType.SHOVEL_TOOL:
                 tool = new ShovelTool(quantity); // Durability = quantity
                 break;
-            case CollectableType.AXE_TOOL:
-                tool = new AxeTool(quantity); // Durability = quantity
-                break;
                 
             case CollectableType.HAND_TOOL:
                 tool = new HandTool(); // Infinite use
@@ -72,7 +69,6 @@ public static class ToolHelpers
         if (tool == null) return CollectableType.NONE;
         
         if (tool is ShovelTool) return CollectableType.SHOVEL_TOOL;
-        if (tool is AxeTool) return CollectableType.AXE_TOOL;
         if (tool is HandTool) return CollectableType.HAND_TOOL;
         if (tool is WateringCanTool) return CollectableType.WATERING_CAN_TOOL;
                 
@@ -113,7 +109,6 @@ public static class ToolHelpers
         {
             // Tool items
             case CollectableType.SHOVEL_TOOL:
-            case CollectableType.AXE_TOOL:
             case CollectableType.HAND_TOOL:
             case CollectableType.WATERING_CAN_TOOL:
                 canBeTool = true;
@@ -224,7 +219,6 @@ public static class ToolHelpers
         switch (collectableType)
     {
             case CollectableType.SHOVEL_TOOL: return "Shovel";
-            case CollectableType.AXE_TOOL: return "Axe";
             case CollectableType.HAND_TOOL: return "Hand";
             case CollectableType.WATERING_CAN_TOOL: return "Watering Can";
             case CollectableType.WHEATSEED: return "Wheat Seed";

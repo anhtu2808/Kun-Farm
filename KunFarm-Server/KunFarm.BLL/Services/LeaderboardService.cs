@@ -41,6 +41,8 @@ namespace KunFarm.BLL.Services
                             Username = user.Username,
                             DisplayName = user.DisplayName,
                             Money = playerState.Money,
+                            Health = playerState.Health,
+                            Hunger = playerState.Hunger,
                             LastSaved = playerState.LastSaved,
                             IsActive = user.IsActive
                         });
@@ -69,6 +71,116 @@ namespace KunFarm.BLL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating money leaderboard");
+                return new LeaderboardResponse { GeneratedAt = DateTime.UtcNow };
+            }
+        }
+
+        public async Task<LeaderboardResponse> GetHealthLeaderboardAsync(int top = 100)
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var activeUsers = users.Where(u => u.IsActive && !u.IsDeleted).ToList();
+
+                var leaderboardEntries = new List<LeaderboardEntry>();
+
+                foreach (var user in activeUsers)
+                {
+                    var playerState = await _playerStateRepository.GetByUserIdAsync(user.Id);
+                    if (playerState != null)
+                    {
+                        leaderboardEntries.Add(new LeaderboardEntry
+                        {
+                            UserId = user.Id,
+                            Username = user.Username,
+                            DisplayName = user.DisplayName,
+                            Money = playerState.Money,
+                            Health = playerState.Health,
+                            Hunger = playerState.Hunger,
+                            LastSaved = playerState.LastSaved,
+                            IsActive = user.IsActive
+                        });
+                    }
+                }
+
+                // Sort by health descending and take top N
+                var sortedEntries = leaderboardEntries
+                    .OrderByDescending(e => e.Health)
+                    .ThenByDescending(e => e.Money) // Tiebreaker
+                    .Take(top)
+                    .ToList();
+
+                // Assign ranks
+                for (int i = 0; i < sortedEntries.Count; i++)
+                {
+                    sortedEntries[i].Rank = i + 1;
+                }
+
+                return new LeaderboardResponse
+                {
+                    Rankings = sortedEntries,
+                    TotalPlayers = leaderboardEntries.Count,
+                    GeneratedAt = DateTime.UtcNow
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating health leaderboard");
+                return new LeaderboardResponse { GeneratedAt = DateTime.UtcNow };
+            }
+        }
+
+        public async Task<LeaderboardResponse> GetHungerLeaderboardAsync(int top = 100)
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var activeUsers = users.Where(u => u.IsActive && !u.IsDeleted).ToList();
+
+                var leaderboardEntries = new List<LeaderboardEntry>();
+
+                foreach (var user in activeUsers)
+                {
+                    var playerState = await _playerStateRepository.GetByUserIdAsync(user.Id);
+                    if (playerState != null)
+                    {
+                        leaderboardEntries.Add(new LeaderboardEntry
+                        {
+                            UserId = user.Id,
+                            Username = user.Username,
+                            DisplayName = user.DisplayName,
+                            Money = playerState.Money,
+                            Health = playerState.Health,
+                            Hunger = playerState.Hunger,
+                            LastSaved = playerState.LastSaved,
+                            IsActive = user.IsActive
+                        });
+                    }
+                }
+
+                // Sort by hunger descending and take top N
+                var sortedEntries = leaderboardEntries
+                    .OrderByDescending(e => e.Hunger)
+                    .ThenByDescending(e => e.Health) // Tiebreaker
+                    .Take(top)
+                    .ToList();
+
+                // Assign ranks
+                for (int i = 0; i < sortedEntries.Count; i++)
+                {
+                    sortedEntries[i].Rank = i + 1;
+                }
+
+                return new LeaderboardResponse
+                {
+                    Rankings = sortedEntries,
+                    TotalPlayers = leaderboardEntries.Count,
+                    GeneratedAt = DateTime.UtcNow
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating hunger leaderboard");
                 return new LeaderboardResponse { GeneratedAt = DateTime.UtcNow };
             }
         }
@@ -110,6 +222,90 @@ namespace KunFarm.BLL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting player money rank for user: {UserId}", userId);
+                return null;
+            }
+        }
+
+        public async Task<int?> GetPlayerHealthRankAsync(int userId)
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var activeUsers = users.Where(u => u.IsActive && !u.IsDeleted).ToList();
+
+                var userHealth = new List<(int UserId, float Health, int Money)>();
+
+                foreach (var user in activeUsers)
+                {
+                    var playerState = await _playerStateRepository.GetByUserIdAsync(user.Id);
+                    if (playerState != null)
+                    {
+                        userHealth.Add((user.Id, playerState.Health, playerState.Money));
+                    }
+                }
+
+                // Sort by health descending, then by money descending as tiebreaker
+                var sortedByHealth = userHealth
+                    .OrderByDescending(x => x.Health)
+                    .ThenByDescending(x => x.Money)
+                    .ToList();
+
+                // Find the rank of the specified user
+                for (int i = 0; i < sortedByHealth.Count; i++)
+                {
+                    if (sortedByHealth[i].UserId == userId)
+                    {
+                        return i + 1; // Rank is 1-based
+                    }
+                }
+
+                return null; // User not found or not active
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting player health rank for user: {UserId}", userId);
+                return null;
+            }
+        }
+
+        public async Task<int?> GetPlayerHungerRankAsync(int userId)
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var activeUsers = users.Where(u => u.IsActive && !u.IsDeleted).ToList();
+
+                var userHunger = new List<(int UserId, float Hunger, float Health)>();
+
+                foreach (var user in activeUsers)
+                {
+                    var playerState = await _playerStateRepository.GetByUserIdAsync(user.Id);
+                    if (playerState != null)
+                    {
+                        userHunger.Add((user.Id, playerState.Hunger, playerState.Health));
+                    }
+                }
+
+                // Sort by hunger descending, then by health descending as tiebreaker
+                var sortedByHunger = userHunger
+                    .OrderByDescending(x => x.Hunger)
+                    .ThenByDescending(x => x.Health)
+                    .ToList();
+
+                // Find the rank of the specified user
+                for (int i = 0; i < sortedByHunger.Count; i++)
+                {
+                    if (sortedByHunger[i].UserId == userId)
+                    {
+                        return i + 1; // Rank is 1-based
+                    }
+                }
+
+                return null; // User not found or not active
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting player hunger rank for user: {UserId}", userId);
                 return null;
             }
         }

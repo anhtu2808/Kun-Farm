@@ -122,8 +122,8 @@ public class CropGrower : MonoBehaviour
         isMature = plantData.isMature;
 
         // Set sprite tương ứng với stage
-        if (cropData != null && cropData.growthStages != null &&
-            currentStage < cropData.growthStages.Length &&
+        if (cropData != null && cropData.growthStages != null && 
+            currentStage < cropData.growthStages.Length && 
             spriteRenderer != null)
         {
             spriteRenderer.sprite = cropData.growthStages[currentStage];
@@ -143,22 +143,22 @@ public class CropGrower : MonoBehaviour
     {
         if (isMature) return 0f;
         if (cropData == null || cropData.stageDurations == null) return 0f;
-
+        
         float totalRemainingTime = 0f;
-
+        
         // Add remaining time for current stage
         if (currentStage < cropData.stageDurations.Length)
         {
             float remainingCurrentStage = cropData.stageDurations[currentStage] - timer;
             totalRemainingTime += remainingCurrentStage;
         }
-
+        
         // Add time for all future stages
         for (int i = currentStage + 1; i < cropData.stageDurations.Length; i++)
         {
             totalRemainingTime += cropData.stageDurations[i];
         }
-
+        
         return Mathf.Max(0f, totalRemainingTime);
     }
 
@@ -168,12 +168,12 @@ public class CropGrower : MonoBehaviour
     public string GetFormattedRemainingTime()
     {
         float remainingSeconds = GetRemainingGrowthTime();
-
+        
         if (remainingSeconds <= 0) return "Ready!";
-
+        
         int minutes = Mathf.FloorToInt(remainingSeconds / 60f);
         int seconds = Mathf.FloorToInt(remainingSeconds % 60f);
-
+        
         if (minutes > 0)
         {
             return $"{minutes}m {seconds}s";
@@ -191,14 +191,14 @@ public class CropGrower : MonoBehaviour
     {
         if (isMature) return 100f;
         if (cropData == null || cropData.stageDurations == null) return 0f;
-
+        
         // Calculate total duration for all stages
         float totalDuration = 0f;
         for (int i = 0; i < cropData.stageDurations.Length; i++)
         {
             totalDuration += cropData.stageDurations[i];
         }
-
+        
         // Calculate elapsed time
         float elapsedTime = 0f;
         for (int i = 0; i < currentStage; i++)
@@ -206,9 +206,9 @@ public class CropGrower : MonoBehaviour
             elapsedTime += cropData.stageDurations[i];
         }
         elapsedTime += timer; // Add current stage progress
-
+        
         if (totalDuration <= 0) return 0f;
-
+        
         return Mathf.Clamp01(elapsedTime / totalDuration) * 100f;
     }
 
@@ -219,50 +219,22 @@ public class CropGrower : MonoBehaviour
         // Sinh ra các item rơi ra
         foreach (HarvestDrop drop in cropData.harvestDrops)
         {
-            for (int i = 0; i < drop.quantity; i++)
-            {
-                // Vị trí rơi ngẫu nhiên quanh cây
-                Vector3 spawnPos = transform.position + (Vector3)Random.insideUnitCircle * 0.5f;
+           for (int i = 0; i < drop.quantity; i++)
+        {
+            // Vị trí rơi ngẫu nhiên quanh cây
+            Vector3 spawnPos = transform.position + (Vector3)Random.insideUnitCircle * 0.5f;
 
-                if (drop.itemPrefab != null)
-                {
-                    Instantiate(drop.itemPrefab, spawnPos, Quaternion.identity);
-                }
-                else
-                {
-                    Debug.LogWarning("itemPrefab trong HarvestDrop chưa được gán!");
-                }
+            if (drop.itemPrefab != null)
+            {
+                Instantiate(drop.itemPrefab, spawnPos, Quaternion.identity);
             }
+            else
+            {
+                Debug.LogWarning("itemPrefab trong HarvestDrop chưa được gán!");
+            }
+        }
         }
         // GameObject cây sẽ được phá hủy bởi TileManager/PlayerInteraction sau khi Deregister
-    }
-
-    /// <summary>
-    /// Chỉ sinh ra phần quả (không bao gồm hạt giống), và cây sẽ lùi về
-    /// giai đoạn trước đó (isMature = false).
-    /// </summary>
-    public void HarvestFruitOnly()
-    {
-        if (!isMature) return;
-
-        // Giả sử trong harvestDrops bạn đánh dấu loại nào là “quả”
-        foreach (var drop in cropData.harvestDrops)
-        {
-            if (drop.isFruit)    // bạn cần thêm 1 flag trong HarvestDrop
-            {
-                for (int i = 0; i < drop.quantity; i++)
-                {
-                    Vector3 spawnPos = transform.position + (Vector3)Random.insideUnitCircle * 0.5f;
-                    Instantiate(drop.itemPrefab, spawnPos, Quaternion.identity);
-                }
-            }
-        }
-
-        // Lùi về giai đoạn trước (ví dụ stage cuối - 1)
-        currentStage = Mathf.Max(0, currentStage - 1);
-        spriteRenderer.sprite = cropData.growthStages[currentStage];
-        isMature = false;
-        timer = 0f;  // reset đếm lại từ giai đoạn mới
     }
 
     /// <summary>
@@ -272,36 +244,36 @@ public class CropGrower : MonoBehaviour
     {
         if (isMature) return 0f; // Can't water mature plants
         if (currentStage >= cropData.growthStages.Length - 1) return 0f; // Already at final stage
-
+        
         // Calculate remaining time for current stage
         float remainingTime = cropData.stageDurations[currentStage] - timer;
-
+        
         // Calculate time to reduce (30% of remaining time)
         float timeToReduce = remainingTime * reductionPercent;
-
+        
         // Apply the reduction by advancing the timer
         timer += timeToReduce;
-
+        
         // Ensure timer doesn't exceed stage duration
         timer = Mathf.Min(timer, cropData.stageDurations[currentStage]);
-
+        
         return timeToReduce;
     }
-}
-// Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)
-// private void OnTriggerEnter2D(Collider2D other)
-// {
-//     if (other.CompareTag("Player"))
-//     {
-//         playerNearby = true;
-//     }
-// }
 
-// private void OnTriggerExit2D(Collider2D other)
-// {
-//     if (other.CompareTag("Player"))
-//     {
-//         playerNearby = false;
-//     }
-// }
-// }
+    // Logic kiểm tra người chơi lại gần (nếu bạn muốn thu hoạch khi người chơi ở gần)
+    // private void OnTriggerEnter2D(Collider2D other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         playerNearby = true;
+    //     }
+    // }
+
+    // private void OnTriggerExit2D(Collider2D other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         playerNearby = false;
+    //     }
+    // }
+}

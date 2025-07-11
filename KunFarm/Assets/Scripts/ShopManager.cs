@@ -22,7 +22,7 @@ public class ShopManager : MonoBehaviour
     // Events
     public System.Action OnShopUpdated;
     private bool isOpen = false;
-    // API URL will be dynamically generated using ApiClient.BaseUrl
+    private string apiUrl = "http://localhost:5270/regular-shop/{playerId}";
     private bool hasBuyItem = false;
     private List<BuyItemRequest> list;
 
@@ -104,7 +104,7 @@ public class ShopManager : MonoBehaviour
 
     private IEnumerator GetShopData(int playerId)
     {
-        string url = $"{ApiClient.BaseUrl}/regular-shop/{playerId}";
+        string url = apiUrl.Replace("{playerId}", playerId.ToString());
 
         UnityWebRequest request = UnityWebRequest.Get(url);
         yield return request.SendWebRequest();
@@ -225,7 +225,7 @@ public class ShopManager : MonoBehaviour
             Debug.LogError("[ShopManager] No valid player ID for buy request");
             yield break;
         }
-        string apiUrl = $"{ApiClient.BaseUrl}/regular-shop/buy/{playerId}";
+        string apiUrl = $"http://localhost:5270/regular-shop/buy/{playerId}";
 
         // ✅ Sử dụng class rõ ràng thay vì anonymous
         BuyItemRequestList wrapper = new BuyItemRequestList();

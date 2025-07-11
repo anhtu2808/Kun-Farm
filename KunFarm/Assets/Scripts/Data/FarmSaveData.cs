@@ -40,14 +40,6 @@ public class FarmSaveData
             foreach (var kvp in allPlants)
             {
                 var plant = kvp.Value;
-                
-                // Add null check to prevent MissingReferenceException
-                if (plant == null || plant.gameObject == null)
-                {
-                    Debug.LogWarning($"[FarmSaveData] Skipping null plant at ({kvp.Key.x},{kvp.Key.y},{kvp.Key.z})");
-                    continue;
-                }
-                
                 var cropGrower = plant.GetComponent<CropGrower>();
                 if (cropGrower != null && cropGrower.cropData != null && !string.IsNullOrEmpty(cropGrower.cropData.name))
                 {
@@ -81,35 +73,31 @@ public class FarmSaveData
                 
                 foreach (var chicken in allChickens)
                 {
-                    // Enhanced null check to prevent MissingReferenceException
-                    if (chicken == null || chicken.gameObject == null)
+                    if (chicken != null && chicken.gameObject != null)
                     {
-                        Debug.LogWarning("[FarmSaveData] Skipping null chicken during save");
-                        continue;
-                    }
-                    
-                    var chickenData = chicken.GetComponent<ChickenData>();
-                    string chickenId = chickenData != null ? chickenData.chickenId : chicken.name;
+                        var chickenData = chicken.GetComponent<ChickenData>();
+                        string chickenId = chickenData != null ? chickenData.chickenId : chicken.name;
                         var chickenState = ChickenManager.Instance.GetChickenState(chickenId);
                         
-                    if (chickenState != null)
-                    {
-                        chickenStates.Add(new ChickenSaveState
+                        if (chickenState != null)
                         {
-                            chickenId = chickenState.chickenId,
-                            positionX = chickenState.position.x,
-                            positionY = chickenState.position.y,
-                            positionZ = chickenState.position.z,
-                            isFed = chickenState.isFed,
-                            feedEndTime = chickenState.feedEndTime,
-                            totalEggsLaid = chickenState.totalEggsLaid,
-                            currentEggLayInterval = chickenState.currentEggLayInterval,
-                            baseEggLayInterval = chickenState.baseEggLayInterval,
-                            isMoving = chickenState.isMoving,
-                            speedMultiplier = chickenState.speedMultiplier,
-                            isBoosted = chickenState.isBoosted,
-                            eggLayTimer = chicken.GetEggLayTimer()
-                        });
+                            chickenStates.Add(new ChickenSaveState
+                            {
+                                chickenId = chickenState.chickenId,
+                                positionX = chickenState.position.x,
+                                positionY = chickenState.position.y,
+                                positionZ = chickenState.position.z,
+                                isFed = chickenState.isFed,
+                                feedEndTime = chickenState.feedEndTime,
+                                totalEggsLaid = chickenState.totalEggsLaid,
+                                currentEggLayInterval = chickenState.currentEggLayInterval,
+                                baseEggLayInterval = chickenState.baseEggLayInterval,
+                                isMoving = chickenState.isMoving,
+                                speedMultiplier = chickenState.speedMultiplier,
+                                isBoosted = chickenState.isBoosted,
+                                eggLayTimer = chicken.GetEggLayTimer()
+                            });
+                        }
                     }
                 }
                 
@@ -136,14 +124,7 @@ public class FarmSaveData
             
             foreach (var egg in allEggs)
             {
-                // Add null check to prevent MissingReferenceException
-                if (egg == null || egg.gameObject == null)
-                {
-                    Debug.LogWarning("[FarmSaveData] Skipping null egg during save");
-                    continue;
-                }
-                
-                if (egg.type == CollectableType.EGG)
+                if (egg != null && egg.type == CollectableType.EGG)
                 {
                     eggStates.Add(new EggSaveState
                     {

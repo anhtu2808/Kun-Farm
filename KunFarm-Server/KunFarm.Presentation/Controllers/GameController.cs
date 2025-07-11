@@ -227,36 +227,5 @@ namespace KunFarm.Presentation.Controllers
                 return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
             }
         }
-
-        [HttpPost("reset/{userId}")]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-        public async Task<ActionResult<ApiResponse<bool>>> ResetGame(int userId)
-        {
-            try
-            {
-                if (userId <= 0)
-                {
-                    return BadRequest(ApiResponse<object>.Error("Invalid user ID", 400));
-                }
-
-                var success = await _gameService.ResetGameAsync(userId);
-                
-                if (success)
-                {
-                    return Ok(ApiResponse<bool>.Success(true, "Game reset successfully"));
-                }
-                else
-                {
-                    return BadRequest(ApiResponse<bool>.Error("Failed to reset game", 400));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in ResetGame endpoint");
-                return StatusCode(500, ApiResponse<object>.Error("Internal server error", 500));
-            }
-        }
     }
 } 
