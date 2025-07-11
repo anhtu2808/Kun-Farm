@@ -22,6 +22,7 @@ public class FarmManager : MonoBehaviour
     private bool hasTriedLogin = false;
     private bool isLoading = false; // Flag to prevent save during load
     private float loadCompleteTime = 0f; // Time when load completed
+    private bool isRestarting = false; // Flag to prevent save during restart
 
     void Start()
     {
@@ -57,10 +58,26 @@ public class FarmManager : MonoBehaviour
         currentUserId = userId;
     }
 
+    /// <summary>
+    /// Set restart flag to prevent save operations during game restart
+    /// </summary>
+    public void SetRestarting(bool restarting)
+    {
+        isRestarting = restarting;
+        if (restarting)
+            Debug.Log("[FarmManager] Restart mode enabled - save operations disabled");
+        else
+            Debug.Log("[FarmManager] Restart mode disabled - save operations re-enabled");
+    }
+
     public void SaveFarmState()
     {
-        if (tileManager == null || ApiClient.Instance == null)
+        if (tileManager == null || ApiClient.Instance == null || isRestarting)
+        {
+            if (isRestarting)
+                Debug.LogWarning("[FarmManager] Skipping save during restart to avoid MissingReferenceException");
             return;
+        }
 
         var farmData = FarmSaveData.FromTileManager(tileManager, currentUserId);
         ApiClient.Instance.SaveFarmState(farmData, success => OnSaveComplete(success));
@@ -246,13 +263,13 @@ public class FarmManager : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && autoSaveEnabled && !isLoading && (loadCompleteTime == 0f || Time.time - loadCompleteTime > 5f))
+        if (pauseStatus && autoSaveEnabled && !isLoading && !isRestarting && (loadCompleteTime == 0f || Time.time - loadCompleteTime > 5f))
             SaveFarmState();
     }
 
     void OnApplicationFocus(bool hasFocus)
     {
-        if (!hasFocus && autoSaveEnabled)
+        if (!hasFocus && autoSaveEnabled && !isRestarting)
         {
             float timeSinceLoad = loadCompleteTime > 0f ? Time.time - loadCompleteTime : 0f;
             if (!isLoading && (loadCompleteTime == 0f || timeSinceLoad > 5f))

@@ -214,6 +214,13 @@ public class GameOverManager : MonoBehaviour
     
     private IEnumerator RestartGameCoroutine()
     {
+        // Set restart flag to prevent save operations during restart
+        var farmManager = FindObjectOfType<FarmManager>();
+        if (farmManager != null)
+        {
+            farmManager.SetRestarting(true);
+        }
+        
         // Resume time scale
         Time.timeScale = 1f;
         
@@ -273,6 +280,13 @@ public class GameOverManager : MonoBehaviour
         
         // Reset local game state without reloading scene
         ResetLocalGameState();
+        
+        // Re-enable save operations after restart is complete
+        var farmManagerAfterReset = FindObjectOfType<FarmManager>();
+        if (farmManagerAfterReset != null)
+        {
+            farmManagerAfterReset.SetRestarting(false);
+        }
         
         yield return null;
     }
