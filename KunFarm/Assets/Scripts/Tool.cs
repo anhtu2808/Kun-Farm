@@ -154,8 +154,17 @@ public class HandTool : Tool
             {
                 if (cropGrower.isMature)
                 {
+                    if (cropGrower.cropData.cropName == "Apple")
+                    {
+                        cropGrower.HarvestFruitOnly();
+                    }
+                    else
+                    {
+                        // Thu hoạch cả hạt và quả
+                        cropGrower.Harvest(); // spawn tất cả harvestDrops
+                    }
                     // Plant is mature - harvest it
-                    cropGrower.HarvestFruitOnly();
+
                     // tileManager.DeregisterPlant(cellPosition);
                     // tileManager.SetTileState(cellPosition, TileState.Dug);
                     // Object.Destroy(plant);
