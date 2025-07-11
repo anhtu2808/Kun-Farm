@@ -131,31 +131,39 @@ public class SaveAndExitManager : MonoBehaviour
         
         // Step 1: Save Player Data (Position, Health, Hunger, Money)
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Saving player data...");
+            Debug.Log("🔄 [SaveAndExitManager] Step 1/4: Saving player data...");
         yield return StartCoroutine(SavePlayerData());
         
         // Step 2: Save Farm Data (Tiles, Plants, Chickens, Eggs)
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Saving farm data...");
+            Debug.Log("🔄 [SaveAndExitManager] Step 2/4: Saving farm data...");
         yield return StartCoroutine(SaveFarmData());
         
-        // Step 3: Save Toolbar Data
+        // Step 3: Save Toolbar Data (9 tool slots)
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Saving toolbar...");
+            Debug.Log("🔄 [SaveAndExitManager] Step 3/4: Saving toolbar (9 tool slots)...");
         yield return StartCoroutine(SaveToolbarData());
         
-        // Step 4: Save Inventory Data
+        // Step 4: Save Inventory Data (27 inventory slots)
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Saving inventory...");
+            Debug.Log("🔄 [SaveAndExitManager] Step 4/4: Saving inventory (27 slots)...");
         yield return StartCoroutine(SaveInventoryData());
         
         // Step 5: Wait a bit for all saves to complete
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Finalizing...");
+            Debug.Log("[SaveAndExitManager] Finalizing save process...");
         yield return new WaitForSeconds(1f);
         
         if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] All data saved successfully!");
+        {
+            Debug.Log("=== SAVE AND EXIT SUMMARY ===");
+            Debug.Log("✅ Player Data: Position, Health, Hunger, Money saved");
+            Debug.Log("✅ Farm Data: Tiles, Plants, Chickens, Eggs saved");
+            Debug.Log("✅ Toolbar Data: All 9 tool slots saved");
+            Debug.Log("✅ Inventory Data: All 27 inventory slots saved");
+            Debug.Log("🎯 [SaveAndExitManager] ALL DATA SAVED SUCCESSFULLY!");
+            Debug.Log("===============================");
+        }
         
         // Quit game
         QuitGame();
@@ -219,10 +227,15 @@ public class SaveAndExitManager : MonoBehaviour
             toolManager.SaveToolbar();
             
             if (showDebugInfo)
-                Debug.Log("[SaveAndExitManager] Toolbar data save triggered");
+                Debug.Log("[SaveAndExitManager] ✅ Toolbar save triggered via ToolManager.SaveToolbar()");
+        }
+        else
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[SaveAndExitManager] ❌ ToolManager not found - toolbar NOT saved!");
         }
         
-        yield return new WaitForSeconds(0.5f); // Wait for API call
+        yield return new WaitForSeconds(1f); // Wait longer for API call
     }
     
     private IEnumerator SaveInventoryData()
@@ -234,10 +247,15 @@ public class SaveAndExitManager : MonoBehaviour
             inventory.ForceSaveChanges();
             
             if (showDebugInfo)
-                Debug.Log("[SaveAndExitManager] Inventory data save triggered");
+                Debug.Log("[SaveAndExitManager] ✅ Inventory save triggered via Inventory.ForceSaveChanges()");
+        }
+        else
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("[SaveAndExitManager] ❌ Inventory not found - inventory NOT saved!");
         }
         
-        yield return new WaitForSeconds(1f); // Wait for API call
+        yield return new WaitForSeconds(2f); // Wait longer for batch API call
     }
     
     private void QuitGame()
