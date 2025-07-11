@@ -195,30 +195,49 @@ public class ApiClient : MonoBehaviour
                 try
                 {
                     Debug.Log($"[ApiClient] Raw load response: {response}");
-                    var apiResponse = JsonUtility.FromJson<ApiResponseWrapper<FarmStateServerResponse>>(response);
+                    
+                    // Use simple direct parsing - create a complete response class
+                    var farmResponse = JsonUtility.FromJson<FarmLoadResponse>(response);
+                    if (farmResponse == null)
+                    {
+                        Debug.LogError("[ApiClient] Failed to parse farm load response");
+                        onComplete?.Invoke(null);
+                        return;
+                    }
+                    
+                    Debug.Log($"[ApiClient] Parse successful - Code: {farmResponse.code}, Message: {farmResponse.message}");
+                    
+                    if (farmResponse.code != 200 || farmResponse.data == null)
+                    {
+                        Debug.LogWarning($"[ApiClient] Server returned error or empty data: {farmResponse.message}");
+                        onComplete?.Invoke(null);
+                        return;
+                    }
+                    
+                    var farmStateData = farmResponse.data;
                     
                     // Debug server response structure
-                    Debug.Log($"[ApiClient] API Response - Success: {apiResponse.success}, Code: {apiResponse.code}");
-                    if (apiResponse.data != null)
+                    Debug.Log($"[ApiClient] Farm Data - UserId: {farmStateData.userId}");
+                    if (farmStateData != null)
                     {
-                        Debug.Log($"[ApiClient] Server data - UserId: {apiResponse.data.userId}");
-                        Debug.Log($"[ApiClient] Server data - TileStates: {apiResponse.data.tileStates?.Length ?? 0}");
-                        Debug.Log($"[ApiClient] Server data - Plants: {apiResponse.data.plants?.Length ?? 0}");
-                        Debug.Log($"[ApiClient] Server data - ChickensStateJson length: {apiResponse.data.chickensStateJson?.Length ?? 0}");
-                        Debug.Log($"[ApiClient] Server data - EggsStateJson length: {apiResponse.data.eggsStateJson?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - UserId: {farmStateData.userId}");
+                        Debug.Log($"[ApiClient] Server data - TileStates: {farmStateData.tileStates?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - Plants: {farmStateData.plants?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - ChickensStateJson length: {farmStateData.chickensStateJson?.Length ?? 0}");
+                        Debug.Log($"[ApiClient] Server data - EggsStateJson length: {farmStateData.eggsStateJson?.Length ?? 0}");
                         
                         // Debug first few plants
-                        if (apiResponse.data.plants != null && apiResponse.data.plants.Length > 0)
+                        if (farmStateData.plants != null && farmStateData.plants.Length > 0)
                         {
-                            for (int i = 0; i < Math.Min(3, apiResponse.data.plants.Length); i++)
+                            for (int i = 0; i < Math.Min(3, farmStateData.plants.Length); i++)
                             {
-                                var plant = apiResponse.data.plants[i];
+                                var plant = farmStateData.plants[i];
                                 Debug.Log($"[ApiClient] Server plant {i}: ({plant.x}, {plant.y}, {plant.z}) cropType: '{plant.cropType}' stage: {plant.currentStage}");
                             }
                         }
                     }
                     
-                    if (apiResponse.success && apiResponse.data != null)
+                    if (farmResponse.code == 200 && farmStateData != null)
                     {
                         // Helper function để clean JSON strings từ server
                         string CleanJsonString(string jsonString)
@@ -236,19 +255,19 @@ public class ApiClient : MonoBehaviour
                         // Convert server response to Unity format
                         var farmData = new FarmSaveData
                         {
-                            userId = apiResponse.data.userId,
+                            userId = farmStateData.userId,
                             tileStates = new System.Collections.Generic.List<TileStateData>(),
                             plants = new System.Collections.Generic.List<PlantData>(),
-                            chickensStateJson = CleanJsonString(apiResponse.data.chickensStateJson),
-                            eggsStateJson = CleanJsonString(apiResponse.data.eggsStateJson)
+                            chickensStateJson = CleanJsonString(farmStateData.chickensStateJson),
+                            eggsStateJson = CleanJsonString(farmStateData.eggsStateJson)
                         };
                         
                         Debug.Log($"[ApiClient] Cleaned JSON - Chickens: '{farmData.chickensStateJson}', Eggs: '{farmData.eggsStateJson}'");
 
                         // Convert tile states
-                        if (apiResponse.data.tileStates != null)
+                        if (farmStateData.tileStates != null)
                         {
-                            foreach (var tileState in apiResponse.data.tileStates)
+                            foreach (var tileState in farmStateData.tileStates)
                             {
                                 farmData.tileStates.Add(new TileStateData
                                 {
@@ -261,9 +280,9 @@ public class ApiClient : MonoBehaviour
                         }
 
                         // Convert plants with validation
-                        if (apiResponse.data.plants != null)
+                        if (farmStateData.plants != null)
                         {
-                            foreach (var plant in apiResponse.data.plants)
+                            foreach (var plant in farmStateData.plants)
                             {
                                 // Validate plant data before adding
                                 if (string.IsNullOrEmpty(plant.cropType))
@@ -370,4 +389,13 @@ public class ServerPlantData
     public int currentStage;
     public float timer;
     public bool isMature;
+}
+
+// Direct response class that matches the exact JSON structure
+[System.Serializable]
+public class FarmLoadResponse
+{
+    public int code;
+    public string message;
+    public FarmStateServerResponse data;
 }
