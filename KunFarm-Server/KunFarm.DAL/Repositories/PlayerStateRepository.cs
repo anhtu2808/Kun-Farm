@@ -134,5 +134,19 @@ namespace KunFarm.DAL.Repositories
                 return false;
             }
         }
-    }
+
+        public async Task<bool> UpdatePlayerAsync(PlayerState player)
+		{
+			try
+			{
+				_context.PlayerStates.Update(player);
+				return await _context.SaveChangesAsync() > 0;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+	}
 } 

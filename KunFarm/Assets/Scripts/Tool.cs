@@ -363,7 +363,9 @@ public class AxeTool : Tool
         if (plant != null)
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
-            return cropGrower != null; // Can use on any plant, regardless of maturity
+            if (cropGrower == null) return false;
+            
+            return cropGrower.isMature; // Chỉ có thể dùng khi cây đã trưởng thành
         }
         return false;
     }
