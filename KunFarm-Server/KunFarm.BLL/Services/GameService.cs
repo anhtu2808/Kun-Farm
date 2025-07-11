@@ -395,5 +395,73 @@ namespace KunFarm.BLL.Services
                 return false;
             }
         }
+
+        public async Task<bool> ResetGameAsync(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Resetting game state for user: {UserId}", userId);
+
+                // Check if user exists
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found: {UserId}", userId);
+                    return false;
+                }
+
+                // Reset player state to default values
+                var playerStateSuccess = await _playerStateRepository.SavePlayerStateAsync(
+                    userId,
+                    money: 200,           // Default money
+                    posX: 0f,           // Default position 
+                    posY: 0f,
+                    posZ: 0f,
+                    health: 100f,       // Full health
+                    hunger: 100f        // Full hunger
+                );
+
+                if (!playerStateSuccess)
+                {
+                    _logger.LogError("Failed to reset player state for user: {UserId}", userId);
+                    return false;
+                }
+
+                // Reset farm state to empty
+                var farmStateSuccess = await _farmStateRepository.SaveFarmStateAsync(
+                    userId,
+                    tileStatesJson: "[]",       // Empty tiles
+                    plantsJson: "[]",           // No plants
+                    chickensStateJson: "[]",    // No chickens
+                    eggsStateJson: "[]"         // No eggs
+                );
+
+                if (!farmStateSuccess)
+                {
+                    _logger.LogError("Failed to reset farm state for user: {UserId}", userId);
+                    return false;
+                }
+
+                // Reset toolbar to empty
+                var toolbarSuccess = await _playerToolbarRepository.SavePlayerToolbarAsync(
+                    userId,
+                    toolsJson: "[]"             // Empty toolbar
+                );
+
+                if (!toolbarSuccess)
+                {
+                    _logger.LogError("Failed to reset toolbar for user: {UserId}", userId);
+                    return false;
+                }
+
+                _logger.LogInformation("Game state reset successfully for user: {UserId}", userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting game state for user: {UserId}", userId);
+                return false;
+            }
+        }
     }
 } 

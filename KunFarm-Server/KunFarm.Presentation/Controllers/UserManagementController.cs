@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace KunFarm.Presentation.Controllers
 {
     [ApiController]
-    [Route("/admin/users")]
+    [Route("/admin/user-management")]
     public class UserManagementController : ControllerBase
     {
         private readonly IUserManagementService _userManagementService;
@@ -332,5 +332,26 @@ namespace KunFarm.Presentation.Controllers
                 return StatusCode(500, ApiResponse<object>.Error("Có lỗi xảy ra trên server", 500));
             }
         }
-    }
+
+		[HttpPut("{userId}/money")]
+		[ProducesResponseType(typeof(ApiResponse<object>), 200)]
+		[ProducesResponseType(typeof(ApiResponse<object>), 404)]
+		[ProducesResponseType(typeof(ApiResponse<object>), 500)]
+		public async Task<ActionResult<ApiResponse<object>>> UpdateMoney(int userId, [FromBody] UpdateMoneyRequest req)
+		{
+			try
+			{
+				var success = await _userManagementService.UpdateUserMoneyAsync(userId, req.Money);
+				if (!success)
+					return NotFound(ApiResponse<object>.Error("User not found", 404));
+
+				return Ok(ApiResponse<object>.Success(null, "Money updated successfully"));
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating money for user {UserId}", userId);
+				return StatusCode(500, ApiResponse<object>.Error("Server error", 500));
+			}
+		}
+	}
 } 

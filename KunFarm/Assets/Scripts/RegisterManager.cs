@@ -21,7 +21,7 @@ public class RegisterManager : MonoBehaviour
 
     /* ---------- Settings ---------- */
     [Header("Settings")]
-    public string registerUrl = "http://localhost:5270/auth/register";
+    // API URL will be loaded from ApiClient.BaseUrl
     [SerializeField] private bool showDebug = true;
 
     /* ---------- DTO ---------- */
@@ -196,11 +196,12 @@ public class RegisterManager : MonoBehaviour
 
         string jsonPayload = JsonUtility.ToJson(registerRequest);
 
+        string apiUrl = $"{ApiClient.BaseUrl}/auth/register";
         if (showDebug)
-            Debug.Log("[Register] POST " + registerUrl + " Payload: " + jsonPayload);
+            Debug.Log("[Register] POST " + apiUrl + " Payload: " + jsonPayload);
 
         // Send request
-        UnityWebRequest req = new UnityWebRequest(registerUrl, "POST");
+        UnityWebRequest req = new UnityWebRequest(apiUrl, "POST");
         req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonPayload));
         req.downloadHandler = new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");

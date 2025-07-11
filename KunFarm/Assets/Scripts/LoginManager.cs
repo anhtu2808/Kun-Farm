@@ -18,7 +18,7 @@ public class LoginManager : MonoBehaviour
 
     /* ---------- Settings ---------- */
     [Header("Settings")]
-    public string loginUrl = "http://localhost:5270/auth/login";
+    // API URL will be loaded from ApiClient.BaseUrl
     [SerializeField] private bool showDebug = true;
 
     /* ---------- DTO ---------- */
@@ -107,10 +107,11 @@ public class LoginManager : MonoBehaviour
             };
         string jsonPayload = JsonUtility.ToJson(rq);
 
-        if (showDebug) Debug.Log($"[Login] POST {loginUrl}\nPayload: {jsonPayload}");
+        string apiUrl = $"{ApiClient.BaseUrl}/auth/login";
+        if (showDebug) Debug.Log($"[Login] POST {apiUrl}\nPayload: {jsonPayload}");
 
         /* 2) Send request */
-        using var req = new UnityWebRequest(loginUrl, "POST");
+        using var req = new UnityWebRequest(apiUrl, "POST");
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonPayload));
         req.downloadHandler = new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");

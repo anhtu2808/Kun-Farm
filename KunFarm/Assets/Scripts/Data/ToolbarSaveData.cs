@@ -57,7 +57,7 @@ public class ToolbarSaveData
                 {
                     continue;
                 }
-                
+
                 Tool tool = CreateToolFromData(toolData);
                 if (tool != null)
                 {
@@ -84,7 +84,7 @@ public class ToolbarSaveData
 
         // Update toolbar display
         toolManager.UpdateToolbarDisplay();
-        
+
         Debug.Log("[ToolbarSaveData] Hand Tool đã được đặt ở slot đầu tiên khi load");
     }
 
@@ -100,6 +100,12 @@ public class ToolbarSaveData
                     shovel.animatorToolIndex = data.animatorToolIndex;
                     LoadToolIcon(shovel, data.iconPath);
                     return shovel;
+                case "AxeTool":
+                    var axe = new AxeTool(data.quantity);
+                    axe.toolName = data.toolName;
+                    axe.animatorToolIndex = data.animatorToolIndex;
+                    LoadToolIcon(axe, data.iconPath);
+                    return axe;
 
                 // WateringCanTool not available in this project
 
@@ -152,7 +158,7 @@ public class ToolbarSaveData
 
     private void LoadToolIcon(Tool tool, string iconPath)
     {
-        if (string.IsNullOrEmpty(iconPath)) 
+        if (string.IsNullOrEmpty(iconPath))
         {
             // Nếu không có iconPath, thử load default icon cho HandTool
             if (tool is HandTool)
@@ -165,10 +171,10 @@ public class ToolbarSaveData
         try
         {
             // Try to load icon from Resources với nhiều path
-            Sprite icon = Resources.Load<Sprite>($"Sprites/{iconPath}") ?? 
+            Sprite icon = Resources.Load<Sprite>($"Sprites/{iconPath}") ??
                          Resources.Load<Sprite>($"Tools/{iconPath}") ??
                          Resources.Load<Sprite>(iconPath);
-            
+
             if (icon != null)
             {
                 tool.toolIcon = icon;
@@ -176,7 +182,7 @@ public class ToolbarSaveData
             else
             {
                 Debug.LogWarning($"[ToolbarSaveData] Could not load icon: {iconPath}");
-                
+
                 // Fallback cho HandTool
                 if (tool is HandTool)
                 {
@@ -187,7 +193,7 @@ public class ToolbarSaveData
         catch (Exception ex)
         {
             Debug.LogError($"[ToolbarSaveData] Error loading icon {iconPath}: {ex.Message}");
-            
+
             // Fallback cho HandTool
             if (tool is HandTool)
             {
@@ -199,12 +205,12 @@ public class ToolbarSaveData
     private void TryLoadHandToolIcon(Tool handTool)
     {
         // Thử load icon từ các path có thể cho HandTool
-        Sprite handIcon = Resources.Load<Sprite>("Sprites/hand_icon") ?? 
+        Sprite handIcon = Resources.Load<Sprite>("Sprites/hand_icon") ??
                          Resources.Load<Sprite>("Tools/hand_icon") ??
                          Resources.Load<Sprite>("hand_icon") ??
                          Resources.Load<Sprite>("Sprites/hand") ??
                          Resources.Load<Sprite>("hand");
-        
+
         if (handIcon != null)
         {
             handTool.toolIcon = handIcon;
@@ -266,4 +272,4 @@ public class ToolSlotSaveData
     public int quantity = 0;
     public int animatorToolIndex = 0;
     public string iconPath = "";
-} 
+}

@@ -18,13 +18,15 @@ namespace KunFarm.BLL.Services
         private readonly IPlayerStateRepository _playerStateRepository;
         private readonly IConfiguration _configuration;
         private readonly IRegularShopSlotService _regularShopSlotService;
+        private readonly IInventorySlotService _inventoryService;
 
-        public AuthService(IUserRepository userRepository, IPlayerStateRepository playerStateRepository, IConfiguration configuration, IRegularShopSlotService regularShopSlotService)
+        public AuthService(IUserRepository userRepository, IPlayerStateRepository playerStateRepository, IConfiguration configuration, IRegularShopSlotService regularShopSlotService, IInventorySlotService inventorySlotService)
         {
             _userRepository = userRepository;
             _playerStateRepository = playerStateRepository;
             _configuration = configuration;
             _regularShopSlotService = regularShopSlotService;
+            _inventoryService = inventorySlotService;
         }
 
         public async Task<AuthResponse?> LoginAsync(LoginRequest request)
@@ -124,7 +126,7 @@ namespace KunFarm.BLL.Services
 
                 await _playerStateRepository.CreatePlayerStateAsync(playerState);
                 await _regularShopSlotService.CreatePlayerSlot(user.Id);
-
+                await _inventoryService.InitInventory(user.Id);
                 // Generate token
                 var token = GenerateToken(user.Id, user.Username);
 

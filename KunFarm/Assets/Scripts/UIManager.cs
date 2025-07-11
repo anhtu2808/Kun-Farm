@@ -76,10 +76,11 @@ public class UIManager : MonoBehaviour
         {
             ToggleUI(UIType.RegularShop);
         }
-        // ESC - Close all UIs
-        else if (Input.GetKeyDown(KeyCode.Escape))
+        // ESC - Close all UIs (only if any UI is open)
+        else if (Input.GetKeyDown(KeyCode.Escape) && IsAnyUIOpen())
         {
             CloseAllUIs();
+            if (showDebug) Debug.Log("[UIManager] ESC pressed - closed all UIs");
         }
     }
     

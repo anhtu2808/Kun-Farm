@@ -14,8 +14,6 @@ namespace KunFarm.BLL.DTOs.Response
         public string Username { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public int Money { get; set; }
-        public float Health { get; set; }
-        public float Hunger { get; set; }
         public DateTime LastSaved { get; set; }
         public bool IsActive { get; set; }
     }

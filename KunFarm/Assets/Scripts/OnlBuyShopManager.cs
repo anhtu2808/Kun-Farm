@@ -109,7 +109,7 @@ public class OnlBuyShopManager : MonoBehaviour
     private IEnumerator LoadShopData(int customPlayerId = -1)
     {
         int targetPlayerId = customPlayerId > 0 ? customPlayerId : playerId;
-        string apiUrl = $"http://localhost:5270/online-shop/2";
+        string apiUrl = $"{ApiClient.BaseUrl}/online-shop/2";
 
         UnityWebRequest request = UnityWebRequest.Get(apiUrl);
         yield return request.SendWebRequest();
@@ -189,7 +189,7 @@ public class OnlBuyShopManager : MonoBehaviour
             Debug.LogError("[OnlBuyShopManager] No valid player ID for buy request");
             yield break;
         }
-        string apiUrl = $"http://localhost:5270/online-shop/buy/{playerId}";
+        string apiUrl = $"{ApiClient.BaseUrl}/online-shop/buy/{playerId}";
         List<int> itemIds = new List<int> { data.id };
 
         string json = "[" + string.Join(",", itemIds) + "]";

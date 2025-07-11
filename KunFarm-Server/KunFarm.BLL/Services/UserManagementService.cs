@@ -341,5 +341,18 @@ namespace KunFarm.BLL.Services
                 return 0;
             }
         }
-    }
+
+		public async Task<bool> UpdateUserMoneyAsync(int userId, int newMoney)
+		{
+            var user = await _userRepository.GetByIdAsync(userId);  
+			var player = await _playerStateRepository.GetByUserIdAsync(userId);
+			if (player == null || user == null) return false;
+			player.Money = newMoney;
+			user.UpdatedAt = DateTime.UtcNow;
+            await _playerStateRepository.UpdatePlayerAsync(player);
+			await _userRepository.UpdateAsync(user);
+			await _userRepository.SaveChangesAsync();
+			return true;
+		}
+	}
 } 

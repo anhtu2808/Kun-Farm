@@ -185,7 +185,7 @@ public class Inventory : MonoBehaviour
     private IEnumerator GetInventoryData(int playerId = 0)
     {
         Debug.Log("📡 [Inventory] Đang gọi API để load data...");
-        string apiUrl = "http://localhost:5270/inventory/{playerId}";
+        string apiUrl = $"{ApiClient.BaseUrl}/inventory/{playerId}";
         UnityWebRequest request = UnityWebRequest.Get(apiUrl.Replace("{playerId}", playerId.ToString()));
         yield return request.SendWebRequest();
 
@@ -398,7 +398,7 @@ public class Inventory : MonoBehaviour
             Debug.LogError("[Inventory] No valid player ID for batch update");
             yield break;
         }
-        string apiUrl = $"http://localhost:5270/inventory/batch-update/{playerId}";
+        string apiUrl = $"{ApiClient.BaseUrl}/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
         
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -480,7 +480,7 @@ public class Inventory : MonoBehaviour
             Debug.LogError("[Inventory] No valid player ID for quit save");
             yield break;
         }
-        string apiUrl = $"http://localhost:5270/inventory/batch-update/{playerId}";
+        string apiUrl = $"{ApiClient.BaseUrl}/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
         
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
