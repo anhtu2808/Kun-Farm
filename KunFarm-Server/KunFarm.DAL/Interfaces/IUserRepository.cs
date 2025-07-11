@@ -9,5 +9,7 @@ namespace KunFarm.DAL.Interfaces
         Task<bool> ExistsByUsernameAsync(string username);
         Task<bool> ExistsByEmailAsync(string email);
         Task UpdateLastLoginAsync(int userId);
-    }
+
+        Task<List<User>> GetAllOnlyPlayersAsync();
+	}
 } 

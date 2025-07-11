@@ -1,231 +1,383 @@
 @page "/admin/users"
 @model KunFarm.Presentation.Pages.Admin.UsersModel
 @{
-    ViewData["Title"] = "Quản Lý Người Dùng";
+	ViewData["Title"] = "User Management";
 }
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-users"></i> Quản Lý Người Dùng
-                    </h3>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-success" onclick="exportUsers()">
-                            <i class="fas fa-download"></i> Xuất Excel
-                        </button>
-                        <button class="btn btn-info" onclick="refreshUsers()">
-                            <i class="fas fa-sync-alt"></i> Làm mới
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card-body">
-                    <!-- Statistics Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h4 id="totalUsers">-</h4>
-                                            <p class="mb-0">Tổng Người Dùng</p>
-                                        </div>
-                                        <div class="align-self-center">
-                                            <i class="fas fa-users fa-2x"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h4 id="activeUsers">-</h4>
-                                            <p class="mb-0">Đang Hoạt Động</p>
-                                        </div>
-                                        <div class="align-self-center">
-                                            <i class="fas fa-user-check fa-2x"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h4 id="inactiveUsers">-</h4>
-                                            <p class="mb-0">Không Hoạt Động</p>
-                                        </div>
-                                        <div class="align-self-center">
-                                            <i class="fas fa-user-times fa-2x"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h4 id="onlineNow">-</h4>
-                                            <p class="mb-0">Đang Online</p>
-                                        </div>
-                                        <div class="align-self-center">
-                                            <i class="fas fa-wifi fa-2x"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<h3 class="card-title mb-0">
+						<i class="fas fa-users"></i> User Management
+					</h3>
+					<div class="d-flex gap-2">
+						<button class="btn btn-success" onclick="exportUsers()">
+							<i class="fas fa-download"></i> Export Excel
+						</button>
+						<button class="btn btn-info" onclick="refreshUsers()">
+							<i class="fas fa-sync-alt"></i> Refresh
+						</button>
+					</div>
+				</div>
 
-                    <!-- Search and Filter -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm theo tên, email...">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="roleFilter" onchange="filterUsers()">
-                                <option value="">Tất cả vai trò</option>
-                                <option value="ADMIN">Quản trị viên</option>
-                                <option value="PLAYER">Người chơi</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="statusFilter" onchange="filterUsers()">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="true">Hoạt động</option>
-                                <option value="false">Không hoạt động</option>
-                            </select>
-                        </div>
-                    </div>
+				<div class="card-body">
+					<!-- Statistics Cards -->
+					<div class="row mb-4">
+						<div class="col-md-3">
+							<div class="card bg-primary text-white">
+								<div class="card-body">
+									<div class="d-flex justify-content-between">
+										<div>
+											<h4>@Model.TotalUsers</h4>
+											<p class="mb-0">Total Users</p>
+										</div>
+										<div class="align-self-center">
+											<i class="fas fa-users fa-2x"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card bg-success text-white">
+								<div class="card-body">
+									<div class="d-flex justify-content-between">
+										<div>
+											<h4>@Model.ActiveUsers</h4>
+											<p class="mb-0">Active Users</p>
+										</div>
+										<div class="align-self-center">
+											<i class="fas fa-user-check fa-2x"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card bg-warning text-white">
+								<div class="card-body">
+									<div class="d-flex justify-content-between">
+										<div>
+											<h4>@Model.InactiveUsers</h4>
+											<p class="mb-0">Inactive Users</p>
+										</div>
+										<div class="align-self-center">
+											<i class="fas fa-user-times fa-2x"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card bg-info text-white">
+								<div class="card-body">
+									<div class="d-flex justify-content-between">
+										<div>
+											<h4 id="onlineNow">-</h4>
+											<p class="mb-0">Currently Online</p>
+										</div>
+										<div class="align-self-center">
+											<i class="fas fa-wifi fa-2x"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-                    <!-- Users Table -->
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover" id="usersTable">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên đăng nhập</th>
-                                    <th>Email</th>
-                                    <th>Tên hiển thị</th>
-                                    <th>Vai trò</th>
-                                    <th>Tiền</th>
-                                    <th>Sức khỏe</th>
-                                    <th>Trạng thái</th>
-                                    <th>Đăng nhập cuối</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody">
-                                <!-- Data will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
+					<!-- Search & Filter -->
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<div class="input-group">
+								<input type="text" class="form-control" id="searchInput" placeholder="Search by username, email...">
+								<button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+									<i class="fas fa-search"></i>
+								</button>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<select class="form-select" id="roleFilter" onchange="filterUsers()">
+								<option value="">All Roles</option>
+								<option value="ADMIN">Administrator</option>
+								<option value="PLAYER">Player</option>
+							</select>
+						</div>
+						<div class="col-md-3">
+							<select class="form-select" id="statusFilter" onchange="filterUsers()">
+								<option value="">All Statuses</option>
+								<option value="true">Active</option>
+								<option value="false">Inactive</option>
+							</select>
+						</div>
+					</div>
 
-                    <!-- Loading indicator -->
-                    <div id="loadingIndicator" class="text-center my-4" style="display: none;">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Đang tải...</span>
-                        </div>
-                        <p class="mt-2">Đang tải dữ liệu...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+					<!-- Users Table -->
+					<div class="table-responsive">
+						<table class="table table-striped table-hover" id="usersTable">
+							<thead class="table-dark">
+								<tr>
+									<th>ID</th>
+									<th>Username</th>
+									<th>Email</th>
+									<th>Display Name</th>
+									<th>Role</th>
+									<th>Money</th>
+									<th>Health</th>
+									<th>Status</th>
+									<th>Last Login</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody id="usersTableBody">
+								@{
+									if (Model.Users != null && Model.Users.Count > 0)
+									{
+										foreach (var u in Model.Users)
+										{
+											<tr>
+												<td>@u.Id</td>
+												<td>@u.Username</td>
+												<td>@u.Email</td>
+												<td>@u.DisplayName</td>
+												<td>@u.Role</td>
+												<td id="moneyCell-@u.Id">@u.Money</td>
+												<td>@u.Health</td>
+												<td>
+													@if (u.IsActive)
+													{
+														<span class="badge bg-success">Active</span>
+													}
+													else
+													{
+														<span class="badge bg-secondary">Inactive</span>
+													}
+												</td>
+												<td>@(u.LastLoginAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+												<td>
+													@if (u.IsActive)
+													{
+														<button class="btn btn-sm btn-warning" onclick="deactivateUser(@u.Id)">
+															Deactivate
+														</button>
+													}
+													else
+													{
+														<button class="btn btn-sm btn-success" onclick="activateUser(@u.Id)">
+															Activate
+														</button>
+													}
+													<button class="btn btn-sm btn-outline-primary"
+															onclick="openEditMoneyModal(@u.Id)">
+														Edit Money
+													</button>
+												</td>
+											</tr>
+										}
+									}
+									else
+									{
+										<tr>
+											<td colspan="10" class="text-center">No users found</td>
+										</tr>
+									}
+								}
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Loading Indicator -->
+					<div id="loadingIndicator" class="text-center my-4" style="display: none;">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p class="mt-2">Loading data...</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
-<!-- User Edit Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chỉnh sửa người dùng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editUserForm">
-                    <input type="hidden" id="editUserId">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="editDisplayName" class="form-label">Tên hiển thị</label>
-                                <input type="text" class="form-control" id="editDisplayName">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="editEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="editEmail">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="editRole" class="form-label">Vai trò</label>
-                                <select class="form-select" id="editRole">
-                                    <option value="PLAYER">Người chơi</option>
-                                    <option value="ADMIN">Quản trị viên</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="editIsActive" class="form-label">Trạng thái</label>
-                                <select class="form-select" id="editIsActive">
-                                    <option value="true">Hoạt động</option>
-                                    <option value="false">Không hoạt động</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6>Trạng thái game</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="editMoney" class="form-label">Tiền</label>
-                                <input type="number" class="form-control" id="editMoney" min="0">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="editHealth" class="form-label">Sức khỏe</label>
-                                <input type="number" class="form-control" id="editHealth" min="0" max="100">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="editHunger" class="form-label">Độ đói</label>
-                                <input type="number" class="form-control" id="editHunger" min="0" max="100">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="saveUser()">Lưu thay đổi</button>
-            </div>
-        </div>
-    </div>
+
+<div class="modal fade" id="editMoneyModal" tabindex="-1" aria-labelledby="editMoneyLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editMoneyLabel">Edit User Money</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<form id="editMoneyForm">
+					<input type="hidden" id="modalUserId" />
+					<div class="mb-3">
+						<label for="modalMoneyInput" class="form-label">New Money Amount</label>
+						<input type="number" class="form-control" id="modalMoneyInput" min="0" />
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-primary" id="modalSaveMoneyBtn">Save</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 @section Scripts {
-    <script src="~/js/admin-users.js"></script>
-} 
+	<script>
+		// Client‑side filter logic
+		function applyClientFilter() {
+			const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+			const roleVal = document.getElementById('roleFilter').value;
+			const statusVal = document.getElementById('statusFilter').value; // "" | "true" | "false"
+
+			const rows = document.querySelectorAll('#usersTableBody tr');
+
+			rows.forEach(row => {
+				const cells = row.querySelectorAll('td');
+				if (cells.length === 0) return;
+
+				const username = cells[1].textContent.trim().toLowerCase();
+				const email = cells[2].textContent.trim().toLowerCase();
+				const displayName = cells[3].textContent.trim().toLowerCase();
+				const rowRole = cells[4].textContent.trim();
+				const badge = cells[7].querySelector('span');
+				const isActive = badge.classList.contains('bg-success');
+
+				const matchSearch = !searchVal
+					|| username.includes(searchVal)
+					|| email.includes(searchVal)
+					|| displayName.includes(searchVal);
+
+				const matchRole = !roleVal || rowRole === roleVal;
+				const matchStatus = !statusVal
+					|| (statusVal === 'true' && isActive)
+					|| (statusVal === 'false' && !isActive);
+
+				row.style.display = (matchSearch && matchRole && matchStatus) ? '' : 'none';
+			});
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			document.getElementById('searchInput').addEventListener('input', applyClientFilter);
+			document.getElementById('roleFilter').addEventListener('change', applyClientFilter);
+			document.getElementById('statusFilter').addEventListener('change', applyClientFilter);
+			applyClientFilter();
+		});
+
+		// Activate a user
+		async function activateUser(userId) {
+			if (!confirm('Are you sure you want to activate this user?')) return;
+			try {
+				const resp = await fetch(`/admin/user-management/${userId}/activate`, {
+					method: 'POST'
+				});
+				const result = await resp.json();
+				if (resp.ok && result.code === 200) {
+					alert('User activated successfully');
+					window.location.reload();
+				} else {
+					alert(result.message || 'Failed to activate user');
+				}
+			} catch {
+				alert('Error calling the API');
+			}
+		}
+
+		// Deactivate a user
+		async function deactivateUser(userId) {
+			if (!confirm('Are you sure you want to deactivate this user?')) return;
+			try {
+				const resp = await fetch(`/admin/user-management/${userId}/deactivate`, {
+					method: 'POST'
+				});
+				const result = await resp.json();
+				if (resp.ok && result.code === 200) {
+					alert('User deactivated successfully');
+					window.location.reload();
+				} else {
+					alert(result.message || 'Failed to deactivate user');
+				}
+			} catch {
+				alert('Error calling the API');
+			}
+		}
+
+		function openEditMoneyModal(userId) {
+			// Grab the *current* value from the table cell
+			const cell = document.getElementById(`moneyCell-${userId}`);
+			if (!cell) {
+				console.error('money cell not found for user', userId);
+				return;
+			}
+
+			const currentMoney = parseInt(cell.textContent.trim(), 10) || 0;
+			document.getElementById('modalUserId').value = userId;
+			document.getElementById('modalMoneyInput').value = currentMoney;
+
+			new bootstrap.Modal(document.getElementById('editMoneyModal')).show();
+		}
+
+		// 2) Handle the Save button in the modal
+		document.getElementById('modalSaveMoneyBtn')
+			.addEventListener('click', applyMoneyUpdate);
+
+		async function applyMoneyUpdate() {
+			const userId = document.getElementById('modalUserId').value;
+			const inputEl = document.getElementById('modalMoneyInput');
+			const newMoney = parseInt(inputEl.value, 10);
+
+			if (isNaN(newMoney) || newMoney < 0) {
+				alert('Please enter a valid non‑negative number.');
+				return;
+			}
+
+			let response;
+			try {
+				response = await fetch(`/admin/user-management/${userId}/money`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ money: newMoney })
+				});
+			} catch (networkErr) {
+				console.error('Fetch failed:', networkErr);
+				alert('🚨 Network error: cannot reach server. Check your connection or CORS policy.');
+				return;
+			}
+
+			// If the server responded with 4xx/5xx
+			if (!response.ok) {
+				const text = await response.text();
+				console.error(`Server HTTP ${response.status}:`, text);
+				alert(`Server error ${response.status}: ${response.statusText}`);
+				return;
+			}
+
+			// Parse JSON body (if any)
+			let payload;
+			try {
+				payload = await response.json();
+			} catch (parseErr) {
+				console.error('Invalid JSON from server:', parseErr);
+				alert('⚠️ Unexpected response format from server.');
+				return;
+			}
+
+			// Check your API’s own “code” field
+			if (payload.code !== 200) {
+				console.warn('API signaled failure:', payload);
+				alert(payload.message || 'Operation failed on server.');
+				return;
+			}
+
+			// Success! Update the UI
+			document.getElementById(`moneyCell-${userId}`).textContent = newMoney;
+			bootstrap.Modal.getInstance(
+				document.getElementById('editMoneyModal')
+			).hide();
+			alert('💾 Money updated successfully');
+		}
+	</script>
+}
