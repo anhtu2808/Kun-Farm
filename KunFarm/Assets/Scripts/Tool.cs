@@ -51,6 +51,7 @@ public class ShovelTool : Tool
         {
             tileManager.SetTileState(cellPosition, TileState.Dug);
         }
+        PlayDiggingSound();
     }
 
     public override bool CanUse(Vector3Int cellPosition, TileManager tileManager)
@@ -67,6 +68,19 @@ public class ShovelTool : Tool
     public override bool IsConsumable()
     {
         return true; // Shovel có thể hết độ bền
+    }
+    private void PlayDiggingSound()
+    {
+        // Tìm DiggingAudio component trong Player hoặc GameObject đang sử dụng tool
+        DiggingAudio diggingAudio = Object.FindObjectOfType<DiggingAudio>();
+        if (diggingAudio != null)
+        {
+            diggingAudio.PlayDiggingSoundWithRandomPitch();
+        }
+        else
+        {
+            Debug.LogWarning("DiggingAudio component not found in scene!");
+        }
     }
 }
 

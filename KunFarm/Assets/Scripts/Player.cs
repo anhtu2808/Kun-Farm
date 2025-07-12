@@ -6,7 +6,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public Inventory inventory;
-
+    private PickupAudio pickupAudio;
     [SerializeField]
     public Wallet wallet;
 
@@ -34,6 +34,19 @@ public class Player : MonoBehaviour
             wallet = FindObjectOfType<Wallet>();
         if (inventory == null)
             inventory = FindObjectOfType<Inventory>();
+        pickupAudio = GetComponent<PickupAudio>();
+        if (pickupAudio == null)
+        {
+            pickupAudio = gameObject.AddComponent<PickupAudio>();
+        }
+    }
+
+    public void PlayPickupSound()
+    {
+        if (pickupAudio != null)
+        {
+            pickupAudio.PlayPickupSound();
+        }
     }
 
     public void DropItem(Collectable item)
