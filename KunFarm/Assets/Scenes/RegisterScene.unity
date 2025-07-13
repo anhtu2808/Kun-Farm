@@ -467,8 +467,12 @@ PrefabInstance:
       value: 32.0011
       objectReference: {fileID: 0}
     - target: {fileID: 3341251974140445617, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3341251974140445617, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -20
       objectReference: {fileID: 0}
     - target: {fileID: 3644207956295213525, guid: 306d69364d1d1cc4aa6359481804b098, type: 3}
       propertyPath: m_fontSize
