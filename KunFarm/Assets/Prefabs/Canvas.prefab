@@ -360,8 +360,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8297144726557748587}
-        m_TargetAssemblyTypeName: NewBehaviourScript, Assembly-CSharp
-        m_MethodName: ToggleInventory
+        m_TargetAssemblyTypeName: Inventory, Assembly-CSharp
+        m_MethodName: CloseInventory
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -724,7 +724,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -945,7 +945,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -1166,7 +1166,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -1387,7 +1387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -1608,7 +1608,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -1829,7 +1829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -2050,7 +2050,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -2271,7 +2271,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -2492,7 +2492,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -2713,7 +2713,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -2934,7 +2934,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -3155,7 +3155,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -3376,7 +3376,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -3593,7 +3593,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -3814,7 +3814,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4035,7 +4035,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4256,7 +4256,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4477,7 +4477,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4698,7 +4698,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4919,7 +4919,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -5140,7 +5140,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NewBehaviourScript, Assembly-CSharp
+      value: Inventory, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1743414059725280260, guid: 2435968592d635941a5eace313b8b998, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument

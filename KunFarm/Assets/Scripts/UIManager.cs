@@ -84,6 +84,15 @@ public class UIManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Toggle inventory - for UI button compatibility
+    /// </summary>
+    public void ToggleInventory()
+    {
+        ToggleUI(UIType.Inventory);
+        if (showDebug) Debug.Log("[UIManager] ToggleInventory called from button");
+    }
+    
     public void ToggleUI(UIType uiType)
     {
         if (currentlyOpenUI == uiType)

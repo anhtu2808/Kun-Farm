@@ -6,17 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
     public Transform inventorySlotContainer;
     public GameObject inventorySlotPrefab;
+
+    public GameObject closeButtonPrefab;
     public Player player;
     public GameObject inventoryPanel; // ← Gán panel chứa UI inventory
     public bool IsOpen => inventoryPanel.activeSelf;
     private int totalSlots = 27;
     private List<GameObject> slotInstances = new();
-    
+
     // Track changes for auto-save
     private bool hasChanges = false;
     private float autoSaveTimer = 0f;
@@ -80,6 +83,10 @@ public class Inventory : MonoBehaviour
     {
         inventoryPanel.SetActive(false);
         InitializeEmptySlots();
+        
+        // Setup close button
+        SetupCloseButton();
+        
         int playerId = PlayerPrefs.GetInt("PLAYER_ID", 0);
         if (playerId > 0)
         {
@@ -95,7 +102,7 @@ public class Inventory : MonoBehaviour
     {
         // Input handling moved to UIManager
         // Tab key is now handled by UIManager
-        
+
         // Auto save every 30 seconds
         if (isAutoSaveEnabled)
         {
@@ -124,6 +131,53 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Closes the inventory panel. This method is specifically for button clicks.
+    /// </summary>
+    public void CloseInventory()
+    {
+        if (inventoryPanel.activeSelf)
+        {
+            inventoryPanel.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Opens the inventory panel. This method is specifically for button clicks.
+    /// </summary>
+    public void OpenInventory()
+    {
+        if (!inventoryPanel.activeSelf)
+        {
+            inventoryPanel.SetActive(true);
+            Refresh();
+        }
+    }
+
+    /// <summary>
+    /// Sets up the close button click event
+    /// </summary>
+    private void SetupCloseButton()
+    {
+        if (closeButtonPrefab != null)
+        {
+            Button closeButton = closeButtonPrefab.GetComponent<Button>();
+            if (closeButton != null)
+            {
+                closeButton.onClick.AddListener(CloseInventory);
+                Debug.Log("[Inventory] Close button successfully connected!");
+            }
+            else
+            {
+                Debug.LogWarning("[Inventory] Close button prefab doesn't have Button component!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[Inventory] Close button prefab not assigned!");
+        }
+    }
+
     public void Refresh()
     {
         for (int i = 0; i < slotInstances.Count; i++)
@@ -149,7 +203,7 @@ public class Inventory : MonoBehaviour
         {
             GameObject slotGO = Instantiate(inventorySlotPrefab, inventorySlotContainer);
             slotInstances.Add(slotGO);
-            
+
             Slot_UI slotUI = slotGO.GetComponent<Slot_UI>();
             InventorySlotData emptyData = new InventorySlotData
             {
@@ -162,7 +216,7 @@ public class Inventory : MonoBehaviour
             };
             slotUI.Setup(emptyData);
             StartCoroutine(DelayedInitDragDrop(slotUI, i));
-            
+
             var emptySlot = new Slot
             {
                 type = CollectableType.NONE,
@@ -194,7 +248,7 @@ public class Inventory : MonoBehaviour
                     slot.type = System.Enum.TryParse<CollectableType>(apiSlot.collectableType, out var parsedType) ? parsedType : CollectableType.NONE;
                     slot.icon = Resources.Load<Sprite>($"Sprites/{apiSlot.icon}");
                     slot.count = apiSlot.quantity;
-                    
+
                     Slot_UI slotUI = slotInstances[apiSlot.slotIndex].GetComponent<Slot_UI>();
                     slotUI.Setup(apiSlot);
                 }
@@ -305,7 +359,7 @@ public class Inventory : MonoBehaviour
     {
         onInventoryChanged?.Invoke();
     }
-    
+
     /// <summary>
     /// Mark inventory as changed for auto-save
     /// </summary>
@@ -314,7 +368,7 @@ public class Inventory : MonoBehaviour
         hasChanges = true;
         Debug.Log($"📝 [Change Tracking] Inventory marked as changed");
     }
-    
+
     /// <summary>
     /// Force save all slots immediately (public method)
     /// </summary>
@@ -325,11 +379,11 @@ public class Inventory : MonoBehaviour
             StartCoroutine(SaveAllSlots());
         }
     }
-    
+
     private IEnumerator SaveAllSlots()
     {
         if (!hasChanges) yield break;
-        
+
         UpdateInventorySlotRequest[] allSlots = new UpdateInventorySlotRequest[totalSlots];
 
         for (int i = 0; i < totalSlots; i++)
@@ -341,15 +395,15 @@ public class Inventory : MonoBehaviour
                 quantity = slots[i].count
             };
         }
-        
+
         BatchUpdateInventoryRequest batchRequest = new BatchUpdateInventoryRequest
         {
             slots = allSlots
         };
-        
+
         yield return StartCoroutine(SendBatchUpdateRequest(batchRequest));
     }
-    
+
     /// <summary>
     /// Send batch update request to server
     /// </summary>
@@ -363,15 +417,15 @@ public class Inventory : MonoBehaviour
         }
         string apiUrl = $"{ApiClient.BaseUrl}/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
-        
+
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
         UnityWebRequest webRequest = new UnityWebRequest(apiUrl, "PUT");
         webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
         webRequest.downloadHandler = new DownloadHandlerBuffer();
         webRequest.SetRequestHeader("Content-Type", "application/json");
-        
+
         yield return webRequest.SendWebRequest();
-        
+
         if (webRequest.result == UnityWebRequest.Result.Success)
         {
             hasChanges = false;
@@ -385,13 +439,13 @@ public class Inventory : MonoBehaviour
             StartCoroutine(SaveAllSlotsSync());
         }
     }
-    
+
     private IEnumerator SaveAllSlotsSync()
     {
         isAutoSaveEnabled = false;
-        
+
         UpdateInventorySlotRequest[] allSlots = new UpdateInventorySlotRequest[totalSlots];
-        
+
         for (int i = 0; i < totalSlots; i++)
         {
             allSlots[i] = new UpdateInventorySlotRequest
@@ -401,17 +455,17 @@ public class Inventory : MonoBehaviour
                 quantity = slots[i].count
             };
         }
-        
+
         BatchUpdateInventoryRequest batchRequest = new BatchUpdateInventoryRequest
         {
             slots = allSlots
         };
-        
+
         yield return StartCoroutine(SendBatchUpdateRequestSync(batchRequest));
-        
+
         Debug.Log($"✅ [Quit] Completed saving all 27 slots before quit");
     }
-    
+
     /// <summary>
     /// Synchronous version for quit save
     /// </summary>
@@ -425,17 +479,17 @@ public class Inventory : MonoBehaviour
         }
         string apiUrl = $"{ApiClient.BaseUrl}/inventory/batch-update/{playerId}";
         string json = JsonUtility.ToJson(request);
-        
+
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
         UnityWebRequest webRequest = new UnityWebRequest(apiUrl, "PUT");
         webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
         webRequest.downloadHandler = new DownloadHandlerBuffer();
         webRequest.SetRequestHeader("Content-Type", "application/json");
-        
+
         Debug.Log($"📤 [Quit Save] Sending all 27 slots...");
-        
+
         yield return webRequest.SendWebRequest();
-        
+
         if (webRequest.result == UnityWebRequest.Result.Success)
         {
             Debug.Log($"✅ [Quit Save] All slots saved successfully");
