@@ -321,7 +321,7 @@ public class GameOverManager : MonoBehaviour
         var wallet = FindObjectOfType<Wallet>();
         if (wallet != null)
         {
-            wallet.SetMoney(200);
+            wallet.SetMoney(1000);
             
             if (showDebugLogs)
             {

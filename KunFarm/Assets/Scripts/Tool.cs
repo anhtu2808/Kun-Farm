@@ -108,6 +108,7 @@ public class SeedTool : Tool
         Vector3 worldPos = tileManager.GetTilemap().GetCellCenterWorld(cellPosition);
         GameObject newPlant = Object.Instantiate(cropData.cropPrefab, worldPos, Quaternion.identity);
         newPlant.name = cropData.cropName + " Plant";
+        Debug.Log($"[SeedTool] ✅ Planted {cropData.cropName} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
 
         CropGrower cropGrower = newPlant.GetComponent<CropGrower>();
         if (cropGrower != null)
@@ -117,7 +118,7 @@ public class SeedTool : Tool
             cropGrower.SetTilePosition(cellPosition);
             tileManager.RegisterPlant(cellPosition, newPlant);
             tileManager.SetTileState(cellPosition, TileState.Planted);
-            Debug.Log($"[SeedTool] ✅ Planted {cropData.name} at ({cellPosition.x}, {cellPosition.y}) with cropData set");
+            Debug.Log($"[SeedTool] ✅ Planted {cropData.name}");
         }
         else
         {
@@ -168,7 +169,7 @@ public class HandTool : Tool
             {
                 if (cropGrower.isMature)
                 {
-                    if (cropGrower.cropData.cropName == "Apple")
+                    if (cropGrower.cropData.name == "AppleTree")
                     {
                         cropGrower.HarvestFruitOnly();
                     }
@@ -176,12 +177,13 @@ public class HandTool : Tool
                     {
                         // Thu hoạch cả hạt và quả
                         cropGrower.Harvest(); // spawn tất cả harvestDrops
+                        tileManager.DeregisterPlant(cellPosition);
+                        tileManager.SetTileState(cellPosition, TileState.Dug);
+                        Object.Destroy(plant);
                     }
                     // Plant is mature - harvest it
 
-                    // tileManager.DeregisterPlant(cellPosition);
-                    // tileManager.SetTileState(cellPosition, TileState.Dug);
-                    // Object.Destroy(plant);
+
 
                     // Show harvest success notification
                     string cropName = cropGrower.cropData?.cropName ?? "Plant";
@@ -387,7 +389,7 @@ public class AxeTool : Tool
         {
             CropGrower cropGrower = plant.GetComponent<CropGrower>();
             if (cropGrower == null) return false;
-            
+
             return cropGrower.isMature; // Chỉ có thể dùng khi cây đã trưởng thành
         }
         return false;
