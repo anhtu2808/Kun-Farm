@@ -83,13 +83,11 @@ public class OnlSellShopManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"❌ [Sell Shop] SoldItemSlot_UI component not found on prefab!");
                 Destroy(slotGO);
             }
         }
 
         slotsInitialized = true;
-        Debug.Log($"✅ [Sell Shop] Đã khởi tạo {soldSlots.Count} slot rỗng");
     }
 
     void Update()
@@ -167,15 +165,12 @@ public class OnlSellShopManager : MonoBehaviour
     /// </summary>
     public void SellItemOnline(CollectableType type, int quantity, int pricePerUnit)
     {
-        // Kiểm tra xem player có đủ item để bán không
         if (!HasSufficientItems(type, quantity))
         {
-            Debug.LogWarning($"❌ [Online Sell] Không đủ {type} để bán! Cần: {quantity}, Có: {GetInventoryItemCount(type)}");
             SimpleNotificationPopup.Show($"Không đủ {type} để bán! Cần: {quantity}, bạn có: {GetInventoryItemCount(type)}");
             return;
         }
 
-        Debug.Log($"🛒 [Online Sell] Bán item: {type}, Số lượng: {quantity}, Giá mỗi đơn vị: {pricePerUnit}G");
         int totalPrice = quantity * pricePerUnit;
         StartCoroutine(SendSellRequest(type.ToString(), quantity, totalPrice, type));
     }
@@ -184,11 +179,8 @@ public class OnlSellShopManager : MonoBehaviour
     {
         if (playerId <= 0)
         {
-            Debug.LogError("[OnlSellShopManager] No valid player ID for sell request");
             yield break;
         }
-        
-        Debug.Log($"📤 [Online Sell] Gửi yêu cầu bán: {collectableType}, Số lượng: {quantity}, Tổng giá: {totalPrice}");
         string url = $"{ApiClient.BaseUrl}/online-shop/sell/{playerId}";
 
         SellItemRequest requestData = new SellItemRequest
@@ -206,37 +198,26 @@ public class OnlSellShopManager : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        Debug.Log("📤 [Online Sell] Đang gửi dữ liệu: " + json);
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("✅ [Online Sell] Bán thành công: " + request.downloadHandler.text);
             SimpleNotificationPopup.Show($"Bán thành công {quantity}x {itemType} với tổng giá {totalPrice}G!");
             
-            // ✅ THỰC SỰ TRỪ ITEM KHỎI INVENTORY
             bool itemRemoved = RemoveItemFromInventory(itemType, quantity);
             if (itemRemoved)
             {
                 CollectableType parsedType = (CollectableType)System.Enum.Parse(typeof(CollectableType), collectableType);
                 AddSoldItem(parsedType, quantity, totalPrice);
                 
-                // Notify inventory changed để refresh UI
                 if (player != null && player.inventory != null)
                 {
                     player.inventory.NotifyInventoryChanged();
                 }
-                
-                Debug.Log($"✅ [Online Sell] Đã trừ {quantity}x {itemType} khỏi inventory");
-            }
-            else
-            {
-                Debug.LogError($"❌ [Online Sell] Không thể trừ {quantity}x {itemType} khỏi inventory!");
             }
         }
         else
         {
-            Debug.LogError("❌ [Online Sell] Lỗi khi gửi request: " + request.error);
             SimpleNotificationPopup.Show($"Bán thất bại! Lỗi: {request.error}");
         }
     }
@@ -348,45 +329,29 @@ public class OnlSellShopManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             string json = request.downloadHandler.text;
-            Debug.Log($"✅ [Sell Shop] Sold items response: {json}");
             
-            // Parse response
             SoldItemsWrapper response = JsonUtility.FromJson<SoldItemsWrapper>(json);
             if (response != null && response.data != null)
             {
-                Debug.Log($"📋 [Sell Shop] Tìm thấy {response.data.Count} items đã đăng bán");
-                
-                // Hiển thị tất cả items trên UI (cả đang bán và đã bán)
                 DisplaySoldItemsOnUI(response.data);
             }
             else
             {
-                Debug.Log($"📋 [Sell Shop] Không có items, hiển thị slot rỗng");
-                // Reset về trạng thái rỗng nếu không có data
                 ClearAllSlots();
             }
         }
         else
         {
-            Debug.LogError($"❌ [Sell Shop] Load sold items failed: {request.error}");
             SimpleNotificationPopup.Show($"Không thể tải danh sách items! Lỗi: {request.error}");
-            // Reset về trạng thái rỗng nếu API lỗi
             ClearAllSlots();
         }
     }
 
-    /// <summary>
-    /// Hiển thị danh sách sold items lên UI, sử dụng slot có sẵn
-    /// </summary>
     private void DisplaySoldItemsOnUI(List<SellItemResponse> soldItems)
     {
-        // Reset tất cả slot về trạng thái rỗng trước
         ClearAllSlots();
-        
-        // Đảm bảo có đủ slot cho tất cả items
         EnsureEnoughSlots(soldItems.Count);
         
-        // Fill data vào các slot
         for (int i = 0; i < soldItems.Count && i < soldSlots.Count; i++)
         {
             var item = soldItems[i];
@@ -394,13 +359,9 @@ public class OnlSellShopManager : MonoBehaviour
             
             if (slotUI != null)
             {
-                // Setup UI với callback claim
                 slotUI.Setup(item, this, OnClaimSingleItem);
-                Debug.Log($"📦 [Sell Shop UI] Filled slot {i}: {item.collectableType}, ItemId: {item.id}, Price: {item.price}G, CanBuy: {item.canBuy}");
             }
         }
-        
-        Debug.Log($"✅ [Sell Shop] Hiển thị {soldItems.Count} items trên {soldSlots.Count} slot");
     }
 
     /// <summary>
@@ -412,7 +373,6 @@ public class OnlSellShopManager : MonoBehaviour
             return; // Đã có đủ slot
 
         int slotsToAdd = requiredSlots - soldSlots.Count;
-        Debug.Log($"🔧 [Sell Shop] Cần thêm {slotsToAdd} slot (từ {soldSlots.Count} lên {requiredSlots})");
 
         for (int i = 0; i < slotsToAdd; i++)
         {
@@ -426,42 +386,27 @@ public class OnlSellShopManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"❌ [Sell Shop] SoldItemSlot_UI component not found on prefab!");
                 Destroy(slotGO);
             }
         }
-
-        Debug.Log($"✅ [Sell Shop] Đã tạo thêm {slotsToAdd} slot, tổng: {soldSlots.Count}");
     }
 
-    /// <summary>
-    /// Callback khi player click claim một item cụ thể
-    /// </summary>
     private void OnClaimSingleItem(SellItemResponse item)
     {
         if (item.canBuy)
         {
-            Debug.LogWarning($"⚠️ [Claim] Item {item.collectableType} vẫn đang bán (canBuy=true), không thể claim!");
             SimpleNotificationPopup.Show($"{item.collectableType} vẫn đang bán, chưa thể claim!");
             return;
         }
         
-        Debug.Log($"💰 [Claim] Player muốn claim: {item.collectableType} với giá {item.price}G");
-        
-        // Claim chỉ 1 item này
         List<int> singleItemId = new List<int> { item.id };
         StartCoroutine(ClaimMoneyCoroutine(singleItemId, item.price));
     }
 
-    /// <summary>
-    /// Claim money từ các items đã bán
-    /// </summary>
     private IEnumerator ClaimMoneyCoroutine(List<int> itemIds, int expectedAmount)
     {
         string apiUrl = $"{ApiClient.BaseUrl}/online-shop/claim-money/{playerId}";
         string json = "[" + string.Join(",", itemIds) + "]";
-        
-        Debug.Log($"📤 [Sell Shop] Claiming money for items: {json}");
         
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         UnityWebRequest request = new UnityWebRequest(apiUrl, "POST");
@@ -473,9 +418,6 @@ public class OnlSellShopManager : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"✅ [Sell Shop] Claim money thành công! Response: {request.downloadHandler.text}");
-            
-            // Cộng tiền vào wallet Unity
             if (player?.wallet != null)
             {
                 player.wallet.Add(expectedAmount);
@@ -503,9 +445,6 @@ public class OnlSellShopManager : MonoBehaviour
     /// </summary>
     private void DestroyClaimedSlot(int itemId)
     {
-        Debug.Log($"🗑️ [Sell Shop] Tìm và destroy slot với itemId: {itemId}");
-        
-        // Tìm slot với itemId cụ thể
         SoldItemSlot_UI slotToDestroy = null;
         foreach (var slot in soldSlots)
         {
@@ -518,26 +457,13 @@ public class OnlSellShopManager : MonoBehaviour
         
         if (slotToDestroy != null)
         {
-            // Remove từ list trước khi destroy
             soldSlots.Remove(slotToDestroy);
-            
-            // Destroy slot
             slotToDestroy.DestroySlot();
-            
-            Debug.Log($"✅ [Sell Shop] Đã destroy slot itemId: {itemId}. Còn lại: {soldSlots.Count} slot");
-        }
-        else
-        {
-            Debug.LogWarning($"⚠️ [Sell Shop] Không tìm thấy slot với itemId: {itemId}");
         }
     }
 
-    /// <summary>
-    /// Re-enable slot buttons for specific items (khi claim thất bại)
-    /// </summary>
     private void EnableSlotButtonsForItems(List<int> itemIds)
     {
-        // Tìm và re-enable buttons cho các items failed
         foreach (var slot in soldSlots)
         {
             if (slot != null && itemIds.Contains(slot.GetItemId()))

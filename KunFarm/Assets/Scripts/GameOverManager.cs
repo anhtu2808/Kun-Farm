@@ -42,7 +42,6 @@ public class GameOverManager : MonoBehaviour
         
         Instance = this;
         
-        // Auto-find UI components theo hierarchy của bạn
         if (gameOverPanel == null)
         {
             gameOverPanel = GameObject.Find("GameOverPanel");
@@ -50,7 +49,6 @@ public class GameOverManager : MonoBehaviour
         
         if (restartButton == null)
         {
-            // Tìm button PlayAgain
             GameObject playAgainObj = GameObject.Find("PlayAgain");
             if (playAgainObj != null)
             {
@@ -60,7 +58,6 @@ public class GameOverManager : MonoBehaviour
         
         if (gameOverText == null)
         {
-            // Tìm GameOverText trực tiếp
             GameObject gameOverTextObj = GameObject.Find("GameOverText");
             if (gameOverTextObj != null)
             {
@@ -70,10 +67,8 @@ public class GameOverManager : MonoBehaviour
         
         if (gameOverCanvasGroup == null && gameOverPanel != null)
         {
-            // Tìm CanvasGroup component trên GameOverPanel
             gameOverCanvasGroup = gameOverPanel.GetComponent<CanvasGroup>();
             
-            // Nếu không có, tự tạo CanvasGroup component
             if (gameOverCanvasGroup == null)
             {
                 gameOverCanvasGroup = gameOverPanel.AddComponent<CanvasGroup>();
@@ -84,7 +79,6 @@ public class GameOverManager : MonoBehaviour
             }
         }
         
-        // Setup initial state
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -93,10 +87,7 @@ public class GameOverManager : MonoBehaviour
     
     void Start()
     {
-        // Find PlayerStats reference
         playerStats = FindObjectOfType<PlayerStats>();
-        
-        // Setup UI
         SetupUI();
         
         if (showDebugLogs)

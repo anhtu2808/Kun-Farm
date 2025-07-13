@@ -36,24 +36,20 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        // Auto-find animator if not assigned
         if (animator == null)
             animator = GetComponent<Animator>();
 
-        // Auto-find AudioSource if not assigned
         if (audioSource == null)
         {
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
             {
-                // Tạo AudioSource nếu chưa có
                 audioSource = gameObject.AddComponent<AudioSource>();
             }
         }
 
-        // Configure AudioSource
         audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f; // 2D sound
+        audioSource.spatialBlend = 0f;
     }
 
     void Update()
@@ -95,7 +91,7 @@ public class Movement : MonoBehaviour
         if (isCurrentlyMoving && !wasMoving)
         {
             PlayFootstepSound();
-            footstepTimer = 0f; // Reset timer
+                            footstepTimer = 0f;
         }
 
         // Tiếp tục phát âm thanh trong quá trình di chuyển

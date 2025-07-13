@@ -117,26 +117,16 @@ public class OnlBuyShopManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             string json = request.downloadHandler.text;
-            Debug.Log($"✅ [Online Buy] Shop data received: {json}");
 
             BuyShopWrapper response = JsonUtility.FromJson<BuyShopWrapper>(json);
             if (response?.data != null)
             {
-                Debug.Log($"📊 [Online Buy] Loading {response.data.Count()} shop items");
-
                 foreach (var item in response.data)
                 {
-                    Debug.Log($"📦 [Online Buy] Shop item: {item.collectableType} - {item.price}G - CanBuy: {item.canBuy} - Qty: {item.quantity}");
                     GameObject slotGO = Instantiate(shopSlotPrefab, shopSlotContainer);
                     var slotUI = slotGO.GetComponent<ShopBuySlot_UI>();
                     slotUI.Setup(item, this);
                 }
-
-                Debug.Log($"✅ [Online Buy] Loaded {response.data.Count()} shop items successfully");
-            }
-            else
-            {
-                Debug.Log("📋 [Online Buy] No shop data available or empty response");
             }
         }
         else
@@ -162,18 +152,14 @@ public class OnlBuyShopManager : MonoBehaviour
         // Kiểm tra đủ tiền
         if (player?.wallet == null)
         {
-            Debug.LogError("❌ [Online Buy] Player wallet không tìm thấy!");
             return;
         }
 
         if (player.wallet.Money < data.price)
         {
-            Debug.LogWarning($"❌ [Online Buy] Không đủ tiền! Cần: {data.price}G, Có: {player.wallet.Money}G");
             SimpleNotificationPopup.Show($"Không đủ tiền! Cần: {data.price}G, bạn có: {player.wallet.Money}G");
             return;
         }
-
-        Debug.Log($"🛒 [Online Buy] Mua item: {data.collectableType}, Số lượng: {data.quantity}, Giá: {data.price}G");
 
         // Call API ngay lập tức để update DB
         StartCoroutine(SendBuyRequestImmediate(data));
@@ -193,7 +179,6 @@ public class OnlBuyShopManager : MonoBehaviour
         List<int> itemIds = new List<int> { data.id };
 
         string json = "[" + string.Join(",", itemIds) + "]";
-        Debug.Log($"📤 [Online Buy] Gửi yêu cầu mua itemId: {data.id} cho playerId: {playerId}, JSON: {json}");
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         UnityWebRequest request = new UnityWebRequest(apiUrl, "POST");
@@ -205,21 +190,14 @@ public class OnlBuyShopManager : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"✅ [Online Buy] Mua thành công itemId: {data.id} cho playerId: {playerId}! Response: " + request.downloadHandler.text);
-
-            // ✅ TRỪ TIỀN KHI API THÀNH CÔNG
             bool moneySpent = player.wallet.Spend(data.price);
             if (!moneySpent)
             {
-                Debug.LogError($"❌ [Online Buy] Không thể trừ tiền! Cần: {data.price}G, Có: {player.wallet.Money}G");
                 yield break;
             }
 
-            Debug.Log($"💰 [Online Buy] Đã trừ {data.price}G, còn lại: {player.wallet.Money}G");
             SimpleNotificationPopup.Show($"Successfully purchased {data.collectableType} for {data.price}G! Remaining balance: {player.wallet.Money}G");
 
-
-            // CHỈ ADD VÀO INVENTORY NẾU API THÀNH CÔNG VÀ ĐÃ TRỪ TIỀN
             if (Enum.TryParse<CollectableType>(data.collectableType, ignoreCase: true, out var parsedType))
             {
                 var collectable = itemManager.GetItemByType(parsedType);
@@ -227,25 +205,14 @@ public class OnlBuyShopManager : MonoBehaviour
                 {
                     player.inventory.Add(collectable, data.quantity);
                     player.inventory.NotifyInventoryChanged();
-                    Debug.Log($"✅ [Online Buy] Đã thêm {data.quantity}x {parsedType} vào inventory");
                     SimpleNotificationPopup.Show($"Đã thêm {data.quantity}x {parsedType} vào inventory!");
                 }
-                else
-                {
-                    Debug.LogError($"❌ [Online Buy] Không tìm thấy collectable cho {parsedType}");
-                }
-            }
-            else
-            {
-                Debug.LogError($"❌ [Online Buy] Không parse được CollectableType từ '{data.collectableType}'");
             }
 
-            // Hide item UI sau khi mua thành công
             HideItemAfterPurchase(data.id);
         }
         else
         {
-            Debug.LogError($"❌ [Online Buy] Mua thất bại itemId: {data.id}, Error: " + request.error);
             SimpleNotificationPopup.Show($"Mua thất bại! Lỗi: {request.error}");
         }
     }
@@ -302,12 +269,7 @@ public class OnlBuyShopManager : MonoBehaviour
     /// </summary>
     private void LoadShopDataOnOpen()
     {
-        Debug.Log("📥 [Online Buy] Refresh shop data khi mở giao diện");
-
-        // Clear existing items
         ClearShopItems();
-
-        // Load fresh data from API
         StartCoroutine(LoadShopData());
     }
 
@@ -326,7 +288,5 @@ public class OnlBuyShopManager : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log("🧹 [Online Buy] Đã clear tất cả items cũ");
     }
 }

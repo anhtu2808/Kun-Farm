@@ -189,7 +189,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler
                 
                 // Show notification
                 string itemName = currentSlot.type.ToString();
-                SimpleNotificationPopup.Show($"Dropped {itemName}! Right-click to drop items.");
+                SimpleNotificationPopup.Show($"Dropped {itemName}!");
                 
                 // If slot is empty, clear the slot data
                 if (currentSlot.count <= 0)

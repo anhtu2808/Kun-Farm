@@ -46,13 +46,13 @@ public class SaveAndExitManager : MonoBehaviour
     
     void Update()
     {
-        // Handle ESC key to toggle popup
-        if (Input.GetKeyDown(KeyCode.Escape) && !isSaving)
-        {
-            if (showDebugInfo)
-                Debug.Log("[SaveAndExitManager] ESC key pressed - toggling popup");
-            TogglePopup();
-        }
+        // // Handle ESC key to toggle popup
+        // if (Input.GetKeyDown(KeyCode.Escape) && !isSaving)
+        // {
+        //     if (showDebugInfo)
+        //         Debug.Log("[SaveAndExitManager] ESC key pressed - toggling popup");
+        //     TogglePopup();
+        // }
     }
     
     public void TogglePopup()
@@ -62,7 +62,6 @@ public class SaveAndExitManager : MonoBehaviour
         isPopupOpen = !isPopupOpen;
         saveAndExitPopup.SetActive(isPopupOpen);
         
-        // Pause/unpause game when popup is open
         Time.timeScale = isPopupOpen ? 0f : 1f;
         
         if (showDebugInfo)
@@ -129,41 +128,11 @@ public class SaveAndExitManager : MonoBehaviour
             yield break;
         }
         
-        // Step 1: Save Player Data (Position, Health, Hunger, Money)
-        if (showDebugInfo)
-            Debug.Log("🔄 [SaveAndExitManager] Step 1/4: Saving player data...");
         yield return StartCoroutine(SavePlayerData());
-        
-        // Step 2: Save Farm Data (Tiles, Plants, Chickens, Eggs)
-        if (showDebugInfo)
-            Debug.Log("🔄 [SaveAndExitManager] Step 2/4: Saving farm data...");
         yield return StartCoroutine(SaveFarmData());
-        
-        // Step 3: Save Toolbar Data (9 tool slots)
-        if (showDebugInfo)
-            Debug.Log("🔄 [SaveAndExitManager] Step 3/4: Saving toolbar (9 tool slots)...");
         yield return StartCoroutine(SaveToolbarData());
-        
-        // Step 4: Save Inventory Data (27 inventory slots)
-        if (showDebugInfo)
-            Debug.Log("🔄 [SaveAndExitManager] Step 4/4: Saving inventory (27 slots)...");
         yield return StartCoroutine(SaveInventoryData());
-        
-        // Step 5: Wait a bit for all saves to complete
-        if (showDebugInfo)
-            Debug.Log("[SaveAndExitManager] Finalizing save process...");
         yield return new WaitForSeconds(1f);
-        
-        if (showDebugInfo)
-        {
-            Debug.Log("=== SAVE AND EXIT SUMMARY ===");
-            Debug.Log("✅ Player Data: Position, Health, Hunger, Money saved");
-            Debug.Log("✅ Farm Data: Tiles, Plants, Chickens, Eggs saved");
-            Debug.Log("✅ Toolbar Data: All 9 tool slots saved");
-            Debug.Log("✅ Inventory Data: All 27 inventory slots saved");
-            Debug.Log("🎯 [SaveAndExitManager] ALL DATA SAVED SUCCESSFULLY!");
-            Debug.Log("===============================");
-        }
         
         // Quit game
         QuitGame();

@@ -48,16 +48,12 @@ public class ToolManager : MonoBehaviour
     {
         UpdateToolbarUI();
 
-        // Auto-find components if not assigned
         if (playerMovement == null)
             playerMovement = FindObjectOfType<Movement>();
         if (inventoryUI == null)
             inventoryUI = FindObjectOfType<Inventory>();
 
-        // Get user ID from PlayerPrefs
         currentUserId = PlayerPrefs.GetInt("PLAYER_ID", 0);
-
-        // Đảm bảo Hand Tool luôn có ở slot đầu tiên
         EnsureHandTool();
 
 
@@ -65,13 +61,8 @@ public class ToolManager : MonoBehaviour
 
     void Update()
     {
-        // Listen for toolbar selection changes
         CheckToolSelection();
-
-        // Listen for food eating (Space key)
         CheckFoodEating();
-
-        // Auto-save toolbar if changes detected
         CheckAutoSave();
     }
 
@@ -82,12 +73,10 @@ public class ToolManager : MonoBehaviour
         // Luôn đặt Hand Tool ở slot đầu tiên (index 0) với icon từ ToolData
         tools[0] = CreateHandToolWithIcon();
 
-        // Initialize tools từ ToolData array (bắt đầu từ slot 1)
         for (int i = 0; i < toolDataArray.Length && i + 1 < tools.Length; i++)
         {
             if (toolDataArray[i] != null)
             {
-                // Skip HandTool ToolData vì đã được set ở slot 0
                 if (toolDataArray[i].toolType != ToolType.Hand)
                 {
                     tools[i + 1] = toolDataArray[i].CreateTool();
@@ -130,20 +119,17 @@ public class ToolManager : MonoBehaviour
         if (isUsingTool)
             return;
 
-        // Check for Space key input
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Tool currentTool = SelectedTool;
             if (currentTool is FoodTool foodTool && foodTool.quantity > 0)
             {
-                // Check if this is wheat - use for chicken feeding only
                 if (IsWheatFood(foodTool))
                 {
                     HandleWheatFeeding(foodTool);
                 }
                 else
                 {
-                    // For other foods (Apple, Grape), player eats normally
                     foodTool.EatFood();
                     HandleToolConsumption(foodTool);
                 }
