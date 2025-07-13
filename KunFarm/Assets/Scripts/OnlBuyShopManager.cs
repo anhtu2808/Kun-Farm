@@ -205,7 +205,7 @@ public class OnlBuyShopManager : MonoBehaviour
                 {
                     player.inventory.Add(collectable, data.quantity);
                     player.inventory.NotifyInventoryChanged();
-                    SimpleNotificationPopup.Show($"Đã thêm {data.quantity}x {parsedType} vào inventory!");
+                    SimpleNotificationPopup.Show($"Added {data.quantity}x {parsedType} to inventory!");
                 }
             }
 
@@ -213,7 +213,7 @@ public class OnlBuyShopManager : MonoBehaviour
         }
         else
         {
-            SimpleNotificationPopup.Show($"Mua thất bại! Lỗi: {request.error}");
+            SimpleNotificationPopup.Show($"Buy failed! Error: {request.error}");
         }
     }
 

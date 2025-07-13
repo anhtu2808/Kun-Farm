@@ -153,7 +153,7 @@ public class ShopManager : MonoBehaviour
         if (player.wallet.Money < data.buyPrice)
         {
             Debug.LogWarning($"❌ [Regular Shop] Không đủ tiền! Cần: {data.buyPrice}G, Có: {player.wallet.Money}G");
-            SimpleNotificationPopup.Show($"Không đủ tiền! Cần: {data.buyPrice}G, bạn có: {player.wallet.Money}G");
+            SimpleNotificationPopup.Show($"Not enough money! Need: {data.buyPrice}G, you have: {player.wallet.Money}G");
             return;
         }
 
