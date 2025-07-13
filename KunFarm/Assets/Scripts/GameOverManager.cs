@@ -17,7 +17,7 @@ public class GameOverManager : MonoBehaviour
     
     [Header("Settings")]
     [SerializeField] private string gameOverMessage = "GAME OVER";
-    [SerializeField] private string restartButtonText = "Chơi lại";
+    [SerializeField] private string restartButtonText = "Play again";
     [SerializeField] private bool pauseGameOnDeath = true;
     [SerializeField] private float fadeInDuration = 1f;
     
@@ -361,7 +361,29 @@ public class GameOverManager : MonoBehaviour
             }
         }
         
-        // 6. Hide game over panel
+        // 6. Clear toolbar slots (except hand tool at slot 0)
+        var toolManager = FindObjectOfType<ToolManager>();
+        if (toolManager != null)
+        {
+            // Clear all toolbar slots (slots 1-8, keep hand tool at slot 0)
+            for (int i = 1; i < 9; i++)
+            {
+                toolManager.SetToolAtIndex(i, null);
+            }
+            
+            // Ensure hand tool is at slot 0
+            toolManager.EnsureHandTool();
+            
+            // Update toolbar display
+            toolManager.UpdateToolbarDisplay();
+            
+            if (showDebugLogs)
+            {
+                Debug.Log("[GameOverManager] Cleared toolbar slots (except hand tool at slot 0)");
+            }
+        }
+        
+        // 7. Hide game over panel
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);

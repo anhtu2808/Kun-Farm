@@ -413,7 +413,7 @@ namespace KunFarm.BLL.Services
                 // Reset player state to default values
                 var playerStateSuccess = await _playerStateRepository.SavePlayerStateAsync(
                     userId,
-                    money: 200,           // Default money
+                    money: 1000,           // Default money
                     posX: 0f,           // Default position 
                     posY: 0f,
                     posZ: 0f,

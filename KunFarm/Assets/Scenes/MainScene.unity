@@ -8448,6 +8448,10 @@ PrefabInstance:
       propertyPath: restartButton
       value: 
       objectReference: {fileID: 1311260163}
+    - target: {fileID: 8896762370256508795, guid: de75177c81ac74e7d9cff622607d2466, type: 3}
+      propertyPath: restartButtonText
+      value: Play Again
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
