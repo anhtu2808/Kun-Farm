@@ -145,8 +145,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 3
-  icon: {fileID: 1212611662, guid: e2a7f6d1349c3fc4e860200f7714deca, type: 3}
+  icon: {fileID: 21300000, guid: 0a0b9d08e30c83a4c93c1c9fbdc27e16, type: 2}
   rb2d: {fileID: 0}
+  hatchTime: 0
+  hatchTimer: 0
+  requiresInteraction: 1
 --- !u!50 &3061645067562128337
 Rigidbody2D:
   serializedVersion: 4
