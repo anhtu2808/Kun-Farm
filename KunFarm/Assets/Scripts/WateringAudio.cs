@@ -16,6 +16,7 @@ public class WateringAudio : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
+        audioSource.volume = 0.3f;
     }
 
     // Đây là hàm chúng ta sẽ gọi từ Animation Event
